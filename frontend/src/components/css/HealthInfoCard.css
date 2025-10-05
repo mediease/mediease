@@ -1,0 +1,41 @@
+.card {
+  max-width: 450px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  font-size: 14px; /* 👈 Reduced font size */
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px; /* 👈 Smaller title font */
+    font-weight: bold;
+  }
+  
+  .info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 0;
+  }
+  
+  .label {
+    flex: 1;
+    font-size: 14px;
+  }
+  
+  .value-box {
+    flex: 1;
+    background-color: #d7f4fc7d;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    margin-left: 12px;
+  }
+  

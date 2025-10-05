@@ -1,0 +1,75 @@
+.patient-card {
+    max-width: 450px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    font-size: 14px; /* 👈 Reduced font size */
+  }
+  
+  .patient-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px; /* 👈 Smaller title font */
+    font-weight: bold;
+  }
+  
+  .patient-profile-row {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .patient-image,
+  .patient-placeholder {
+    width: 120px;  /* 👈 Increased size */
+    height: 150px; /* 👈 Increased size */
+    border-radius: 12px;
+    object-fit: cover;
+  }
+  
+  .patient-placeholder {
+    background-color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #444;
+  }
+  
+  .patient-info-block {
+    margin-left: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .data-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+  
+  .data-label {
+    min-width: 130px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .data-value {
+    background-color: #d7f4fc7d;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    flex-grow: 1;             /* 👈 Stretch to fill remaining space */
+  }
+  
+  
+  
+  
+  

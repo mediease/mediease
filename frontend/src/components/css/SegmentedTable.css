@@ -1,0 +1,46 @@
+.segmented-table-wrapper {
+    width: 100%;
+    margin: 0px auto;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    padding: 16px;
+  }
+  
+  /* Make table fixed height and scrollable */
+  .table-scroll-container {
+    max-height: 360px; /* 👈 Adjust height as needed */
+    overflow-y: auto;
+    border-radius: 6px;
+  }
+  
+  /* Keep full table width */
+  .segmented-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    font-size: 14px;
+  }
+  
+  .segmented-table th {
+    font-weight: normal;
+    color: #999999;
+    padding: 6px 10px;
+    text-align: center;
+    background-color: #f9f9f9;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  
+  .segmented-table td {
+    padding: 8px 10px;
+    text-align: center;
+  }
+  
+  .even-row {
+    background-color: #d7f4fc7d;
+  }
+  

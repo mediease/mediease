@@ -1,0 +1,64 @@
+.info-card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    padding: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 380px;
+    min-height: 160px;
+    
+  }
+  
+  .info-text {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .info-title {
+    color: #1c2f5d;
+    font-size: 1.45rem;
+    font-weight: 600;
+  }
+  
+  .info-count {
+    font-size: 2.8rem;
+    font-weight: bold;
+    color: #1c2f5d;
+    margin-top: 10px;
+  }
+  
+  .info-button {
+    margin-top: 18px;
+    background-color: #1c2f5d;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+  }
+  
+  .info-button:hover {
+    background-color: #1a2b52;
+  }
+  
+  .info-icon {
+    background-color: #1c2f5d;
+    padding: 18px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .icon-svg {
+    color: white;
+    width: 42px;
+    height: 42px;
+  }
+  

@@ -1,0 +1,31 @@
+.segmented-control {
+    display: flex;
+    padding: 2px;
+    background: linear-gradient(to right, #dbeafe, #e5e7eb); /* light blue to gray */
+    border-radius: 9999px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+  }
+  
+  .segmented-control-button {
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    border-radius: 9999px;
+    font-weight: 500;
+    font-size: 0.75rem; /* smaller text */
+    color: #4b5563; /* gray-700 */
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  
+  .segmented-control-button:hover {
+    color: #111827; /* darker hover */
+  }
+  
+  .segmented-control-button.selected {
+    background-color: #ffffff;
+    color: #000000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
