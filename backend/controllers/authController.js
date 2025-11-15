@@ -1,9 +1,17 @@
 import User from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 
-// Generate JWT Token
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+// Generate JWT Token (includes medicalLicenseId when available)
+const generateToken = (user) => {
+  const payload = {
+    userId: user._id
+  };
+
+  if (user.medicalLicenseId) {
+    payload.medicalLicenseId = user.medicalLicenseId;
+  }
+
+  return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '1d'
   });
 };
@@ -11,7 +19,7 @@ const generateToken = (userId) => {
 // Register a new user
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, role, nic, doctorId, division } = req.body;
+    const { firstName, lastName, email, password, confirmPassword, role, nic, medicalLicenseId, division, nurId } = req.body;
 
     // Validate required fields
     const requiredFields = ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'role', 'nic'];
@@ -51,16 +59,26 @@ export const register = async (req, res) => {
 
     // Validate doctor-specific fields
     if (role === 'doctor') {
-      if (!doctorId) {
+      if (!medicalLicenseId) {
         return res.status(400).json({
           success: false,
-          message: 'Doctor ID is required for doctor registration'
+          message: 'Medical License ID is required for doctor registration'
         });
       }
       if (!division) {
         return res.status(400).json({
           success: false,
           message: 'Division is required for doctor registration'
+        });
+      }
+    }
+
+    // Validate nurse-specific fields
+    if (role === 'nurse') {
+      if (!nurId) {
+        return res.status(400).json({
+          success: false,
+          message: 'NURID is required for nurse registration'
         });
       }
     }
@@ -88,13 +106,13 @@ export const register = async (req, res) => {
       }
     }
 
-    // Check if doctorId already exists (for doctors)
+    // Check if medicalLicenseId already exists (for doctors)
     if (role === 'doctor') {
-      const existingDoctor = await User.findOne({ doctorId });
+      const existingDoctor = await User.findOne({ medicalLicenseId });
       if (existingDoctor) {
         return res.status(400).json({
           success: false,
-          message: 'Doctor with this ID already exists'
+          message: 'Doctor with this Medical License ID already exists'
         });
       }
     }
@@ -111,8 +129,11 @@ export const register = async (req, res) => {
     };
 
     if (role === 'doctor') {
-      userData.doctorId = doctorId;
+      userData.medicalLicenseId = medicalLicenseId;
       userData.division = division;
+    }
+    if (role === 'nurse') {
+      userData.nurId = nurId;
     }
 
     const user = new User(userData);
@@ -184,7 +205,7 @@ export const login = async (req, res) => {
     }
 
     // Generate token
-    const token = generateToken(user._id);
+    const token = generateToken(user);
 
     // Remove password from response
     const userResponse = user.toJSON();

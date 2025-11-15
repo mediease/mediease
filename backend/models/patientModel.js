@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
 
 const patientSchema = new mongoose.Schema({
+  phn: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true
+  },
   nic: {
     type: String,
     required: [true, 'NIC is required'],
@@ -61,6 +67,24 @@ const patientSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true
+});
+
+// Auto-generate PHN (PH00001...)
+patientSchema.pre('validate', async function(next) {
+  try {
+    if (!this.phn) {
+      const last = await mongoose.model('Patient').findOne({ phn: /^PH/ }).sort({ phn: -1 }).lean();
+      let nextNum = 1;
+      if (last && last.phn) {
+        const n = parseInt(last.phn.replace(/^PH0*/, ''), 10);
+        if (!isNaN(n)) nextNum = n + 1;
+      }
+      this.phn = 'PH' + String(nextNum).padStart(5, '0');
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 const Patient = mongoose.model('Patient', patientSchema);

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAppointment, getPendingAppointments, getAllDoctorAppointments } from '../controllers/appointmentController.js';
+import { createAppointment, getPendingAppointments, getAllDoctorAppointments, getAppointmentByApid, updateAppointment, deleteAppointment } from '../controllers/appointmentController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { roleMiddleware } from '../middleware/roleMiddleware.js';
 
@@ -16,6 +16,15 @@ router.get('/pending/:doctorId', roleMiddleware('doctor'), getPendingAppointment
 
 // GET /api/appointments/doctor/:doctorId - Get all appointments for a doctor (Doctor only)
 router.get('/doctor/:doctorId', roleMiddleware('doctor'), getAllDoctorAppointments);
+
+// GET /api/appointments/:apid - Get appointment by APID
+router.get('/:apid', getAppointmentByApid);
+
+// PUT /api/appointments/:apid - Update appointment by APID
+router.put('/:apid', updateAppointment);
+
+// DELETE /api/appointments/:apid - Delete appointment by APID
+router.delete('/:apid', deleteAppointment);
 
 export default router;
 

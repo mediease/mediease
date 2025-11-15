@@ -18,8 +18,13 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data._id) {",
-									"        pm.collectionVariables.set(\"doctor_id\", jsonData.data._id);",
+									"    if (jsonData.data) {",
+									"        if (jsonData.data._id) {",
+									"            pm.collectionVariables.set(\"doctor_id\", jsonData.data._id);",
+									"        }",
+									"        if (jsonData.data.medicalLicenseId) {",
+									"            pm.collectionVariables.set(\"doctor_license\", jsonData.data.medicalLicenseId);",
+									"        }",
 									"    }",
 									"}"
 								],
@@ -37,7 +42,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"role\": \"doctor\",\n  \"nic\": \"123456789V\",\n  \"doctorId\": \"DOC001\",\n  \"division\": \"Cardiology\"\n}"
+							  "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"role\": \"doctor\",\n  \"nic\": \"123456789V\",\n  \"medicalLicenseId\": \"DOC001\",\n  \"division\": \"Cardiology\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
@@ -156,6 +161,9 @@
 									"    var jsonData = pm.response.json();",
 									"    if (jsonData.data && jsonData.data.token) {",
 									"        pm.collectionVariables.set(\"doctor_token\", jsonData.data.token);",
+									"    }",
+									"    if (jsonData.data && jsonData.data.user && jsonData.data.user.medicalLicenseId) {",
+									"        pm.collectionVariables.set(\"doctor_license\", jsonData.data.user.medicalLicenseId);",
 									"    }",
 									"}"
 								],
@@ -309,7 +317,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/admin/approve/{{doctor_id}}",
+							"raw": "{{base_url}}/api/admin/approve/{{doctor_license}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -317,10 +325,10 @@
 								"api",
 								"admin",
 								"approve",
-								"{{doctor_id}}"
+								"{{doctor_license}}"
 							]
 						},
-						"description": "Approve a doctor registration. Replace {{doctor_id}} with actual doctor ID from pending doctors list. Requires admin authentication."
+						"description": "Approve a doctor registration. Replace {{doctor_license}} with the doctor's Medical License ID from pending doctors list. Requires admin authentication."
 					},
 					"response": []
 				},
@@ -336,7 +344,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/admin/reject/{{doctor_id}}",
+							"raw": "{{base_url}}/api/admin/reject/{{doctor_license}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -344,10 +352,10 @@
 								"api",
 								"admin",
 								"reject",
-								"{{doctor_id}}"
+								"{{doctor_license}}"
 							]
 						},
-						"description": "Reject a doctor registration. Replace {{doctor_id}} with actual doctor ID. Requires admin authentication."
+						"description": "Reject a doctor registration. Replace {{doctor_license}} with the doctor's Medical License ID. Requires admin authentication."
 					},
 					"response": []
 				},
@@ -502,8 +510,13 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data._id) {",
-									"        pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"    if (jsonData.data) {",
+									"        if (jsonData.data._id) {",
+									"            pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"        }",
+									"        if (jsonData.data.phn) {",
+									"            pm.collectionVariables.set(\"patient_phn\", jsonData.data.phn);",
+									"        }",
 									"    }",
 									"}"
 								],
@@ -551,8 +564,13 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data._id) {",
-									"        pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"    if (jsonData.data) {",
+									"        if (jsonData.data._id) {",
+									"            pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"        }",
+									"        if (jsonData.data.phn) {",
+									"            pm.collectionVariables.set(\"patient_phn\", jsonData.data.phn);",
+									"        }",
 									"    }",
 									"}"
 								],
@@ -785,7 +803,17 @@
 			"type": "string"
 		},
 		{
+			"key": "patient_phn",
+			"value": "",
+			"type": "string"
+		},
+		{
 			"key": "doctor_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "doctor_license",
 			"value": "",
 			"type": "string"
 		},

@@ -22,20 +22,20 @@ router.use(roleMiddleware('admin'));
 // GET /api/admin/pending-doctors - Get all pending doctors
 router.get('/pending-doctors', getPendingDoctors);
 
-// PUT /api/admin/approve/:id - Approve doctor registration
-router.put('/approve/:id', approveDoctor);
+// PUT /api/admin/approve/:medicalLicenseId - Approve doctor registration
+router.put('/approve/:medicalLicenseId', approveDoctor);
 
-// PUT /api/admin/reject/:id - Reject doctor registration
-router.put('/reject/:id', rejectDoctor);
+// PUT /api/admin/reject/:medicalLicenseId - Reject doctor registration
+router.put('/reject/:medicalLicenseId', rejectDoctor);
 
 // GET /api/admin/pending-nurses - Get all pending nurses
 router.get('/pending-nurses', getPendingNurses);
 
-// PUT /api/admin/approve-nurse/:id - Approve nurse registration
-router.put('/approve-nurse/:id', approveNurse);
+// PUT /api/admin/approve-nurse/:nurId - Approve nurse registration (by NURID)
+router.put('/approve-nurse/:nurId', approveNurse);
 
-// PUT /api/admin/reject-nurse/:id - Reject nurse registration
-router.put('/reject-nurse/:id', rejectNurse);
+// PUT /api/admin/reject-nurse/:nurId - Reject nurse registration (by NURID)
+router.put('/reject-nurse/:nurId', rejectNurse);
 
 // GET /api/admin/users - Get all users
 router.get('/users', getAllUsers);

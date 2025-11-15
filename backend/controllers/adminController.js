@@ -25,9 +25,9 @@ export const getPendingDoctors = async (req, res) => {
 // Approve doctor registration
 export const approveDoctor = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { medicalLicenseId } = req.params;
 
-    const user = await User.findById(id);
+    const user = await User.findOne({ medicalLicenseId });
 
     if (!user) {
       return res.status(404).json({
@@ -79,9 +79,9 @@ export const approveDoctor = async (req, res) => {
 // Reject doctor registration
 export const rejectDoctor = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { medicalLicenseId } = req.params;
 
-    const user = await User.findById(id);
+    const user = await User.findOne({ medicalLicenseId });
 
     if (!user) {
       return res.status(404).json({
@@ -155,9 +155,9 @@ export const getPendingNurses = async (req, res) => {
 // Approve nurse registration
 export const approveNurse = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { nurId } = req.params;
 
-    const user = await User.findById(id);
+    const user = await User.findOne({ nurId });
 
     if (!user) {
       return res.status(404).json({
@@ -209,9 +209,9 @@ export const approveNurse = async (req, res) => {
 // Reject nurse registration
 export const rejectNurse = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { nurId } = req.params;
 
-    const user = await User.findById(id);
+    const user = await User.findOne({ nurId });
 
     if (!user) {
       return res.status(404).json({

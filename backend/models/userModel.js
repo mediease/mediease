@@ -42,7 +42,14 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   // Doctor-specific fields
-  doctorId: {
+  medicalLicenseId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true
+  },
+  // Nurse-specific ID (NURID)
+  nurId: {
     type: String,
     unique: true,
     sparse: true,
@@ -59,19 +66,30 @@ const userSchema = new mongoose.Schema({
 // Validate doctorId and division for doctors
 userSchema.pre('validate', function(next) {
   if (this.role === 'doctor') {
-    if (!this.doctorId) {
-      this.invalidate('doctorId', 'Doctor ID is required for doctors');
+    if (!this.medicalLicenseId) {
+      this.invalidate('medicalLicenseId', 'Medical License ID is required for doctors');
     }
     if (!this.division) {
       this.invalidate('division', 'Division is required for doctors');
     }
   } else {
-    // Remove doctorId and division for non-doctors
-    if (this.doctorId) {
-      this.doctorId = undefined;
+    // Remove medicalLicenseId and division for non-doctors
+    if (this.medicalLicenseId) {
+      this.medicalLicenseId = undefined;
     }
     if (this.division) {
       this.division = undefined;
+    }
+  }
+
+  // Validate nurse-specific ID
+  if (this.role === 'nurse') {
+    if (!this.nurId) {
+      this.invalidate('nurId', 'NURID is required for nurses');
+    }
+  } else {
+    if (this.nurId) {
+      this.nurId = undefined;
     }
   }
   next();

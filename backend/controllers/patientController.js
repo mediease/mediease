@@ -56,11 +56,12 @@ export const getAllPatients = async (req, res) => {
   }
 };
 
-// Get a single patient by ID
-export const getPatientById = async (req, res) => {
+// Get a single patient by PHN
+export const getPatientByPhn = async (req, res) => {
   try {
-    const patient = await Patient.findById(req.params.id);
-    
+    const { phn } = req.params;
+    const patient = await Patient.findOne({ phn });
+
     if (!patient) {
       return res.status(404).json({
         success: false,
@@ -73,13 +74,6 @@ export const getPatientById = async (req, res) => {
       data: patient
     });
   } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid patient ID'
-      });
-    }
-    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch patient',
@@ -89,10 +83,11 @@ export const getPatientById = async (req, res) => {
 };
 
 // Update patient info
-export const updatePatient = async (req, res) => {
+export const updatePatientByPhn = async (req, res) => {
   try {
-    const patient = await Patient.findByIdAndUpdate(
-      req.params.id,
+    const { phn } = req.params;
+    const patient = await Patient.findOneAndUpdate(
+      { phn },
       req.body,
       {
         new: true,
@@ -113,13 +108,6 @@ export const updatePatient = async (req, res) => {
       data: patient
     });
   } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid patient ID'
-      });
-    }
-    
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -135,9 +123,10 @@ export const updatePatient = async (req, res) => {
 };
 
 // Delete a patient
-export const deletePatient = async (req, res) => {
+export const deletePatientByPhn = async (req, res) => {
   try {
-    const patient = await Patient.findByIdAndDelete(req.params.id);
+    const { phn } = req.params;
+    const patient = await Patient.findOneAndDelete({ phn });
 
     if (!patient) {
       return res.status(404).json({
@@ -152,13 +141,6 @@ export const deletePatient = async (req, res) => {
       data: patient
     });
   } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid patient ID'
-      });
-    }
-    
     res.status(500).json({
       success: false,
       message: 'Failed to delete patient',

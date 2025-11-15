@@ -2,9 +2,9 @@ import express from 'express';
 import {
   createPatient,
   getAllPatients,
-  getPatientById,
-  updatePatient,
-  deletePatient
+  getPatientByPhn,
+  updatePatientByPhn,
+  deletePatientByPhn
 } from '../controllers/patientController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -19,14 +19,14 @@ router.post('/', createPatient);
 // GET /api/patients - Get all patients (requires authentication)
 router.get('/', getAllPatients);
 
-// GET /api/patients/:id - Get a single patient by ID (requires authentication)
-router.get('/:id', getPatientById);
+// GET /api/patients/:phn - Get a single patient by PHN (requires authentication)
+router.get('/:phn', getPatientByPhn);
 
-// PUT /api/patients/:id - Update patient info (requires authentication)
-router.put('/:id', updatePatient);
+// PUT /api/patients/:phn - Update patient info (requires authentication)
+router.put('/:phn', updatePatientByPhn);
 
-// DELETE /api/patients/:id - Delete a patient (requires authentication)
-router.delete('/:id', deletePatient);
+// DELETE /api/patients/:phn - Delete a patient (requires authentication)
+router.delete('/:phn', deletePatientByPhn);
 
 export default router;
 

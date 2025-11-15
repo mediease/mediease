@@ -1,20 +1,26 @@
 import mongoose from 'mongoose';
 
 const appointmentSchema = new mongoose.Schema({
-  patientId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Patient',
-    required: [true, 'Patient ID is required']
+  apid: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true
   },
-  doctorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, 'Doctor ID is required']
+  patientPhn: {
+    type: String,
+    required: [true, 'Patient PHN is required'],
+    trim: true
   },
   nurseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, 'Nurse ID is required']
+    type: String,
+    required: [true, 'Nurse ID is required'],
+    trim: true
+  },
+  doctorId: {
+    type: String,
+    required: [true, 'Doctor ID is required'],
+    trim: true
   },
   doctorName: {
     type: String,
@@ -48,6 +54,24 @@ const appointmentSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true
+});
+
+// Auto-generate APID (AP00001...)
+appointmentSchema.pre('validate', async function(next) {
+  try {
+    if (!this.apid) {
+      const last = await mongoose.model('Appointment').findOne({ apid: /^AP/ }).sort({ apid: -1 }).lean();
+      let nextNum = 1;
+      if (last && last.apid) {
+        const n = parseInt(last.apid.replace(/^AP0*/, ''), 10);
+        if (!isNaN(n)) nextNum = n + 1;
+      }
+      this.apid = 'AP' + String(nextNum).padStart(5, '0');
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);

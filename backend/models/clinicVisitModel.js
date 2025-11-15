@@ -1,15 +1,21 @@
 import mongoose from 'mongoose';
 
 const clinicVisitSchema = new mongoose.Schema({
-  patientId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Patient',
-    required: [true, 'Patient ID is required']
+  apid: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true
+  },
+  patientPhn: {
+    type: String,
+    required: [true, 'Patient PHN is required'],
+    trim: true
   },
   doctorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, 'Doctor ID is required']
+    type: String,
+    required: [true, 'Doctor ID is required'],
+    trim: true
   },
   doctorName: {
     type: String,
@@ -26,10 +32,6 @@ const clinicVisitSchema = new mongoose.Schema({
     required: [true, 'Date is required'],
     default: Date.now
   },
-  time: {
-    type: String,
-    required: [true, 'Time is required']
-  },
   complaint: {
     type: String,
     required: [true, 'Complaint is required'],
@@ -39,15 +41,15 @@ const clinicVisitSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Weight is required']
   },
-  notes: {
+  visitNote: {
     type: String,
-    required: [true, 'Notes are required'],
+    required: false,
     trim: true
   },
-  appointmentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Appointment',
-    default: null
+  appointmentApid: {
+    type: String,
+    default: null,
+    trim: true
   }
 }, {
   timestamps: true

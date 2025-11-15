@@ -37,8 +37,8 @@ export const createAppointment = async (req, res) => {
       });
     }
 
-    // Verify doctor exists and is a doctor
-    const doctor = await User.findById(doctorId);
+    // Verify doctor exists by medicalLicenseId and is a doctor
+    const doctor = await User.findOne({ medicalLicenseId: doctorId });
     if (!doctor) {
       return res.status(404).json({
         success: false,
@@ -64,7 +64,7 @@ export const createAppointment = async (req, res) => {
     const doctorName = `${doctor.firstName} ${doctor.lastName}`;
     const doctorDivision = doctor.division || '';
 
-    // Create appointment
+    // Create appointment (store doctorId string, not ObjectId)
     const appointment = new Appointment({
       patientPhn,
       doctorId,
@@ -96,11 +96,10 @@ export const createAppointment = async (req, res) => {
     } : null;
 
     const doctorInfo = {
-      _id: doctor._id,
+      medicalLicenseId: doctor.medicalLicenseId,
       firstName: doctor.firstName,
       lastName: doctor.lastName,
       email: doctor.email,
-      doctorId: doctor.doctorId,
       division: doctor.division
     };
 
@@ -162,7 +161,7 @@ export const getAppointmentByApid = async (req, res) => {
     // Get patient and nurse info
     const patient = await Patient.findOne({ phn: appointment.patientPhn });
     const nurse = await User.findOne({ nurId: appointment.nurseId });
-    const doctor = await User.findById(appointment.doctorId);
+    const doctor = await User.findOne({ medicalLicenseId: appointment.doctorId });
 
     const responseData = {
       ...appointment.toObject(),
@@ -179,11 +178,10 @@ export const getAppointmentByApid = async (req, res) => {
         email: nurse.email
       } : null,
       doctorInfo: doctor ? {
-        _id: doctor._id,
+        medicalLicenseId: doctor.medicalLicenseId,
         firstName: doctor.firstName,
         lastName: doctor.lastName,
         email: doctor.email,
-        doctorId: doctor.doctorId,
         division: doctor.division
       } : null
     };
@@ -230,7 +228,7 @@ export const updateAppointment = async (req, res) => {
     // Get patient and nurse info
     const patient = await Patient.findOne({ phn: appointment.patientPhn });
     const nurse = await User.findOne({ nurId: appointment.nurseId });
-    const doctor = await User.findById(appointment.doctorId);
+    const doctor = await User.findOne({ medicalLicenseId: appointment.doctorId });
 
     const responseData = {
       ...appointment.toObject(),
@@ -247,11 +245,10 @@ export const updateAppointment = async (req, res) => {
         email: nurse.email
       } : null,
       doctorInfo: doctor ? {
-        _id: doctor._id,
+        medicalLicenseId: doctor.medicalLicenseId,
         firstName: doctor.firstName,
         lastName: doctor.lastName,
         email: doctor.email,
-        doctorId: doctor.doctorId,
         division: doctor.division
       } : null
     };
@@ -300,10 +297,10 @@ export const deleteAppointment = async (req, res) => {
 export const getPendingAppointments = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const requestingDoctorId = req.user._id.toString();
+    const requestingLicenseId = req.user.medicalLicenseId;
 
     // Verify the doctor is requesting their own appointments
-    if (doctorId !== requestingDoctorId) {
+    if (doctorId !== requestingLicenseId) {
       return res.status(403).json({
         success: false,
         message: 'You can only view your own pending appointments'
@@ -326,8 +323,8 @@ export const getPendingAppointments = async (req, res) => {
     // Populate patient and nurse info
     const appointmentsWithInfo = await Promise.all(
       appointments.map(async (appointment) => {
-        const patient = await Patient.findOne({ phn: appointment.patientPhn });
-        const nurse = await User.findOne({ nurId: appointment.nurseId });
+          const patient = await Patient.findOne({ phn: appointment.patientPhn });
+          const nurse = await User.findOne({ nurId: appointment.nurseId });
 
         return {
           ...appointment.toObject(),
@@ -365,10 +362,10 @@ export const getPendingAppointments = async (req, res) => {
 export const getAllDoctorAppointments = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const requestingDoctorId = req.user._id.toString();
+    const requestingLicenseId = req.user.medicalLicenseId;
 
     // Verify the doctor is requesting their own appointments
-    if (doctorId !== requestingDoctorId) {
+    if (doctorId !== requestingLicenseId) {
       return res.status(403).json({
         success: false,
         message: 'You can only view your own appointments'
@@ -391,7 +388,7 @@ export const getAllDoctorAppointments = async (req, res) => {
       appointments.map(async (appointment) => {
         const patient = await Patient.findOne({ phn: appointment.patientPhn });
         const nurse = await User.findOne({ nurId: appointment.nurseId });
-        const doctor = await User.findById(appointment.doctorId);
+        const doctor = await User.findOne({ medicalLicenseId: appointment.doctorId });
 
         return {
           ...appointment.toObject(),
@@ -440,7 +437,7 @@ export const getAllAppointments = async (req, res) => {
       appointments.map(async (appointment) => {
         const patient = await Patient.findOne({ phn: appointment.patientPhn });
         const nurse = await User.findOne({ nurId: appointment.nurseId });
-        const doctor = await User.findById(appointment.doctorId);
+        const doctor = await User.findOne({ medicalLicenseId: appointment.doctorId });
 
         return {
           ...appointment.toObject(),
@@ -457,7 +454,7 @@ export const getAllAppointments = async (req, res) => {
             email: nurse.email
           } : null,
           doctorInfo: doctor ? {
-            _id: doctor._id,
+            medicalLicenseId: doctor.medicalLicenseId,
             firstName: doctor.firstName,
             lastName: doctor.lastName,
             division: doctor.division,

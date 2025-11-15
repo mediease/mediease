@@ -18,8 +18,13 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data._id) {",
-									"        pm.collectionVariables.set(\"doctor_id\", jsonData.data._id);",
+									"    if (jsonData.data) {",
+									"        if (jsonData.data._id) {",
+									"            pm.collectionVariables.set(\"doctor_id\", jsonData.data._id);",
+									"        }",
+									"        if (jsonData.data.medicalLicenseId) {",
+									"            pm.collectionVariables.set(\"doctor_license\", jsonData.data.medicalLicenseId);",
+									"        }",
 									"    }",
 									"}"
 								],
@@ -37,7 +42,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"role\": \"doctor\",\n  \"nic\": \"123456789V\",\n  \"doctorId\": \"DOC001\",\n  \"division\": \"Cardiology\"\n}"
+							  "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"role\": \"doctor\",\n  \"nic\": \"123456789V\",\n  \"medicalLicenseId\": \"DOC001\",\n  \"division\": \"Cardiology\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
@@ -156,7 +161,9 @@
 									"    var jsonData = pm.response.json();",
 									"    if (jsonData.data && jsonData.data.token) {",
 									"        pm.collectionVariables.set(\"doctor_token\", jsonData.data.token);",
-									"        pm.collectionVariables.set(\"doctor_id\", jsonData.data.user._id);",
+									"    }",
+									"    if (jsonData.data && jsonData.data.user && jsonData.data.user.medicalLicenseId) {",
+									"        pm.collectionVariables.set(\"doctor_license\", jsonData.data.user.medicalLicenseId);",
 									"    }",
 									"}"
 								],
@@ -311,7 +318,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/admin/approve/{{doctor_id}}",
+							"raw": "{{base_url}}/api/admin/approve/{{doctor_license}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -319,10 +326,10 @@
 								"api",
 								"admin",
 								"approve",
-								"{{doctor_id}}"
+								"{{doctor_license}}"
 							]
 						},
-						"description": "Approve a doctor registration. Replace {{doctor_id}} with actual doctor ID from pending doctors list. Requires admin authentication."
+						"description": "Approve a doctor registration. Replace {{doctor_license}} with the doctor's Medical License ID from pending doctors list. Requires admin authentication."
 					},
 					"response": []
 				},
@@ -338,7 +345,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/admin/reject/{{doctor_id}}",
+							"raw": "{{base_url}}/api/admin/reject/{{doctor_license}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -346,10 +353,10 @@
 								"api",
 								"admin",
 								"reject",
-								"{{doctor_id}}"
+								"{{doctor_license}}"
 							]
 						},
-						"description": "Reject a doctor registration. Replace {{doctor_id}} with actual doctor ID. Requires admin authentication."
+						"description": "Reject a doctor registration. Replace {{doctor_license}} with the doctor's Medical License ID. Requires admin authentication."
 					},
 					"response": []
 				},
@@ -556,8 +563,13 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data._id) {",
-									"        pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"    if (jsonData.data) {",
+									"        if (jsonData.data._id) {",
+									"            pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"        }",
+									"        if (jsonData.data.phn) {",
+									"            pm.collectionVariables.set(\"patient_phn\", jsonData.data.phn);",
+									"        }",
 									"    }",
 									"}"
 								],
@@ -805,9 +817,14 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data._id) {",
-									"        pm.collectionVariables.set(\"appointment_id\", jsonData.data._id);",
-									"        console.log(\"Appointment ID saved: \" + jsonData.data._id);",
+									"    if (jsonData.data) {",
+									"        if (jsonData.data._id) {",
+									"            pm.collectionVariables.set(\"appointment_id\", jsonData.data._id);",
+									"            console.log(\"Appointment ID saved: \" + jsonData.data._id);",
+									"        }",
+									"        if (jsonData.data.apid) {",
+									"            pm.collectionVariables.set(\"appointment_apid\", jsonData.data.apid);",
+									"        }",
 									"    }",
 									"}"
 								],
@@ -830,7 +847,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"roomNo\": \"Room 101\",\n  \"type\": \"normal\"\n}"
+							"raw": "{\n  \"patientPhn\": \"{{patient_phn}}\",\n  \"doctorId\": \"{{doctor_license}}\",\n  \"roomNo\": \"Room 101\",\n  \"type\": \"normal\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/appointments",
@@ -842,7 +859,7 @@
 								"appointments"
 							]
 						},
-						"description": "Create a new appointment. Only nurses can create appointments. System auto-fills doctorName, doctorDivision, and date. Requires nurse authentication. Uses {{patient_id}} and {{doctor_id}} variables. Appointment ID will be saved automatically."
+						"description": "Create a new appointment. Only nurses can create appointments. System auto-fills doctorName, doctorDivision, and date. Requires nurse authentication. Uses {{patient_phn}} and {{doctor_license}} variables. Appointment ID and APID will be saved automatically."
 					},
 					"response": []
 				},
@@ -880,7 +897,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"roomNo\": \"Emergency Room 1\",\n  \"type\": \"emergency\"\n}"
+							"raw": "{\n  \"patientPhn\": \"{{patient_phn}}\",\n  \"doctorId\": \"{{doctor_license}}\",\n  \"roomNo\": \"Emergency Room 1\",\n  \"type\": \"emergency\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/appointments",
@@ -908,7 +925,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/appointments/pending/{{doctor_id}}",
+							"raw": "{{base_url}}/api/appointments/pending/{{doctor_license}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -916,10 +933,10 @@
 								"api",
 								"appointments",
 								"pending",
-								"{{doctor_id}}"
+								"{{doctor_license}}"
 							]
 						},
-						"description": "Get all pending appointments for a specific doctor. Only doctors can view their own pending appointments. Requires doctor authentication. Uses {{doctor_id}} variable (automatically set from login)."
+						"description": "Get all pending appointments for a specific doctor. Only doctors can view their own pending appointments. Requires doctor authentication. Uses {{doctor_license}} variable (automatically set from login)."
 					},
 					"response": []
 				},
@@ -935,7 +952,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/appointments/doctor/{{doctor_id}}",
+							"raw": "{{base_url}}/api/appointments/doctor/{{doctor_license}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -943,10 +960,10 @@
 								"api",
 								"appointments",
 								"doctor",
-								"{{doctor_id}}"
+								"{{doctor_license}}"
 							]
 						},
-						"description": "Get ALL appointments (pending and completed) for a specific doctor. Sorted by date in descending order (most recent first). Only doctors can view their own appointments. Requires doctor authentication. Uses {{doctor_id}} variable (automatically set from login)."
+						"description": "Get ALL appointments (pending and completed) for a specific doctor. Sorted by date in descending order (most recent first). Only doctors can view their own appointments. Requires doctor authentication. Uses {{doctor_license}} variable (automatically set from login)."
 					},
 					"response": []
 				}
@@ -991,20 +1008,21 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\",\n  \"complaint\": \"Patient complains of chest pain and shortness of breath\",\n  \"weight\": 75.5,\n  \"notes\": \"Patient appears anxious. Blood pressure slightly elevated. Recommended ECG and blood tests.\"\n}"
+							"raw": "{\n  \"complaint\": \"Patient complains of chest pain and shortness of breath\",\n  \"weight\": 75.5,\n  \"visitNote\": \"Patient appears anxious. Blood pressure slightly elevated. Recommended ECG and blood tests.\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/clinic-visits/start",
+							"raw": "{{base_url}}/api/clinic-visits/start-appointment/{{appointment_apid}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"clinic-visits",
-								"start"
+								"start-appointment",
+								"{{appointment_apid}}"
 							]
 						},
-						"description": "Start a clinic visit linked to an appointment. Only doctors can start clinic visits. System auto-fills doctorName, doctorDivision, date, and time. If appointmentId is provided, the appointment will be marked as completed and deleted. Requires doctor authentication. Uses {{patient_id}} and {{appointment_id}} variables. Clinic visit ID will be saved automatically."
+						"description": "Start a clinic visit using an appointment APID. Only doctors can start clinic visits. The appointment will be marked completed (not deleted). Requires doctor authentication. Uses {{appointment_apid}} variable. Clinic visit will include the APID and patient PHN."
 					},
 					"response": []
 				},
@@ -1042,20 +1060,21 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"complaint\": \"Patient reports persistent headache for 3 days\",\n  \"weight\": 68.2,\n  \"notes\": \"Patient has no history of migraines. Temperature normal. Prescribed pain relief medication and advised to return if symptoms persist.\"\n}"
+							"raw": "{\n  \"complaint\": \"Patient reports persistent headache for 3 days\",\n  \"weight\": 68.2,\n  \"visitNote\": \"Patient has no history of migraines. Temperature normal. Prescribed pain relief medication and advised to return if symptoms persist.\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/clinic-visits/start",
+							"raw": "{{base_url}}/api/clinic-visits/start/{{patient_phn}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"clinic-visits",
-								"start"
+								"start",
+								"{{patient_phn}}"
 							]
 						},
-						"description": "Start a clinic visit without an appointment (walk-in patient). Only doctors can start clinic visits. System auto-fills doctorName, doctorDivision, date, and time. Requires doctor authentication. Uses {{patient_id}} variable. Clinic visit ID will be saved automatically."
+						"description": "Start a clinic visit for a patient PHN (walk-in). Only doctors can start clinic visits. Requires doctor authentication. Uses {{patient_phn}} variable. Clinic visit will include patient PHN."
 					},
 					"response": []
 				}
@@ -1113,12 +1132,27 @@
 			"type": "string"
 		},
 		{
+			"key": "doctor_license",
+			"value": "",
+			"type": "string"
+		},
+		{
 			"key": "nurse_id",
 			"value": "",
 			"type": "string"
 		},
 		{
+			"key": "patient_phn",
+			"value": "",
+			"type": "string"
+		},
+		{
 			"key": "admin_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "appointment_apid",
 			"value": "",
 			"type": "string"
 		},
