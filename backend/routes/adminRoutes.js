@@ -8,6 +8,8 @@ import {
   rejectNurse,
   getAllUsers 
 } from '../controllers/adminController.js';
+import { getAllAppointments } from '../controllers/appointmentController.js';
+import { getAllClinicVisits } from '../controllers/clinicVisitController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { roleMiddleware } from '../middleware/roleMiddleware.js';
 
@@ -37,6 +39,12 @@ router.put('/reject-nurse/:id', rejectNurse);
 
 // GET /api/admin/users - Get all users
 router.get('/users', getAllUsers);
+
+// GET /api/admin/appointments - Get all appointments
+router.get('/appointments', getAllAppointments);
+
+// GET /api/admin/clinic-visits - Get all clinic visits
+router.get('/clinic-visits', getAllClinicVisits);
 
 export default router;
 

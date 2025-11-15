@@ -4,6 +4,8 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import patientRoutes from './routes/patientRoutes.js';
+import appointmentRoutes from './routes/appointmentRoutes.js';
+import clinicVisitRoutes from './routes/clinicVisitRoutes.js';
 
 dotenv.config();
 
@@ -20,6 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/patients', patientRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/clinic-visits', clinicVisitRoutes);
 
 // Root route
 app.get('/', (req, res) => {

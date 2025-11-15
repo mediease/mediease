@@ -1,0 +1,1137 @@
+{
+	"info": {
+		"_postman_id": "mediease-api-complete",
+		"name": "Mediease API - Complete Collection",
+		"description": "Complete collection for testing Mediease Patient Management API with Authentication, Admin features, Appointments, and Clinic Visits",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register Doctor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"doctor_id\", jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"role\": \"doctor\",\n  \"nic\": \"123456789V\",\n  \"doctorId\": \"DOC001\",\n  \"division\": \"Cardiology\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new doctor. Requires doctorId and division. Status will be 'pending' until admin approval."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Nurse",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"nurse_id\", jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"nurse@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"role\": \"nurse\",\n  \"nic\": \"987654321V\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new nurse. Does not require doctorId or division. Status will be 'pending' until admin approval."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set(\"admin_token\", jsonData.data.token);",
+									"        pm.collectionVariables.set(\"admin_id\", jsonData.data.user._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as admin. Update email and password in the body. Token will be saved automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Doctor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set(\"doctor_token\", jsonData.data.token);",
+									"        pm.collectionVariables.set(\"doctor_id\", jsonData.data.user._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as doctor. Update email and password. Token and doctor ID will be saved automatically. Note: Doctor must be approved by admin first."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Nurse)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set(\"nurse_token\", jsonData.data.token);",
+									"        pm.collectionVariables.set(\"nurse_id\", jsonData.data.user._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nurse@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as nurse. Update email and password. Token and nurse ID will be saved automatically. Note: Nurse must be approved by admin first."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration and login"
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get Pending Doctors",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0 && jsonData.data[0]._id) {",
+									"        pm.collectionVariables.set(\"doctor_id\", jsonData.data[0]._id);",
+									"        console.log(\"First pending doctor ID saved: \" + jsonData.data[0]._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/pending-doctors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"pending-doctors"
+							]
+						},
+						"description": "Get all doctors with pending status. Requires admin authentication. Automatically saves the first doctor ID from the response."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Doctor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    console.log(\"Doctor approved successfully\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/approve/{{doctor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"approve",
+								"{{doctor_id}}"
+							]
+						},
+						"description": "Approve a doctor registration. Replace {{doctor_id}} with actual doctor ID from pending doctors list. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Doctor",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/reject/{{doctor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"reject",
+								"{{doctor_id}}"
+							]
+						},
+						"description": "Reject a doctor registration. Replace {{doctor_id}} with actual doctor ID. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Nurses",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.length > 0 && jsonData.data[0]._id) {",
+									"        pm.collectionVariables.set(\"nurse_id\", jsonData.data[0]._id);",
+									"        console.log(\"First pending nurse ID saved: \" + jsonData.data[0]._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/pending-nurses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"pending-nurses"
+							]
+						},
+						"description": "Get all nurses with pending status. Requires admin authentication. Automatically saves the first nurse ID from the response."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Nurse",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    console.log(\"Nurse approved successfully\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/approve-nurse/{{nurse_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"approve-nurse",
+								"{{nurse_id}}"
+							]
+						},
+						"description": "Approve a nurse registration. Replace {{nurse_id}} with actual nurse ID from pending nurses list. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Nurse",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/reject-nurse/{{nurse_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"reject-nurse",
+								"{{nurse_id}}"
+							]
+						},
+						"description": "Reject a nurse registration. Replace {{nurse_id}} with actual nurse ID. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
+						},
+						"description": "Get all registered users. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"appointments"
+							]
+						},
+						"description": "Get all appointments in the system. Sorted by date in descending order (most recent first). Includes patient, doctor, and nurse information. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Clinic Visits",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/clinic-visits",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"clinic-visits"
+							]
+						},
+						"description": "Get all clinic visits in the system. Requires admin authentication."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin endpoints for managing users, appointments, and clinic visits. All require admin authentication."
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "Create Patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nic\": \"111222333V\",\n  \"fullName\": \"John Doe\",\n  \"gender\": \"Male\",\n  \"contactNumber\": \"0771234567\",\n  \"dob\": \"1990-01-15\",\n  \"address\": \"123 Main Street, Colombo\",\n  \"guardianNIC\": \"987654321V\",\n  \"guardianName\": \"Jane Doe\",\n  \"height\": 175,\n  \"weight\": 70,\n  \"bloodPressure\": \"120/80\",\n  \"sugarLevel\": \"90\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients"
+							]
+						},
+						"description": "Create a new patient with all required fields and optional fields. Patient ID will be saved automatically. Requires authentication (use admin_token, doctor_token, or nurse_token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient (Minimal)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"patient_id\", jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nic\": \"444555666V\",\n  \"fullName\": \"Sarah Smith\",\n  \"gender\": \"Female\",\n  \"contactNumber\": \"0779876543\",\n  \"dob\": \"1985-05-20\",\n  \"address\": \"456 Oak Avenue, Kandy\",\n  \"guardianNIC\": \"111222333V\",\n  \"guardianName\": \"Robert Smith\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients"
+							]
+						},
+						"description": "Create a patient with only required fields. Patient ID will be saved automatically. Requires authentication (use admin_token, doctor_token, or nurse_token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients"
+							]
+						},
+						"description": "Retrieve all patients from the database. Requires authentication (use admin_token, doctor_token, or nurse_token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Get a single patient by their ID. Uses {{patient_id}} variable automatically set from create requests. Requires authentication (use admin_token, doctor_token, or nurse_token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient (Partial)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"height\": 180,\n  \"weight\": 75,\n  \"bloodPressure\": \"125/85\",\n  \"sugarLevel\": \"95\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Update patient information partially. Uses {{patient_id}} variable. You can update any field. Requires authentication (use admin_token, doctor_token, or nurse_token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient (Full)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nic\": \"111222333V\",\n  \"fullName\": \"John Doe Updated\",\n  \"gender\": \"Male\",\n  \"contactNumber\": \"0771234567\",\n  \"dob\": \"1990-01-15\",\n  \"address\": \"123 Main Street, Colombo, Updated Address\",\n  \"guardianNIC\": \"987654321V\",\n  \"guardianName\": \"Jane Doe Updated\",\n  \"height\": 180,\n  \"weight\": 75,\n  \"bloodPressure\": \"125/85\",\n  \"sugarLevel\": \"95\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Update all patient fields. Uses {{patient_id}} variable. Requires authentication (use admin_token, doctor_token, or nurse_token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"{{patient_id}}"
+							]
+						},
+						"description": "Delete a patient by ID. Uses {{patient_id}} variable. Requires authentication (use admin_token, doctor_token, or nurse_token)."
+					},
+					"response": []
+				}
+			],
+			"description": "All patient-related endpoints"
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "Create Appointment (Nurse)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"appointment_id\", jsonData.data._id);",
+									"        console.log(\"Appointment ID saved: \" + jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{nurse_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"roomNo\": \"Room 101\",\n  \"type\": \"normal\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						},
+						"description": "Create a new appointment. Only nurses can create appointments. System auto-fills doctorName, doctorDivision, and date. Requires nurse authentication. Uses {{patient_id}} and {{doctor_id}} variables. Appointment ID will be saved automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Appointment - Emergency",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"appointment_id\", jsonData.data._id);",
+									"        console.log(\"Emergency Appointment ID saved: \" + jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{nurse_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"roomNo\": \"Emergency Room 1\",\n  \"type\": \"emergency\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						},
+						"description": "Create an emergency appointment. Only nurses can create appointments. Requires nurse authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Appointments (Doctor)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/pending/{{doctor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"pending",
+								"{{doctor_id}}"
+							]
+						},
+						"description": "Get all pending appointments for a specific doctor. Only doctors can view their own pending appointments. Requires doctor authentication. Uses {{doctor_id}} variable (automatically set from login)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Appointments (Doctor)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/appointments/doctor/{{doctor_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"doctor",
+								"{{doctor_id}}"
+							]
+						},
+						"description": "Get ALL appointments (pending and completed) for a specific doctor. Sorted by date in descending order (most recent first). Only doctors can view their own appointments. Requires doctor authentication. Uses {{doctor_id}} variable (automatically set from login)."
+					},
+					"response": []
+				}
+			],
+			"description": "Appointment management endpoints. Nurses can create appointments. Doctors can view their pending appointments or all appointments (pending and completed)."
+		},
+		{
+			"name": "Clinic Visits",
+			"item": [
+				{
+					"name": "Start Clinic Visit (With Appointment)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"clinic_visit_id\", jsonData.data._id);",
+									"        console.log(\"Clinic Visit ID saved: \" + jsonData.data._id);",
+									"        console.log(\"Note: The linked appointment has been marked as completed and deleted.\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"appointmentId\": \"{{appointment_id}}\",\n  \"complaint\": \"Patient complains of chest pain and shortness of breath\",\n  \"weight\": 75.5,\n  \"notes\": \"Patient appears anxious. Blood pressure slightly elevated. Recommended ECG and blood tests.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clinic-visits/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinic-visits",
+								"start"
+							]
+						},
+						"description": "Start a clinic visit linked to an appointment. Only doctors can start clinic visits. System auto-fills doctorName, doctorDivision, date, and time. If appointmentId is provided, the appointment will be marked as completed and deleted. Requires doctor authentication. Uses {{patient_id}} and {{appointment_id}} variables. Clinic visit ID will be saved automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Start Clinic Visit (Without Appointment)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.collectionVariables.set(\"clinic_visit_id\", jsonData.data._id);",
+									"        console.log(\"Clinic Visit ID saved: \" + jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"complaint\": \"Patient reports persistent headache for 3 days\",\n  \"weight\": 68.2,\n  \"notes\": \"Patient has no history of migraines. Temperature normal. Prescribed pain relief medication and advised to return if symptoms persist.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clinic-visits/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clinic-visits",
+								"start"
+							]
+						},
+						"description": "Start a clinic visit without an appointment (walk-in patient). Only doctors can start clinic visits. System auto-fills doctorName, doctorDivision, date, and time. Requires doctor authentication. Uses {{patient_id}} variable. Clinic visit ID will be saved automatically."
+					},
+					"response": []
+				}
+			],
+			"description": "Clinic visit endpoints. Only doctors can start clinic visits. Visits can be linked to appointments or created for walk-in patients."
+		},
+		{
+			"name": "Root",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Check if the API is running"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "doctor_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "nurse_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patient_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "doctor_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "nurse_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "appointment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "clinic_visit_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+
