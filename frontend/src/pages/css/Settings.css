@@ -1,0 +1,220 @@
+/* src/pages/css/Settings.css */
+.settings-page {
+    padding: 0;
+    background-color: #f9fafb;
+    min-height: 100vh;
+  }
+  
+  .settings-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 24px;
+    margin-left: 0;
+  }
+  
+  .settings-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    min-height: 400px;
+    overflow: hidden;
+  }
+  
+  /* Left Sidebar Navigation */
+  .settings-sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .settings-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #000;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+  }
+  
+  .settings-nav-item:hover {
+    background-color: #f3f4f6;
+  }
+  
+  .settings-nav-item.active {
+    background-color: #e0f2fe;
+    color: #0284c7;
+    font-weight: 600;
+  }
+  
+  .settings-nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .settings-nav-label {
+    font-size: 16px;
+  }
+  
+  /* Right Content Area */
+  .settings-content {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+  }
+  
+  .settings-section {
+    max-width: 100%;
+  }
+  
+  .settings-section-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 32px;
+  }
+  
+  /* Info Blocks */
+  .settings-info-block {
+    margin-bottom: 24px;
+  }
+  
+  .settings-info-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .settings-info-icon {
+    font-size: 20px;
+    margin-right: 12px;
+    color: #4b5563;
+  }
+  
+  .settings-info-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+    margin: 0;
+  }
+  
+  .settings-info-description {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 8px 0 16px 32px;
+    line-height: 1.5;
+  }
+  
+  .settings-email-text {
+    font-size: 14px;
+    color: #4b5563;
+    margin: 8px 0 16px 32px;
+    line-height: 1.5;
+  }
+  
+  .settings-email-value {
+    color: #000;
+    font-weight: 500;
+  }
+  
+  .settings-divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin: 16px 0;
+  }
+  
+  /* Action Buttons */
+  .settings-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 24px;
+  }
+  
+  .settings-edit-btn {
+    background: none;
+    border: none;
+    color: #0284c7;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 0;
+    transition: color 0.2s ease;
+    font-family: inherit;
+  }
+  
+  .settings-edit-btn:hover {
+    color: #0369a1;
+    text-decoration: underline;
+  }
+  
+  .settings-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 0;
+    transition: color 0.2s ease;
+    font-family: inherit;
+  }
+  
+  .settings-logout-btn:hover {
+    color: #b91c1c;
+    text-decoration: underline;
+  }
+  
+  .settings-logout-icon {
+    font-size: 16px;
+  }
+  
+  .settings-placeholder {
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 16px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .settings-container {
+      flex-direction: column;
+    }
+  
+    .settings-sidebar {
+      width: 100%;
+      flex-direction: row;
+      overflow-x: auto;
+      border-right: none;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  
+    .settings-nav-item {
+      white-space: nowrap;
+      min-width: fit-content;
+    }
+  
+    .settings-content {
+      padding: 24px;
+    }
+  }
+  
+  
+
+  
