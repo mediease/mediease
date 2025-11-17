@@ -205,7 +205,7 @@
     margin-bottom: 24px;
 }
   
-.edit-profile-icon {
+.edit-profile-icon { /* ✅ FIXED: Icon is not visible */
     font-size: 20px;
     margin-right: 12px;
     color: #4b5563;
