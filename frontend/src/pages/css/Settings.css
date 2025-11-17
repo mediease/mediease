@@ -186,6 +186,162 @@
     font-size: 14px;
     margin-top: 16px;
 }
+
+.notification-section {
+    max-width: 900px;
+}
+
+.notification-header {
+    margin-bottom: 24px;
+}
+
+.notification-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #000;
+    margin: 0 0 4px;
+}
+
+.notification-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.notification-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.notification-row-group {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fbff;
+}
+
+.notification-row-group:nth-child(2),
+.notification-row-group:nth-child(3) {
+    background-color: #ffffff;
+}
+
+.notification-row-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+.notification-row-title {
+    font-weight: 500;
+    color: #000;
+}
+
+.notification-row-caption {
+    text-align: center;
+}
+
+.notification-row-body {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: center;
+    gap: 16px;
+}
+
+.notification-row-label {
+    font-size: 14px;
+    color: #000;
+}
+
+.notification-toggle-group {
+    display: contents;
+}
+
+.notification-toggle {
+    position: relative;
+    width: 54px;
+    height: 28px;
+    border-radius: 999px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    background-color: #e5e7eb;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.notification-toggle.on {
+    background-color: #1d4ed8;
+}
+
+.notification-toggle.off {
+    background-color: #e5e7eb;
+}
+
+.notification-toggle::before {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+    left: 4px;
+    transition: transform 0.2s ease;
+}
+
+.notification-toggle.on::before {
+    transform: translateX(20px);
+}
+
+.toggle-label-on,
+.toggle-label-off {
+    /* Keep text for accessibility but hide in UI */
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.notification-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px 20px;
+    background-color: #ffffff;
+}
+
+.notification-cancel-btn {
+    min-width: 96px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+    color: #374151;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notification-save-btn {
+    min-width: 96px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background-color: #3b82f6;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notification-save-btn:hover {
+    background-color: #2563eb;
+}
   
 .edit-profile-container {
     display: flex;
