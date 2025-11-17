@@ -131,18 +131,26 @@ export const register = asyncHandler(async (req, res) => {
  * @access  Public
  */
 export const login = asyncHandler(async (req, res) => {
-  const { email, nurId, password } = req.body;
+  const { email, password, role } = req.body;
 
-  // Validate input
-  if ((!email && !nurId) || !password) {
+  // Validate required fields
+  if (!email || !password || !role) {
     return res.status(400).json({
       success: false,
-      message: 'Please provide (email or nurId) and password'
+      message: 'Please provide email, password, and role'
     });
   }
 
-  // Find user by email or nurId
-  const user = await User.findOne(nurId ? { nurId } : { email });
+  // Validate role
+  if (!['doctor', 'nurse', 'admin'].includes(role)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Role must be one of doctor, nurse, or admin'
+    });
+  }
+
+  // Find user by email and role (single User model stores all roles)
+  const user = await User.findOne({ email, role });
 
   if (!user) {
     return res.status(401).json({
