@@ -14,7 +14,16 @@ const router = express.Router();
 
 // Public routes
 router.post('/register', register);
-router.post('/login', login);
+router.post('/login', (req, res, next) => {
+  const { role } = req.body;
+  if (!role || !['doctor', 'nurse', 'admin'].includes(role)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Role is required and must be doctor, nurse, or admin'
+    });
+  }
+  next();
+}, login);
 
 // Admin routes
 router.put('/approve/doctor/:medicalLicenseId', protect, adminOnly, approveDoctor);
