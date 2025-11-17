@@ -33,6 +33,10 @@ const Settings = () => {
     labReports: { push: true, email: true },
     prescriptions: { push: true, email: true }
   });
+  const [securityPrefs, setSecurityPrefs] = useState({
+    twoFactor: true,
+    autoLogout: true
+  });
 
   const handleLogout = () => {
     // Handle logout logic here
@@ -75,6 +79,13 @@ const Settings = () => {
 
   const handleSaveNotifications = () => {
     console.log('Notification preferences:', notificationPrefs);
+  };
+
+  const handleToggleSecurity = (key) => {
+    setSecurityPrefs(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
   const handleUpdatePassword = (e) => {
@@ -413,9 +424,60 @@ const Settings = () => {
           )}
 
           {activeSection === 'Security' && (
-            <div className="settings-section">
-              <h2 className="settings-section-title">Security Settings</h2>
-              <p className="settings-placeholder">Security settings content will go here</p>
+            <div className="settings-section security-section">
+              <div className="security-header">
+                <h2 className="security-title">Security &amp; Privacy</h2>
+                <p className="security-subtitle">
+                  Add an extra layer of protection to your account and manage session security
+                </p>
+              </div>
+
+              <div className="security-card">
+                {/* Two-Factor Authentication */}
+                <div className="security-row">
+                  <div className="security-row-text">
+                    <span className="security-row-title">Two-Factor Authentication</span>
+                    <span className="security-row-description">
+                      Add an extra layer of security to your account
+                    </span>
+                  </div>
+                  <div className="security-row-toggle">
+                    <button
+                      type="button"
+                      className={`notification-toggle ${securityPrefs.twoFactor ? 'on' : 'off'}`}
+                      onClick={() => handleToggleSecurity('twoFactor')}
+                    >
+                      <span className="toggle-label-on">On</span>
+                      <span className="toggle-label-off">Off</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Auto Logout */}
+                <div className="security-row">
+                  <div className="security-row-text">
+                    <span className="security-row-title">Auto Logout</span>
+                    <span className="security-row-description">
+                      Automatically log out after 30 minutes of inactivity
+                    </span>
+                  </div>
+                  <div className="security-row-toggle">
+                    <button
+                      type="button"
+                      className={`notification-toggle ${securityPrefs.autoLogout ? 'on' : 'off'}`}
+                      onClick={() => handleToggleSecurity('autoLogout')}
+                    >
+                      <span className="toggle-label-on">On</span>
+                      <span className="toggle-label-off">Off</span>
+                    </button>
+                    
+                  </div>
+                </div>
+
+                <p className="security-last-login">
+                  Last login: Today at 9:30 AM from Chrome on Windows
+                </p>
+              </div>
             </div>
           )}
 
