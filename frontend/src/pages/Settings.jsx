@@ -28,6 +28,11 @@ const Settings = () => {
     confirmPassword: ''
   });
   const [isPasswordUpdated, setIsPasswordUpdated] = useState(false);
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    appointments: { push: true, email: true },
+    labReports: { push: true, email: true },
+    prescriptions: { push: true, email: true }
+  });
 
   const handleLogout = () => {
     // Handle logout logic here
@@ -56,6 +61,20 @@ const Settings = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleToggleNotification = (section, channel) => {
+    setNotificationPrefs(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [channel]: !prev[section][channel]
+      }
+    }));
+  };
+
+  const handleSaveNotifications = () => {
+    console.log('Notification preferences:', notificationPrefs);
   };
 
   const handleUpdatePassword = (e) => {
@@ -288,9 +307,108 @@ const Settings = () => {
           )}
 
           {activeSection === 'Notification' && (
-            <div className="settings-section">
-              <h2 className="settings-section-title">Notification Settings</h2>
-              <p className="settings-placeholder">Notification settings content will go here</p>
+            <div className="settings-section notification-section">
+              <div className="notification-header">
+                <h2 className="notification-title">Notification Preferences</h2>
+                <p className="notification-subtitle">
+                  Manage how you receive alerts for medication and patient updates
+                </p>
+              </div>
+
+              <div className="notification-card">
+                {/* Appointments */}
+                <div className="notification-row-group">
+                  <div className="notification-row-header">
+                    <span className="notification-row-label">                   </span>
+                    <span className="notification-row-caption">Push Notifications</span>
+                    <span className="notification-row-caption">Email Notifications</span>
+                  </div>
+                  <div className="notification-row-body">
+                    <span className="notification-row-label">Appointments</span>
+                    <div className="notification-toggle-group">
+                      <button
+                        type="button"
+                        className={`notification-toggle ${notificationPrefs.appointments.push ? 'on' : 'off'}`}
+                        onClick={() => handleToggleNotification('appointments', 'push')}
+                      >
+                        <span className="toggle-label-on">On</span>
+                        <span className="toggle-label-off">Off</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`notification-toggle ${notificationPrefs.appointments.email ? 'on' : 'off'}`}
+                        onClick={() => handleToggleNotification('appointments', 'email')}
+                      >
+                        <span className="toggle-label-on">On</span>
+                        <span className="toggle-label-off">Off</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lab Reports */}
+                <div className="notification-row-group">
+                  <div className="notification-row-body">
+                    <span className="notification-row-label">Lab Reports</span>
+                    <div className="notification-toggle-group">
+                      <button
+                        type="button"
+                        className={`notification-toggle ${notificationPrefs.labReports.push ? 'on' : 'off'}`}
+                        onClick={() => handleToggleNotification('labReports', 'push')}
+                      >
+                        <span className="toggle-label-on">On</span>
+                        <span className="toggle-label-off">Off</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`notification-toggle ${notificationPrefs.labReports.email ? 'on' : 'off'}`}
+                        onClick={() => handleToggleNotification('labReports', 'email')}
+                      >
+                        <span className="toggle-label-on">On</span>
+                        <span className="toggle-label-off">Off</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Prescriptions */}
+                <div className="notification-row-group">
+                  <div className="notification-row-body">
+                    <span className="notification-row-label">Prescriptions</span>
+                    <div className="notification-toggle-group">
+                      <button
+                        type="button"
+                        className={`notification-toggle ${notificationPrefs.prescriptions.push ? 'on' : 'off'}`}
+                        onClick={() => handleToggleNotification('prescriptions', 'push')}
+                      >
+                        <span className="toggle-label-on">On</span>
+                        <span className="toggle-label-off">Off</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`notification-toggle ${notificationPrefs.prescriptions.email ? 'on' : 'off'}`}
+                        onClick={() => handleToggleNotification('prescriptions', 'email')}
+                      >
+                        <span className="toggle-label-on">On</span>
+                        <span className="toggle-label-off">Off</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="notification-actions">
+                  <button type="button" className="notification-cancel-btn">
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="notification-save-btn"
+                    onClick={handleSaveNotifications}
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
