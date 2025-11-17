@@ -356,6 +356,62 @@
     color: #0369a1;
     text-decoration: underline;
 }
+
+.password-success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    pointer-events: none;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.password-success-card {
+    background: rgba(219, 239, 255, 0.95);
+    border: 1px solid #c7e2ff;
+    border-radius: 12px;
+    padding: 32px 48px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+    text-align: center;
+    color: #0f172a;
+    animation: slideUp 0.3s ease-out;
+}
+
+.password-success-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #0f172a;
+}
+
+.password-success-message {
+    font-size: 16px;
+    margin: 0;
+    color: #1e293b;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
   
 @media (max-width: 768px) {
     .settings-container {

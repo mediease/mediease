@@ -1,5 +1,5 @@
 // src/pages/Settings.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaUser, 
@@ -27,6 +27,7 @@ const Settings = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [isPasswordUpdated, setIsPasswordUpdated] = useState(false);
 
   const handleLogout = () => {
     // Handle logout logic here
@@ -67,7 +68,15 @@ const Settings = () => {
       newPassword: '',
       confirmPassword: ''
     });
+    setIsPasswordUpdated(true);
   };
+
+  useEffect(() => {
+    if (!isPasswordUpdated) return;
+
+    const timer = setTimeout(() => setIsPasswordUpdated(false), 3000);
+    return () => clearTimeout(timer);
+  }, [isPasswordUpdated]);
 
   const menuItems = [
     { id: 'Account', label: 'Account', icon: <FaUser /> },
@@ -78,6 +87,13 @@ const Settings = () => {
 
   return (
     <div className="settings-page">
+      {isPasswordUpdated && (
+        <div className="password-success-overlay">
+          <div className="password-success-card">
+            <p className="password-success-message">Password has been updated.</p>
+          </div>
+        </div>
+      )}
       <h1 className="settings-title">Settings</h1>
       
       <div className="settings-container">
