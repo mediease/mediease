@@ -37,6 +37,11 @@ const Settings = () => {
     twoFactor: true,
     autoLogout: true
   });
+  const [dataPrefs, setDataPrefs] = useState({
+    autoBackup: true
+  });
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleteScheduledOpen, setIsDeleteScheduledOpen] = useState(false);
 
   const handleLogout = () => {
     // Handle logout logic here
@@ -88,6 +93,31 @@ const Settings = () => {
     }));
   };
 
+  const handleToggleData = (key) => {
+    setDataPrefs(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const handleExportData = () => {
+    console.log('Export data clicked');
+  };
+
+  const handleDeleteAccount = () => {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setIsDeleteConfirmOpen(false);
+    setIsDeleteScheduledOpen(true);
+    // Here you would also call your delete API
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteConfirmOpen(false);
+  };
+
   const handleUpdatePassword = (e) => {
     e.preventDefault();
     // Handle password update logic here
@@ -121,6 +151,36 @@ const Settings = () => {
         <div className="password-success-overlay">
           <div className="password-success-card">
             <p className="password-success-message">Password has been updated.</p>
+          </div>
+        </div>
+      )}
+      {isDeleteConfirmOpen && (
+        <div className="data-modal-overlay">
+          <div className="data-modal-card">
+            <p className="data-modal-text">Are you really want to delete you account?</p>
+            <div className="data-modal-actions">
+              <button
+                type="button"
+                className="data-modal-yes"
+                onClick={handleConfirmDelete}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                className="data-modal-no"
+                onClick={handleCancelDelete}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isDeleteScheduledOpen && (
+        <div className="data-modal-overlay">
+          <div className="data-modal-card">
+            <p className="data-modal-text">Your account will delete in 24 hours.</p>
           </div>
         </div>
       )}
@@ -482,9 +542,73 @@ const Settings = () => {
           )}
 
           {activeSection === 'Data' && (
-            <div className="settings-section">
-              <h2 className="settings-section-title">Data Settings</h2>
-              <p className="settings-placeholder">Data settings content will go here</p>
+            <div className="settings-section data-section">
+              <div className="data-header">
+                <h2 className="data-title">Data Management</h2>
+                <p className="data-subtitle">
+                  Control how your data is backed up, exported, and removed from the system
+                </p>
+              </div>
+
+              <div className="data-card">
+                {/* Automatic Backup */}
+                <div className="data-row">
+                  <div className="data-row-text">
+                    <span className="data-row-title">Automatic Backup</span>
+                    <span className="data-row-description">
+                      Enable automatic daily backup of your data
+                    </span>
+                  </div>
+                  <div className="data-row-toggle">
+                    <button
+                      type="button"
+                      className={`notification-toggle ${dataPrefs.autoBackup ? 'on' : 'off'}`}
+                      onClick={() => handleToggleData('autoBackup')}
+                    >
+                      <span className="toggle-label-on">On</span>
+                      <span className="toggle-label-off">Off</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Export Data */}
+                <div className="data-row">
+                  <div className="data-row-text">
+                    <span className="data-row-title">Export Data</span>
+                    <span className="data-row-description">
+                      Download your patient and medication records
+                    </span>
+                  </div>
+                  <div className="data-row-actions">
+                    <button
+                      type="button"
+                      className="data-export-btn"
+                      onClick={handleExportData}
+                    >
+                      export
+                    </button>
+                  </div>
+                </div>
+
+                {/* Delete Account */}
+                <div className="data-row">
+                  <div className="data-row-text">
+                    <span className="data-row-title">Delete Account</span>
+                    <span className="data-row-description">
+                      Permanently delete your account from this site
+                    </span>
+                  </div>
+                  <div className="data-row-actions">
+                    <button
+                      type="button"
+                      className="data-delete-btn"
+                      onClick={handleDeleteAccount}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
