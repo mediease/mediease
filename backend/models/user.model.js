@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters long']
+    minlength: [6, 'Password must be at least 6 characters']
   },
   role: {
     type: String,
@@ -35,64 +35,36 @@ const userSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
-  nic: {
-    type: String,
-    required: [true, 'NIC is required'],
-    unique: true,
-    trim: true
-  },
   // Doctor-specific fields
   medicalLicenseId: {
     type: String,
-    unique: true,
     sparse: true,
-    trim: true
+    unique: true,
+    required: function() {
+      return this.role === 'doctor';
+    }
   },
-  // Nurse-specific ID (NURID)
-  nurId: {
+  nic: {
     type: String,
-    unique: true,
-    sparse: true,
-    trim: true
+    required: function() {
+      return this.role === 'doctor' || this.role === 'nurse';
+    }
   },
   division: {
     type: String,
-    trim: true
+    required: false
+  },
+  // Nurse-specific fields
+  nurId: {
+    type: String,
+    sparse: true,
+    unique: true,
+    required: function() {
+      return this.role === 'nurse';
+    }
   }
 }, {
   timestamps: true
-});
-
-// Validate doctorId and division for doctors
-userSchema.pre('validate', function(next) {
-  if (this.role === 'doctor') {
-    if (!this.medicalLicenseId) {
-      this.invalidate('medicalLicenseId', 'Medical License ID is required for doctors');
-    }
-    if (!this.division) {
-      this.invalidate('division', 'Division is required for doctors');
-    }
-  } else {
-    // Remove medicalLicenseId and division for non-doctors
-    if (this.medicalLicenseId) {
-      this.medicalLicenseId = undefined;
-    }
-    if (this.division) {
-      this.division = undefined;
-    }
-  }
-
-  // Validate nurse-specific ID
-  if (this.role === 'nurse') {
-    if (!this.nurId) {
-      this.invalidate('nurId', 'NURID is required for nurses');
-    }
-  } else {
-    if (this.nurId) {
-      this.nurId = undefined;
-    }
-  }
-  next();
 });
 
 // Hash password before saving
@@ -110,19 +82,18 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Method to compare password
+// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Remove password from JSON output
+// Don't return password in JSON
 userSchema.methods.toJSON = function() {
-  const userObject = this.toObject();
-  delete userObject.password;
-  return userObject;
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
 };
 
 const User = mongoose.model('User', userSchema);
 
 export default User;
-
