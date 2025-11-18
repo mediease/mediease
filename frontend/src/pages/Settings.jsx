@@ -40,8 +40,6 @@ const Settings = () => {
   const [dataPrefs, setDataPrefs] = useState({
     autoBackup: true
   });
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [isDeleteScheduledOpen, setIsDeleteScheduledOpen] = useState(false);
 
   const handleLogout = () => {
     // Handle logout logic here
@@ -105,17 +103,7 @@ const Settings = () => {
   };
 
   const handleDeleteAccount = () => {
-    setIsDeleteConfirmOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setIsDeleteConfirmOpen(false);
-    setIsDeleteScheduledOpen(true);
-    // Here you would also call your delete API
-  };
-
-  const handleCancelDelete = () => {
-    setIsDeleteConfirmOpen(false);
+    console.log('Delete account clicked');
   };
 
   const handleUpdatePassword = (e) => {
@@ -151,36 +139,6 @@ const Settings = () => {
         <div className="password-success-overlay">
           <div className="password-success-card">
             <p className="password-success-message">Password has been updated.</p>
-          </div>
-        </div>
-      )}
-      {isDeleteConfirmOpen && (
-        <div className="data-modal-overlay">
-          <div className="data-modal-card">
-            <p className="data-modal-text">Are you really want to delete you account?</p>
-            <div className="data-modal-actions">
-              <button
-                type="button"
-                className="data-modal-yes"
-                onClick={handleConfirmDelete}
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                className="data-modal-no"
-                onClick={handleCancelDelete}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {isDeleteScheduledOpen && (
-        <div className="data-modal-overlay">
-          <div className="data-modal-card">
-            <p className="data-modal-text">Your account will delete in 24 hours.</p>
           </div>
         </div>
       )}
