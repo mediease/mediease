@@ -9,6 +9,8 @@ function CreateAccount() {
   const [searchParams] = useSearchParams();
   const [userType, setUserType] = useState(searchParams.get('type') || 'doctor');
   const [step, setStep] = useState(1);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [termsAgreed, setTermsAgreed] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -23,6 +25,15 @@ function CreateAccount() {
 
   const handleNext = (e) => {
     e.preventDefault();
+    
+    // Validate required fields for step 1
+    if (!formData.firstName || !formData.lastName || !formData.email || 
+        !formData.division || !formData.phone || !formData.nic) {
+      setMessage({ type: 'error', text: 'Please fill in all required fields' });
+      return;
+    }
+    
+    setMessage({ type: '', text: '' });
     setStep(2);
   };
 
@@ -32,13 +43,82 @@ function CreateAccount() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    setMessage({ type: '', text: '' });
+    
+    // Check terms agreement
+    if (!termsAgreed) {
+      setMessage({ type: 'error', text: 'You must agree to the Terms of Service and Privacy Policy' });
+      return;
+    }
+    
+    // Validate required fields based on userType
+    if (userType === 'doctor') {
+      if (!formData.medicalLicenseId || !formData.password || !formData.confirmPassword) {
+        setMessage({ type: 'error', text: 'Please fill in all required fields' });
+        return;
+      }
+    } else if (userType === 'staff') {
+      if (!formData.firstName || !formData.lastName || !formData.email || 
+          !formData.phone || !formData.password || !formData.confirmPassword) {
+        setMessage({ type: 'error', text: 'Please fill in all required fields' });
+        return;
+      }
+    }
+    
+    // Build request body based on userType
+    let requestBody;
+    if (userType === 'doctor') {
+      requestBody = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: 'doctor',
+        medicalLicenseId: formData.medicalLicenseId,
+        nic: formData.nic,
+        division: formData.division
+      };
+    } else if (userType === 'staff') {
+      requestBody = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: 'staff',
+        nic: formData.nic,
+        division: formData.division
+      };
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Account created successfully' });
+        // Optionally reset form or redirect
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Registration failed' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+      console.error('Registration error:', error);
+    }
   };
 
   const renderStaffForm = () => (
-    <form className="create-form">
+    <form className="create-form" onSubmit={handleSubmit}>
       <div className="back-link-container">
         <Link to="/login" className="back-link">
           ‹ Back to login
@@ -55,6 +135,7 @@ function CreateAccount() {
               placeholder="First Name" 
               value={formData.firstName}
               onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+              required
             />
           </div>
         </div>
@@ -67,6 +148,7 @@ function CreateAccount() {
               placeholder="Last Name" 
               value={formData.lastName}
               onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+              required
             />
           </div>
         </div>
@@ -81,6 +163,7 @@ function CreateAccount() {
             placeholder="Email" 
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
+            required
           />
         </div>
       </div>
@@ -94,6 +177,7 @@ function CreateAccount() {
             placeholder="Phone Number" 
             value={formData.phone}
             onChange={(e) => setFormData({...formData, phone: e.target.value})}
+            required
           />
         </div>
       </div>
@@ -107,6 +191,7 @@ function CreateAccount() {
             placeholder="Password"
             value={formData.password}
             onChange={(e) => setFormData({...formData, password: e.target.value})}
+            required
           />
         </div>
       </div>
@@ -120,13 +205,19 @@ function CreateAccount() {
             placeholder="Re-Enter Password"
             value={formData.confirmPassword}
             onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+            required
           />
         </div>
       </div>
 
       <div className="terms-checkbox">
-        <input type="checkbox" id="terms" />
-        <label htmlFor="terms">I agree to the Terms of Service and Privacy Policy</label>
+        <input 
+          type="checkbox" 
+          id="terms-staff" 
+          checked={termsAgreed}
+          onChange={(e) => setTermsAgreed(e.target.checked)}
+        />
+        <label htmlFor="terms-staff">I agree to the Terms of Service and Privacy Policy</label>
       </div>
 
       <button type="submit" className="next-button">Create an Account</button>
@@ -144,6 +235,20 @@ function CreateAccount() {
           <h1 className="brand-name">MediEase EHR</h1>
         </div>
         <h2 className="subtitle">Create New Account</h2>
+
+        {message.text && (
+          <div style={{
+            padding: '10px 15px',
+            marginBottom: '15px',
+            borderRadius: '5px',
+            backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da',
+            color: message.type === 'success' ? '#155724' : '#721c24',
+            border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+            textAlign: 'center'
+          }}>
+            {message.text}
+          </div>
+        )}
 
         <div className="user-types">
           <div className={`user-type ${userType === 'doctor' ? 'active' : ''}`} onClick={() => setUserType('doctor')}>
@@ -174,10 +279,11 @@ function CreateAccount() {
                     <MdPerson className="input-icon" />
                     <input 
                       type="text" 
-                      placeholder="First Name" 
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                    />
+                    placeholder="First Name" 
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    required
+                  />
                   </div>
                 </div>
                 <div className="form-group">
@@ -186,10 +292,11 @@ function CreateAccount() {
                     <MdPerson className="input-icon" />
                     <input 
                       type="text" 
-                      placeholder="Last Name" 
-                      value={formData.lastName}
-                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                    />
+                    placeholder="Last Name" 
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    required
+                  />
                   </div>
                 </div>
               </div>
@@ -203,6 +310,7 @@ function CreateAccount() {
                     placeholder="Email Address" 
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    required
                   />
                 </div>
               </div>
@@ -216,6 +324,7 @@ function CreateAccount() {
                     placeholder="Your Hospital division" 
                     value={formData.division}
                     onChange={(e) => setFormData({...formData, division: e.target.value})}
+                    required
                   />
                 </div>
               </div>
@@ -229,6 +338,7 @@ function CreateAccount() {
                     placeholder="Phone Number" 
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    required
                   />
                 </div>
               </div>
@@ -242,6 +352,7 @@ function CreateAccount() {
                     placeholder="NIC" 
                     value={formData.nic}
                     onChange={(e) => setFormData({...formData, nic: e.target.value})}
+                    required
                   />
                 </div>
               </div>
@@ -265,6 +376,7 @@ function CreateAccount() {
                     placeholder="Medical License ID" 
                     value={formData.medicalLicenseId}
                     onChange={(e) => setFormData({...formData, medicalLicenseId: e.target.value})}
+                    required
                   />
                 </div>
               </div>
@@ -288,16 +400,22 @@ function CreateAccount() {
                   <MdVpnKey className="input-icon" />
                   <input 
                     type="password" 
-                    placeholder="Re-Enter Password"
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                  />
+                  placeholder="Re-Enter Password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                  required
+                />
                 </div>
               </div>
 
               <div className="terms-checkbox">
-                <input type="checkbox" id="terms" />
-                <label htmlFor="terms">I agree to the Terms of Service and Privacy Policy</label>
+                <input 
+                  type="checkbox" 
+                  id="terms-doctor" 
+                  checked={termsAgreed}
+                  onChange={(e) => setTermsAgreed(e.target.checked)}
+                />
+                <label htmlFor="terms-doctor">I agree to the Terms of Service and Privacy Policy</label>
               </div>
 
               <button type="submit" className="next-button">Create an Account</button>

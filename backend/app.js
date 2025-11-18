@@ -1,55 +1,47 @@
 import express from 'express';
-import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import authRoutes from './routes/authRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
-import patientRoutes from './routes/patientRoutes.js';
-import appointmentRoutes from './routes/appointmentRoutes.js';
-import clinicVisitRoutes from './routes/clinicVisitRoutes.js';
-
-dotenv.config();
-
-// Connect to MongoDB
-connectDB();
+import cors from 'cors';
+import authRoutes from './routes/auth.routes.js';
+import fhirPatientRoutes from './routes/fhirPatient.routes.js';
+import fhirPractitionerRoutes from './routes/fhirPractitioner.routes.js';
+import fhirAppointmentRoutes from './routes/fhirAppointment.routes.js';
+import fhirEncounterRoutes from './routes/fhirEncounter.routes.js';
 
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/clinic-visits', clinicVisitRoutes);
+app.use('/auth', authRoutes);
+app.use('/fhir', fhirPatientRoutes);
+app.use('/fhir', fhirPractitionerRoutes);
+app.use('/fhir', fhirAppointmentRoutes);
+app.use('/fhir', fhirEncounterRoutes);
+app.use('/admin', fhirAppointmentRoutes); // admin appointment routes
+app.use('/admin', authRoutes); // admin approval routes
+app.use('/clinic', fhirEncounterRoutes); // clinic encounter routes
+app.use('/doctor', fhirAppointmentRoutes); // doctor appointment routes
 
-// Root route
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Patient Management API is running'
-  });
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ success: true, message: 'FHIR EMR Server is running', timestamp: new Date() });
 });
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
+  res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
+  console.error('Error:', err.stack);
+  res.status(err.statusCode || 500).json({
     success: false,
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : {}
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 });
 
 export default app;
-

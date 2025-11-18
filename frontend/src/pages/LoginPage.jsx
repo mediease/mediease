@@ -1,25 +1,50 @@
 import React, { useState } from 'react';
 import { MdEmail, MdLock, MdAdminPanelSettings } from 'react-icons/md';
 import { FaUserMd, FaUserTie } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom'; // 👈 import useNavigate
+import { Link, useNavigate } from 'react-router-dom';
+import httpClient from '../services/httpClient';
 import './css/LoginPage.css';
 import logo from '../assets/logo2.png';
 
 function LoginPage() {
   const [userType, setUserType] = useState('doctor');
-  const navigate = useNavigate(); // 👈 useNavigate hook
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); // prevent default form submission
-    // You can add login logic here (authentication, validation, etc.)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    // Navigate based on user type
-    if (userType === 'doctor') {
-      navigate('/doctor');
-    } else if (userType === 'admin') {
-      navigate('/admin');
-    } else if (userType === 'staff') {
-      navigate('/staff');
+    try {
+      const response = await httpClient.post('/auth/login', {
+        email,
+        password,
+        role: userType,
+      });
+
+      // Save token and role to localStorage
+      const { token } = response.data;
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('userRole', userType);
+
+      // Navigate based on user type
+      if (userType === 'doctor') {
+        navigate('/doctor');
+      } else if (userType === 'admin') {
+        navigate('/admin');
+      } else if (userType === 'staff') {
+        navigate('/staff');
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || 'Login failed. Please check your credentials.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,30 +70,42 @@ function LoginPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}> {/* 👈 attach handler here */}
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div style={{ color: '#dc3545', marginBottom: '15px', padding: '10px', backgroundColor: '#f8d7da', borderRadius: '5px', border: '1px solid #f5c6cb' }}>
+              {error}
+            </div>
+          )}
           <div className="form-group">
             <label className="form-label"><strong>Email Address</strong></label>
             <div className="input-with-icon">
               <MdEmail className="input-icon" />
-              <input type="email" placeholder="Enter your email" required />
+              <input 
+                type="email" 
+                placeholder="Enter your email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
             </div>
           </div>
           <div className="form-group">
             <label className="form-label"><strong>Password</strong></label>
             <div className="input-with-icon">
               <MdLock className="input-icon" />
-              <input type="password" placeholder="Enter your password" required />
+              <input 
+                type="password" 
+                placeholder="Enter your password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+              />
             </div>
           </div>
 
-          <div className="remember-forgot">
-            <label className="remember-me">
-              <input type="checkbox" /> Remember me
-            </label>
-            <a href="#" className="link">Forgot Password?</a>
-          </div>
-
-          <button type="submit" className="signin-button">Sign in</button>
+          <button type="submit" className="signin-button" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
         </form>
 
         {userType !== 'admin' && (
