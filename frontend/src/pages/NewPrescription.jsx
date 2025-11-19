@@ -57,6 +57,7 @@ const NewPrescription = () => {
   const [selectedDoseComment, setSelectedDoseComment] = useState("");
   const [drugSearch, setDrugSearch] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [qrUrl, setQrUrl] = useState("");
 
   const [favouriteDrugs, setFavouriteDrugs] = useState(initialFavouriteDrugs);
   const [favouriteGroups, setFavouriteGroups] = useState(initialGroups);
@@ -175,6 +176,24 @@ const NewPrescription = () => {
 
   const handleClosePreview = () => {
     setShowPreview(false);
+  };
+
+  const generateQRCode = () => {
+    try {
+      const payload = {
+        meta: prescriptionMeta,
+        items: prescriptionItems,
+      };
+      const text = JSON.stringify(payload);
+      const encoded = encodeURIComponent(text);
+      // Use Google Chart API to generate a QR code image URL (quick solution without adding deps)
+      const size = 300;
+      const url = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encoded}`;
+      setQrUrl(url);
+    } catch (err) {
+      console.error("Failed to generate QR", err);
+      alert("Failed to generate QR code.");
+    }
   };
 
   const renderSelectionPanel = () => {
@@ -546,9 +565,17 @@ const NewPrescription = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {qrUrl && (
+                  <div className="qr-container">
+                    <h4>Generated QR Code</h4>
+                    <img src={qrUrl} alt="Prescription QR" className="qr-image" />
+                    <p className="selection-helper">Scan this QR to view prescription details.</p>
+                  </div>
+                )}
               </div>
               <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                <button className="action-btn secondary" onClick={handleClosePreview}>Close</button>
+                <button className="action-btn primary" onClick={generateQRCode}>Generate QR code</button>
               </div>
             </div>
           </div>
