@@ -46,12 +46,20 @@ const Visitpatient = () => {
     navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
   };
 
+  const handleAddAllergy = () => {
+    navigate(`/doctor/patient/${id}/allergiesinfo`);
+  };
+
   const handleOrderNewReport = () => {
     navigate(`/doctor/visitpatient/${id}/order-report`);
   };
 
   const handleRequestSummary = () => {
     setIsSummaryModalOpen(true);
+  };
+
+  const handleCloseVisit = () => {
+    navigate('/doctor/patients');
   };
 
   const handleCloseSummary = () => {
@@ -128,7 +136,7 @@ const Visitpatient = () => {
                 <div className="inlineButton"></div>
                 <SimpleButton 
                 label="Add Allergies" 
-                onClick={clickVisit}
+                onClick={handleAddAllergy}
                 />
             </div>
             <div className="inlineButton">
@@ -145,7 +153,7 @@ const Visitpatient = () => {
             <div className="inlineButton">
                 <RedButton
                 label="Close the Visit" 
-                onClick={clickVisit}
+                onClick={handleCloseVisit}
                 />
             </div>
             </div>

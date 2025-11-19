@@ -36,7 +36,7 @@ const navigate = useNavigate();
   };
 
   const handleCancel = () => {
-    navigate(`/patient/${id}`);
+    navigate(`/doctor/patients`);
   };
 
   return (
