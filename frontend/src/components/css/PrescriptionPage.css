@@ -32,6 +32,31 @@
     display: inline-block;
     width: 100%;
   }
+
+.select-wrapper select {
+  width: 100%;
+  padding: 6px 24px 6px 8px;
+  border: 1px solid #cdd2d7;
+  border-radius: 6px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff;
+  background-image: none;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.select-wrapper select::-ms-expand {
+  display: none;
+}
+
+.select-wrapper select:focus {
+  outline: none;
+  border-color: #4fd9ff;
+  box-shadow: 0 0 0 2px rgba(79, 217, 255, 0.2);
+}
   
   .arrow {
     position: absolute;
@@ -110,6 +135,21 @@
     border: 1px solid #ddd;
     resize: vertical;
   }
+
+.comment-input {
+  width: 100%;
+  border: 1px solid #cdd2d7;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #4fd9ff;
+  box-shadow: 0 0 0 2px rgba(79, 217, 255, 0.2);
+}
   
   .action-buttons {
     display: flex;
