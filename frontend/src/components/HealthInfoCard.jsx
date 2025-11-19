@@ -2,12 +2,18 @@ import React from 'react';
 import './css/HealthInfoCard.css';
 
 const HealthInfoCard = ({ height, weight, bmi, bloodPressure, sugarLevel }) => {
+  const formatVal = (val, suffix) => {
+    if (!val || val === '-' ) return '-';
+    // If already contains a unit (space or slash), leave as-is
+    if (/\d.*[a-zA-Z%]/.test(val) || /\//.test(val)) return val;
+    return suffix ? `${val} ${suffix}` : val;
+  };
   const info = [
-    { label: 'Height', value: `${height} cm` },
-    { label: 'Weight', value: `${weight} kg` },
-    { label: 'BMI', value: bmi },
-    { label: 'Blood Pressure', value: bloodPressure },
-    { label: 'Sugar Level', value: `${sugarLevel} mg/dL` },
+    { label: 'Height', value: formatVal(height, 'cm') },
+    { label: 'Weight', value: formatVal(weight, 'kg') },
+    { label: 'BMI', value: formatVal(bmi, '') },
+    { label: 'Blood Pressure', value: formatVal(bloodPressure, '') },
+    { label: 'Sugar Level', value: formatVal(sugarLevel, 'mg/dL') },
   ];
 
   return (
