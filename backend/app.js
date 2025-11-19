@@ -6,6 +6,7 @@ import fhirPractitionerRoutes from './routes/fhirPractitioner.routes.js';
 import fhirAppointmentRoutes from './routes/fhirAppointment.routes.js';
 import fhirEncounterRoutes from './routes/fhirEncounter.routes.js';
 import fhirMedicationRoutes from './routes/fhirMedication.routes.js';
+import fhirPrescriptionRoutes from './routes/fhirPrescription.routes.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/fhir', fhirPractitionerRoutes);
 app.use('/fhir', fhirAppointmentRoutes);
 app.use('/fhir', fhirEncounterRoutes);
 app.use('/fhir', fhirMedicationRoutes);
+app.use('/fhir', fhirPrescriptionRoutes);
 app.use('/admin', fhirAppointmentRoutes); // admin appointment routes
 app.use('/admin', authRoutes); // admin approval routes
 app.use('/clinic', fhirEncounterRoutes); // clinic encounter routes

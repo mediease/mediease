@@ -1,0 +1,148 @@
+{
+  "info": {
+    "name": "MediEase Prescription Test Suite",
+    "description": "Test collection for FHIR MedicationRequest prescription endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "doctorEmail", "value": "john.doe@hospital.com" },
+    { "key": "doctorPassword", "value": "Doctor@123" },
+    { "key": "medicalLicenseId", "value": "MED12345" },
+    { "key": "patientPhn", "value": "PH00001" },
+    { "key": "doctorToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Login Doctor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.test('Success flag', () => json.success === true);",
+              "pm.collectionVariables.set('doctorToken', json.data.token);",
+              "// Decode JWT for role check",
+              "const payload = JSON.parse(Buffer.from(json.data.token.split('.')[1], 'base64').toString('utf8'));",
+              "pm.test('Role is doctor', () => payload.role === 'doctor');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{doctorEmail}}\",\n  \"password\": \"{{doctorPassword}}\",\n  \"role\": \"doctor\"\n}" }
+      }
+    },
+    {
+      "name": "2. Create Prescription (Single item)",
+      "event": [
+        {"listen": "test","script": {"exec": [
+          "pm.test('Status 201', () => pm.response.code === 201);",
+          "const json = pm.response.json();",
+          "pm.test('Success true', () => json.success === true);",
+          "const r = json.data;",
+          "pm.test('MedicationRequest resourceType', () => r.resourceType === 'MedicationRequest');",
+          "pm.test('Has id', () => !!r.id);",
+          "pm.test('Subject reference patientPhn', () => r.subject.reference.endsWith('{{patientPhn}}'));",
+          "pm.test('Requester reference medicalLicenseId', () => r.requester.reference.endsWith('{{medicalLicenseId}}'));",
+          "pm.test('DosageInstruction length 1', () => Array.isArray(r.dosageInstruction) && r.dosageInstruction.length === 1);",
+          "pm.test('Extension visit-type present', () => (r.extension || []).some(e => e.url.includes('visit-type')));"
+        ]}}
+      ],
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/fhir/MedicationRequest", "host": ["{{baseUrl}}"], "path": ["fhir","MedicationRequest"] },
+        "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"complaint\": \"Chest discomfort\",\n  \"visitType\": \"OPD\",\n  \"status\": \"Draft\",\n  \"prescribeDate\": \"2025-11-20T09:30:00Z\",\n  \"prescriptionItems\": [\n    { \"name\": \"Aspirin\", \"dose\": \"75mg\", \"frequency\": \"once daily\", \"period\": \"30d\", \"doseComment\": \"After food\" }\n  ]\n}" }
+      }
+    },
+    {
+      "name": "3. Create Prescription (Multiple items)",
+      "event": [
+        {"listen": "test","script": {"exec": [
+          "pm.test('Status 201', () => pm.response.code === 201);",
+          "const json = pm.response.json();",
+          "const r = json.data;",
+          "pm.test('MedicationRequest resourceType', () => r.resourceType === 'MedicationRequest');",
+          "pm.test('Multiple dosageInstruction entries', () => r.dosageInstruction.length === 2);",
+          "pm.test('All dosage entries have text', () => r.dosageInstruction.every(d => d.text));"
+        ]}}
+      ],
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/fhir/MedicationRequest", "host": ["{{baseUrl}}"], "path": ["fhir","MedicationRequest"] },
+        "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"complaint\": \"Diabetes and Hyperlipidemia\",\n  \"visitType\": \"Clinic\",\n  \"status\": \"Pending\",\n  \"prescriptionItems\": [\n    { \"name\": \"Metformin\", \"dose\": \"500mg\", \"frequency\": \"twice daily\", \"period\": \"90d\" },\n    { \"name\": \"Atorvastatin\", \"dose\": \"20mg\", \"frequency\": \"once nightly\", \"period\": \"60d\" }\n  ]\n}" }
+      }
+    },
+    {
+      "name": "4. Get Prescriptions by Patient",
+      "event": [
+        {"listen": "test","script": {"exec": [
+          "pm.test('Status 200', () => pm.response.code === 200);",
+          "const json = pm.response.json();",
+          "pm.test('Bundle resourceType', () => json.data.resourceType === 'Bundle');",
+          "pm.test('Entries MedicationRequest', () => json.data.entry.every(e => e.resource.resourceType === 'MedicationRequest'));"
+        ]}}
+      ],
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" } ],
+        "url": { "raw": "{{baseUrl}}/fhir/MedicationRequest/{{patientPhn}}", "host": ["{{baseUrl}}"], "path": ["fhir","MedicationRequest","{{patientPhn}}"] }
+      }
+    },
+    {
+      "name": "5. Get Prescriptions by Doctor",
+      "event": [
+        {"listen": "test","script": {"exec": [
+          "pm.test('Status 200', () => pm.response.code === 200);",
+          "const json = pm.response.json();",
+          "pm.test('Bundle present', () => json.data && json.data.resourceType === 'Bundle');",
+          "pm.test('Requester matches doctor', () => json.data.entry.every(e => e.resource.requester.reference.endsWith('{{medicalLicenseId}}')));"
+        ]}}
+      ],
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" } ],
+        "url": { "raw": "{{baseUrl}}/fhir/MedicationRequest/doctor/{{medicalLicenseId}}", "host": ["{{baseUrl}}"], "path": ["fhir","MedicationRequest","doctor","{{medicalLicenseId}}"] }
+      }
+    },
+    {
+      "name": "6. Error - Missing patientPhn",
+      "event": [
+        {"listen": "test","script": {"exec": [
+          "pm.test('Status 400', () => pm.response.code === 400);",
+          "const json = pm.response.json();",
+          "pm.test('Error message present', () => json.message);"
+        ]}}
+      ],
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/fhir/MedicationRequest", "host": ["{{baseUrl}}"], "path": ["fhir","MedicationRequest"] },
+        "body": { "mode": "raw", "raw": "{\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"prescriptionItems\": [{ \"drugName\": \"Aspirin\" }]\n}" }
+      }
+    },
+    {
+      "name": "7. Error - Unauthorized (No Token)",
+      "event": [
+        {"listen": "test","script": {"exec": [
+          "pm.test('Status 401', () => pm.response.code === 401);",
+          "const json = pm.response.json();",
+          "pm.test('Auth failure structure', () => json.success === false && json.message);"
+        ]}}
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/fhir/MedicationRequest/{{patientPhn}}", "host": ["{{baseUrl}}"], "path": ["fhir","MedicationRequest","{{patientPhn}}"] }
+      }
+    }
+  ]
+}
