@@ -46,6 +46,10 @@ const Visitpatient = () => {
     navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
   };
 
+  const handleOrderNewReport = () => {
+    navigate(`/doctor/visitpatient/${id}/order-report`);
+  };
+
   const handleRequestSummary = () => {
     setIsSummaryModalOpen(true);
   };
@@ -118,8 +122,8 @@ const Visitpatient = () => {
           <div className='buttonContainer'>
             <div className="inlineButton">
                 <SimpleButton 
-                label="Oder New Report" 
-                onClick={clickVisit}
+                label="Order New Report" 
+                onClick={handleOrderNewReport}
                 />
                 <div className="inlineButton"></div>
                 <SimpleButton 

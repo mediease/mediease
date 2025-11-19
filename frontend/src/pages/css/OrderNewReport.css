@@ -1,0 +1,226 @@
+.order-report-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.order-report-title {
+  color: #666;
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.order-report-content {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.patient-name-header {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e7ff;
+}
+
+.order-report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.required-asterisk {
+  color: #ff4f4f;
+  margin-left: 4px;
+}
+
+.datepicker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-input-field {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.date-input-field:focus {
+  outline: none;
+  border-color: #4fd9ff;
+  box-shadow: 0 0 0 2px rgba(79, 217, 255, 0.1);
+}
+
+.calendar-icon-field {
+  position: absolute;
+  left: 12px;
+  color: #888;
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  color: #333;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #4fd9ff;
+  box-shadow: 0 0 0 2px rgba(79, 217, 255, 0.1);
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.form-select {
+  appearance: none;
+  padding-right: 35px;
+  cursor: pointer;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  background-color: #fff;
+  color: #333;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #4fd9ff;
+  box-shadow: 0 0 0 2px rgba(79, 217, 255, 0.1);
+}
+
+.required-note {
+  color: #ff4f4f;
+  font-size: 12px;
+  margin: -10px 0 0 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e7ff;
+}
+
+.cancel-button {
+  padding: 10px 24px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  background-color: #f5f5f5;
+  border-color: #b0b0b0;
+}
+
+.save-button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4fd9ff;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #3bc5e5;
+}
+
+/* Custom calendar styling */
+.custom-calendar {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  padding: 8px !important;
+  background-color: #fff !important;
+  border: 1px solid #e0e0e0 !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #4fd9ff !important;
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e0f7ff !important;
+  border-radius: 50% !important;
+}
+
+.react-datepicker__header {
+  background-color: #f8f9ff !important;
+  border-bottom: 1px solid #e0e7ff !important;
+}
+
+.react-datepicker__current-month {
+  color: #333 !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker__day-name {
+  color: #666 !important;
+  font-weight: 500 !important;
+}
+
