@@ -5,6 +5,7 @@ import SegmentedControl from "../components/SegmentedControl";
 import HealthInfoCard from "../components/HealthInfoCard";
 import SimpleButton from '../components/buttons';
 import RedButton from "../components/Redbutton";
+import PatientSummaryModal from "../components/PatientSummaryModal";
 import './css/style.css'
 
 const Visitpatient = () => {
@@ -13,6 +14,7 @@ const Visitpatient = () => {
   const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
 
   const [selectedFilter, setSelectedFilter] = useState("Basic");
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
 
   // Handle tab change with navigation
   const handleTabChange = (option) => {
@@ -42,6 +44,41 @@ const Visitpatient = () => {
 
   const clickVisit = () => {
     navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
+  };
+
+  const handleRequestSummary = () => {
+    setIsSummaryModalOpen(true);
+  };
+
+  const handleCloseSummary = () => {
+    setIsSummaryModalOpen(false);
+  };
+
+  // Patient summary data - in a real app, this would be fetched from an API
+  const patientSummaryData = {
+    demographics: {
+      name: 'Bandarage Naveen Bimsara',
+      age: 24,
+      dob: '2000-06-12',
+      mrn: id || '1001',
+      bloodType: 'A+'
+    },
+    diagnoses: [
+      { name: 'Hypertension', snomed: '3834100' },
+      { name: 'Hyperlipidemia', snomed: '205890000' }
+    ],
+    medications: [
+      { name: 'Amlodipine', dosage: '5mg', condition: 'Hypertension' },
+      { name: 'Atorvastatin', dosage: '20mg', condition: 'Hyperlipidemia' }
+    ],
+    allergies: [
+      { name: 'NSAIDS', severity: 'Moderate', reaction: 'GI upset' }
+    ],
+    labFindings: [
+      { name: 'Blood Pressure', value: '110/70 mmHg' }
+    ],
+    assessment: 'This is a 24-year-old patient with 2 active medical conditions requiring ongoing management. Current medication regimen includes 2 medications. Notable allergies documented. Recent vital signs and laboratory parameters are available.',
+    recommendation: 'Continue current management with regular monitoring and follow-up appointments.'
   };
 
   return (
@@ -93,7 +130,7 @@ const Visitpatient = () => {
             <div className="inlineButton">
                 <SimpleButton 
                 label="Request Summary" 
-                onClick={clickVisit}
+                onClick={handleRequestSummary}
                 />
                 <div className="inlineButton"></div>
                 <SimpleButton 
@@ -110,6 +147,12 @@ const Visitpatient = () => {
             </div>
         </div>
       </div>
+      
+      <PatientSummaryModal 
+        isOpen={isSummaryModalOpen}
+        onClose={handleCloseSummary}
+        patientData={patientSummaryData}
+      />
     </div>
   );
 };
