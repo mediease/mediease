@@ -55,6 +55,7 @@ const NewPrescription = () => {
   const [selectedFrequency, setSelectedFrequency] = useState(frequencyOptions[0]);
   const [selectedPeriod, setSelectedPeriod] = useState(periodOptions[0]);
   const [selectedDoseComment, setSelectedDoseComment] = useState("");
+  const [drugSearch, setDrugSearch] = useState("");
 
   const [favouriteDrugs, setFavouriteDrugs] = useState(initialFavouriteDrugs);
   const [favouriteGroups, setFavouriteGroups] = useState(initialGroups);
@@ -64,6 +65,10 @@ const NewPrescription = () => {
     () => favouriteGroups.find((group) => group.name === selectedGroup),
     [favouriteGroups, selectedGroup]
   );
+  const filteredDrugList = useMemo(() => {
+    if (!drugSearch.trim()) return allDrugList;
+    return allDrugList.filter((drug) => drug.toLowerCase().includes(drugSearch.toLowerCase()));
+  }, [drugSearch]);
 
   const handleTabChange = (option) => {
     setSelectedFilter(option);
@@ -115,6 +120,12 @@ const NewPrescription = () => {
     setPrescriptionItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
+  const handleItemChange = (itemId, field, value) => {
+    setPrescriptionItems((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, [field]: value } : item))
+    );
+  };
+
   const handleAddFavourite = () => {
     if (!selectedDrug) return;
     setFavouriteDrugs((prev) => (prev.includes(selectedDrug) ? prev : [...prev, selectedDrug]));
@@ -146,8 +157,16 @@ const NewPrescription = () => {
           <div className="selection-panel">
             <div className="selection-list">
               <h4>All Drugs</h4>
+              <div className="selection-search">
+                <input
+                  type="text"
+                  placeholder="Search medicine..."
+                  value={drugSearch}
+                  onChange={(e) => setDrugSearch(e.target.value)}
+                />
+              </div>
               <div className="selection-scroll">
-                {allDrugList.map((drug) => (
+                {filteredDrugList.map((drug) => (
                   <button
                     key={drug}
                     className={`pill-button ${drug === selectedDrug ? "active" : ""}`}
@@ -156,6 +175,9 @@ const NewPrescription = () => {
                     {drug}
                   </button>
                 ))}
+                {filteredDrugList.length === 0 && (
+                  <p className="selection-helper">No drugs match “{drugSearch}”.</p>
+                )}
               </div>
             </div>
             <div className="selection-form">
@@ -368,10 +390,50 @@ const NewPrescription = () => {
                 prescriptionItems.map((item) => (
                   <tr key={item.id}>
                     <td>{item.name}</td>
-                    <td>{item.dose}</td>
-                    <td>{item.frequency}</td>
-                    <td>{item.period}</td>
-                    <td>{item.doseComment || "-"}</td>
+                    <td>
+                      <select
+                        value={item.dose}
+                        onChange={(e) => handleItemChange(item.id, "dose", e.target.value)}
+                      >
+                        {doseOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        value={item.frequency}
+                        onChange={(e) => handleItemChange(item.id, "frequency", e.target.value)}
+                      >
+                        {frequencyOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        value={item.period}
+                        onChange={(e) => handleItemChange(item.id, "period", e.target.value)}
+                      >
+                        {periodOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <textarea
+                        rows={1}
+                        value={item.doseComment}
+                        onChange={(e) => handleItemChange(item.id, "doseComment", e.target.value)}
+                        placeholder="Add instructions..."
+                      />
+                    </td>
                     <td>
                       <button className="danger-link" onClick={() => handleDeleteItem(item.id)}>
                         Delete

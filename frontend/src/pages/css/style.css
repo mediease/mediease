@@ -197,6 +197,15 @@
     border: 1px solid #cdd2d7;
     border-radius: 8px;
   }
+  .selection-search{
+    margin-bottom: 10px;
+  }
+  .selection-search input{
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #cbd5f5;
+    border-radius: 8px;
+  }
   .selection-add-btn{
     margin-top: 16px;
     padding: 10px 22px;
