@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import TableN1 from '../components/tableN1';
 import "./css/style.css";
 import { useNavigate } from 'react-router-dom';
+import httpClient from '../services/httpClient';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -10,13 +11,97 @@ const Home = () => {
   const clickPatient = () => navigate('/doctor/patients');
   const clickReports = () => navigate('/doctor/reports');
 
-  const appointmentsData = [
-    { id: "0102", phn: "1001", name: "Niluka", type: "Consultation", date: "01/01/2025", status: "Not Seen" },
-    { id: "0103", phn: "1101", name: "Roshini", type: "Test", date: "01/01/2025", status: "Not Seen" },
-    { id: "0104", phn: "1021", name: "Henry", type: "Consultation", date: "01/01/2025", status: "Not Seen" },
-    { id: "0105", phn: "1022", name: "Sonali", type: "Consultation", date: "01/01/2025", status: "Not Seen" },
-  ];
+  const [appointmentsData, setAppointmentsData] = useState([]);
+  const [doctorName, setDoctorName] = useState(''); // dynamic doctor name
 
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        // 1️⃣ Get doctor info from localStorage (safe parse)
+        let doctorData = null;
+        try {
+          const raw = localStorage.getItem('doctor');
+          doctorData = raw ? JSON.parse(raw) : null;
+        } catch (e) {
+          console.warn('Failed to parse doctor from localStorage:', e);
+        }
+
+        if (doctorData?.firstName || doctorData?.lastName) {
+          setDoctorName(`${doctorData.firstName || ''} ${doctorData.lastName || ''}`.trim());
+        } else {
+          setDoctorName('Doctor');
+        }
+
+        // 2️⃣ Figure out medicalLicenseId from doctor object or legacy key
+        const medicalLicenseId = doctorData?.medicalLicenseId || localStorage.getItem('medicalLicenseId');
+        console.log('Resolved medicalLicenseId:', medicalLicenseId);
+        if (!medicalLicenseId) {
+          console.warn('No medicalLicenseId available; skipping appointments fetch');
+          setAppointmentsData([]);
+          return;
+        }
+
+        // 2️⃣ Fetch pending appointments
+        const res = await httpClient.get(`/doctor/appointments/${medicalLicenseId}`, {
+          params: { status: 'pending' },
+        });
+
+        console.log("Appointments API response:", res.data);
+
+        const rawList = res.data?.data || [];
+        if (!Array.isArray(rawList) || rawList.length === 0) {
+          setAppointmentsData([]);
+          return;
+        }
+
+        // Fetch patient names concurrently
+        const mappedAppointments = await Promise.all(
+          rawList.map(async (item) => {
+            const apid = item.apid || '-';
+            const patientPhn = item.metadata?.patientPhn || '-';
+            let fullName = patientPhn; // default fallback
+
+            if (patientPhn && patientPhn !== '-') {
+              try {
+                const patientRes = await httpClient.get(`/fhir/Patient/${patientPhn}`);
+                const pData = patientRes?.data?.data;
+                const pMeta = pData?.metadata || patientRes?.data?.metadata || {};
+                const firstName = pMeta?.firstName || pData?.firstName || '';
+                const lastName = pMeta?.lastName || pData?.lastName || '';
+                if (firstName || lastName) {
+                  fullName = `${firstName} ${lastName}`.trim();
+                }
+              } catch (e) {
+                console.warn(`Failed to fetch patient ${patientPhn} details:`, e);
+                // keep fallback fullName = patientPhn
+              }
+            }
+
+            return {
+              id: apid,
+              phn: patientPhn,
+              name: fullName || patientPhn,
+              type: item.metadata?.type || '-',
+              date: item.metadata?.appointmentDate
+                ? new Date(item.metadata.appointmentDate).toLocaleString()
+                : '-',
+              status: item.metadata?.status || '-',
+            };
+          })
+        );
+
+        console.log('Mapped Appointments with patient names:', mappedAppointments);
+        setAppointmentsData(mappedAppointments);
+      } catch (err) {
+        console.error("Error fetching appointments:", err);
+        setAppointmentsData([]);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  // Temporary static data for patients and lab reports
   const patientData = [
     { phn: "1001", name: "Niluka", gender: "Female", age: "25" },
     { phn: "1002", name: "Ruwan", gender: "Male", age: "25" },
@@ -31,7 +116,7 @@ const Home = () => {
 
   return (
     <div className="dashboard-container">
-      <h1>Welcome Dr. Sugath!</h1>
+      <h1>Welcome Dr. {doctorName || 'Doctor'}!</h1>
 
       <div className="table-wrapper">
         <TableN1

@@ -25,17 +25,21 @@ httpClient.interceptors.request.use(
 
 // Response interceptor for handling errors globally
 httpClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // Handle common errors here (401, 403, 500, etc.)
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
+    const status = error.response?.status;
+    const originalUrl = error.config?.url || '';
+    // Only force logout on 401 if a token was actually sent (avoid clearing on initial unauthenticated optional calls)
+    const hadToken = !!localStorage.getItem('authToken');
+    if (status === 401 && hadToken) {
+      console.warn('401 detected for', originalUrl, '- clearing credentials');
       localStorage.removeItem('authToken');
       localStorage.removeItem('userRole');
-      // Redirect to login
-      window.location.href = '/login';
+      // Preserve potential doctor object for debugging (comment out if not desired)
+      // localStorage.removeItem('doctor');
+      if (!originalUrl.includes('/auth/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
