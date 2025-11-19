@@ -2,15 +2,52 @@ import React, { useState } from 'react';
 import { FaHeart, FaTimes, FaPrint, FaPlus } from 'react-icons/fa';
 import './css/PrescriptionPage.css';
 
+const doseOptions = [
+  '0.5 drop',
+  '1 drop',
+  '2 drops',
+  '5 drops',
+  '1 tablet',
+  '2 tablets',
+  '5 ml',
+  '10 ml',
+  'As directed',
+];
+
+const frequencyOptions = [
+  'Once daily',
+  'BID',
+  'TID',
+  'QID',
+  'Mane',
+  'Nocte',
+  'PRN',
+  'As needed',
+];
+
+const periodOptions = [
+  'For 3 days',
+  'For 4 days',
+  '1 week',
+  '2 weeks',
+  '1 month',
+  'Until next visit',
+];
+
+const getOptionsWithValue = (options, value) => {
+  if (!value) return options;
+  return options.includes(value) ? options : [...options, value];
+};
+
 const PrescriptionPage = () => {
   // Sample prescription data
   const [prescriptions, setPrescriptions] = useState([
-    { id: 1, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', hasComment: true, hasPharmacistComment: true },
-    { id: 2, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', hasComment: true, hasPharmacistComment: true },
-    { id: 3, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', hasComment: true, hasPharmacistComment: true },
-    { id: 4, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', hasComment: true, hasPharmacistComment: false },
-    { id: 5, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', hasComment: true, hasPharmacistComment: true },
-    { id: 6, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', hasComment: true, hasPharmacistComment: true },
+    { id: 1, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', doseComment: '', pharmacistComment: '' },
+    { id: 2, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', doseComment: '', pharmacistComment: '' },
+    { id: 3, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', doseComment: '', pharmacistComment: '' },
+    { id: 4, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', doseComment: '', pharmacistComment: '' },
+    { id: 5, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', doseComment: '', pharmacistComment: '' },
+    { id: 6, name: 'Adapalene Gel 0.1%, 45g-other', dose: '2 drops', frequency: 'Mane', period: 'For 4 days', doseComment: '', pharmacistComment: '' },
   ]);
   
   // Favorite drugs data
@@ -31,6 +68,25 @@ const PrescriptionPage = () => {
   // Remove a prescription
   const removePrescription = (id) => {
     setPrescriptions(prescriptions.filter(prescription => prescription.id !== id));
+  };
+
+  const duplicatePrescription = (id) => {
+    setPrescriptions(prev => {
+      const index = prev.findIndex(prescription => prescription.id === id);
+      if (index === -1) return prev;
+      const copy = { ...prev[index], id: Date.now() };
+      const updated = [...prev];
+      updated.splice(index + 1, 0, copy);
+      return updated;
+    });
+  };
+
+  const handlePrescriptionChange = (id, field, value) => {
+    setPrescriptions(prev =>
+      prev.map(prescription =>
+        prescription.id === id ? { ...prescription, [field]: value } : prescription
+      )
+    );
   };
 
   // Filter drugs based on search term and active tab
@@ -64,34 +120,69 @@ const PrescriptionPage = () => {
               <td>{prescription.name}</td>
               <td>
                 <div className="select-wrapper">
-                  {prescription.dose}
-                  <span className="arrow">▼</span>
+                  <select
+                    value={prescription.dose}
+                    onChange={(e) => handlePrescriptionChange(prescription.id, 'dose', e.target.value)}
+                  >
+                    {getOptionsWithValue(doseOptions, prescription.dose).map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                 
                 </div>
               </td>
               <td>
                 <div className="select-wrapper">
-                  {prescription.frequency}
-                  <span className="arrow">▼</span>
+                  <select
+                    value={prescription.frequency}
+                    onChange={(e) => handlePrescriptionChange(prescription.id, 'frequency', e.target.value)}
+                  >
+                    {getOptionsWithValue(frequencyOptions, prescription.frequency).map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  
                 </div>
               </td>
               <td>
                 <div className="select-wrapper">
-                  {prescription.period}
-                  <span className="arrow">▼</span>
+                  <select
+                    value={prescription.period}
+                    onChange={(e) => handlePrescriptionChange(prescription.id, 'period', e.target.value)}
+                  >
+                    {getOptionsWithValue(periodOptions, prescription.period).map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                 
                 </div>
               </td>
               <td>
-                <button className="icon-button comment-button">
-                  {prescription.hasComment && '✓'}
-                </button>
+                <textarea
+                  className="comment-input"
+                  rows={2}
+                  value={prescription.doseComment}
+                  onChange={(e) => handlePrescriptionChange(prescription.id, 'doseComment', e.target.value)}
+                  placeholder="Add note..."
+                />
               </td>
               <td>
-                <button className={`pharmacist-comment ${prescription.hasPharmacistComment ? 'has-comment' : ''}`}>
-                  {prescription.hasPharmacistComment && '✓'}
-                </button>
+                <textarea
+                  className="comment-input"
+                  rows={2}
+                  value={prescription.pharmacistComment}
+                  onChange={(e) => handlePrescriptionChange(prescription.id, 'pharmacistComment', e.target.value)}
+                  placeholder="Add pharmacist note..."
+                />
               </td>
               <td>
-                <button className="duplicate-button">
+                <button className="duplicate-button" onClick={() => duplicatePrescription(prescription.id)}>
                   <FaPlus className="icon green" />
                 </button>
               </td>
