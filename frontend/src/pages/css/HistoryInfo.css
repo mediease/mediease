@@ -1,6 +1,126 @@
 * {
   font-family: Arial, sans-serif;
 }
+/* ===== Page Container ===== */
+
+.patientDetailsMain {
+  padding: 20px 25px;
+  background-color: #f5f7fb; /* light grey page bg */
+  min-height: 100vh;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+}
+
+.patientDetailsHeder {
+  margin: 0 0 15px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+}
+
+/* ===== Segmented Control wrapper (if needed) ===== */
+/* In case your SegmentedControl does not have its own styles */
+
+.segmented-control {
+  display: inline-flex;
+  background-color: #eef1f6;
+  border-radius: 18px;
+  padding: 2px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+.segmented-control-option {
+  padding: 6px 18px;
+  font-size: 13px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.segmented-control-option:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.segmented-control-option.selected {
+  background-color: #ffffff;
+  color: #222;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== Card that holds the table ===== */
+
+.visit-history-table-wrapper {
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ebeef4;
+}
+
+/* ===== Table Styles ===== */
+
+.visit-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.visit-history-table thead tr {
+  border-bottom: 1px solid #e0e5ee;
+}
+
+.visit-history-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 500;
+  color: #7c8594;
+  font-size: 12px;
+}
+
+.visit-history-table td {
+  padding: 12px 14px;
+  color: #333;
+  vertical-align: middle;
+}
+
+/* zebra striping similar to the light blue rows in your screenshot */
+.visit-history-table tbody tr:nth-child(odd) {
+  background-color: #f0fbff; /* very light blue */
+}
+
+.visit-history-table tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.visit-history-table tbody tr:hover {
+  background-color: #e5f6ff;
+}
+
+/* align actions column */
+.visit-history-table td:last-child {
+  white-space: nowrap;
+}
+
+/* ===== Buttons in the Actions column ===== */
+
+.visit-history-table button {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid #c5c9d3;
+  background-color: #f7f8fc;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.visit-history-table button:hover {
+  background-color: #e4f3ff;
+  box-shadow: 0 0 0 1px #b8d9ff;
+}
 
 .visit-container {
   display: flex;

@@ -8,11 +8,26 @@ const Allergiesinfo = () => {
   const navigate = useNavigate();
   const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
   const [selectedFilter, setSelectedFilter] = useState("Allergies");
-  const [selectedTab, setSelectedTab] = useState('Drugs');
+
+  const [allergyValue, setAllergyValue] = useState('');
+  const [statusValue, setStatusValue] = useState('current');
+  const [remarksValue, setRemarksValue] = useState('');
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    // do your save logic here
+    console.log({ allergy: allergyValue, status: statusValue, remarks: remarksValue });
+  };
+
+  const handleCancel = () => {
+    setAllergyValue('');
+    setStatusValue('current');
+    setRemarksValue('');
+  };
 
   const handleTabChange = (option) => {
     setSelectedFilter(option);
-    switch(option) {
+    switch (option) {
       case "Basic":
         navigate(`/doctor/visitpatient/${id}`);
         break;
@@ -36,96 +51,88 @@ const Allergiesinfo = () => {
   return (
     <div className="patientDetailsMain">
       <h2 className="patientDetailsHeder">Patients - Naveen Bimsara</h2>
-      <SegmentedControl 
+
+      <SegmentedControl
         options={filterOptions}
         selected={selectedFilter}
         onChange={handleTabChange}
       />
 
       <div className="allergies-main">
-        <div className="allergies-categories">
-          <div className="category-tabs">
-            {['Drugs', 'Food', 'Environmental'].map(tab => (
-              <button 
-                key={tab}
-                className={`category-tab ${selectedTab === tab ? 'active' : ''}`}
-                onClick={() => setSelectedTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+        <div className="allergy-card-wrapper">
+          <div className="allergy-card">
+            <h3 className="allergy-card-title">Allergy</h3>
 
-          <div className="categories-section">
-            <h3>Categories</h3>
-            <div className="category-list">
-              <div className="category-item active">Antibiotics</div>
-              <div className="category-item">Pain Medication</div>
-              <div className="category-item">Anti-inflammatory</div>
-              <div className="category-item">Biologic</div>
-              <div className="category-item">Anesthetics</div>
-              <div className="category-item">Contrast Agent</div>
-            </div>
-
-            <div className="antibiotic-section">
-              <h4>Antibiotics</h4>
-              <div className="allergy-items">
-                <div className="allergy-item">
-                  <div className="allergy-header">
-                    <span>Penicillin</span>
-                    <span className="severity severe">Severe</span>
-                  </div>
-                  <div className="reaction-text">
-                    Reaction: Anaphylaxis - Confirmed 21/12/2024
-                  </div>
-                </div>
-                <div className="allergy-item">
-                  <div className="allergy-header">
-                    <span>Amoxicillin</span>
-                    <span className="severity moderate">Moderate</span>
-                  </div>
-                  <div className="reaction-text">
-                    Reaction: Rash - Reported by patient 06/12/2024
-                  </div>
-                </div>
+            <form className="allergy-form" onSubmit={handleSave}>
+              {/* Allergy text field */}
+              <div className="form-row">
+                <label htmlFor="allergy" className="required-label">
+                  <span className="required-star">*</span> Allergy
+                </label>
+                <input
+                  id="allergy"
+                  name="allergy"
+                  type="text"
+                  placeholder="Allergy"
+                  required
+                  value={allergyValue}
+                  onChange={(e) => setAllergyValue(e.target.value)}
+                />
               </div>
 
-              <div className="available-selections">
-                <h4>Available Selections:</h4>
-                <div className="selection-chips">
-                  <div className="chip">Cephalosporins</div>
-                  <div className="chip">Erythromycin</div>
-                  <div className="chip">Tetracyclines</div>
-                  <div className="chip add-custom">+ Add Custom</div>
+              {/* Status radio buttons */}
+              <div className="form-row">
+                <label className="status-label">Status</label>
+                <div className="radio-group">
+                  <label className="radio-item">
+                    <input
+                      type="radio"
+                      name="status"
+                      value="current"
+                      checked={statusValue === 'current'}
+                      onChange={() => setStatusValue('current')}
+                    />
+                    Current
+                  </label>
+                  <label className="radio-item">
+                    <input
+                      type="radio"
+                      name="status"
+                      value="past"
+                      checked={statusValue === 'past'}
+                      onChange={() => setStatusValue('past')}
+                    />
+                    Past
+                  </label>
                 </div>
               </div>
 
-              <div className="action-buttons">
-                <button className="save-btn">Save</button>
-                <button className="cancel-btn">Cancel</button>
+              {/* Remarks textarea */}
+              <div className="form-row">
+                <label htmlFor="remarks">Remarks</label>
+                <textarea
+                  id="remarks"
+                  name="remarks"
+                  placeholder="Any remarks"
+                  value={remarksValue}
+                  onChange={(e) => setRemarksValue(e.target.value)}
+                />
               </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="allergic-details">
-          <div className="detail-header">
-            <h3>Allergic Details</h3>
+              {/* Hint text */}
+              <div className="form-hint">
+                Fields marked with an asterisk must be filled
+              </div>
+
+              {/* Buttons */}
+              <div className="form-actions">
+                <button type="submit" className="save-btn">Save</button>
+                <button type="button" className="cancel-btn" onClick={handleCancel}>
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-          
-          <div className="detail-item">
-            <div className="detail-title">
-              <span>Penicillin</span>
-              <span className="update-date">Updated: 21/12/2024</span>
-              <span className="severity severe">Severe</span>
-            </div>
-            <div className="detail-content">
-              <p><strong>Reaction:</strong> Anaphylaxis with difficulty breathing, hives, and facial swelling</p>
-              <p><strong>Verification method:</strong> Positive skin test performed by Dr. Roberts</p>
-            </div>
-          </div>
-          
-          {/* Additional allergy details... */}
         </div>
       </div>
     </div>

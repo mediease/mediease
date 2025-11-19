@@ -13,25 +13,36 @@ const MedicationsInfo = () =>{
       const handleIssuePrescription = () => {
         navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
       };
-      const data = [
-        { id: '001', name: 'Albuterol HFA', dose: '2 puffs', frequency: 'q4h prn', quantity: '-', refills: '12', condition: 'Asthma', provider: 'Dr.Nisal Rajeev', prescribed: '20/12/2024' },
-        { id: '002', name: 'Aspirin', dose: '80 mg', frequency: '1 daily', quantity: '-', refills: '12', condition: 'Diabetes', provider: 'Dr.Nisal Rajeev', prescribed: '10/12/2024' },
-        { id: '003', name: 'Beclometha. HFA', dose: '2 puffs', frequency: '1 bid', quantity: '-', refills: '12', condition: 'Asthma', provider: 'Dr.Nisal Rajeev', prescribed: '20/12/2024' },
-        { id: '004', name: 'Carvedilol', dose: '12.5 mg', frequency: '1 daily', quantity: '90', refills: '3', condition: 'Hypertension', provider: 'Dr.Nisal Rajeev', prescribed: '26/12/2024' },
-        { id: '005', name: 'Clorthalidone', dose: '25 mg', frequency: '1 daily', quantity: '90', refills: '3', condition: 'Hypertension', provider: 'Dr.Nisal Rajeev', prescribed: '21/12/2024' },
-        { id: '006', name: 'Citalopram', dose: '25 mg', frequency: '1 daily', quantity: '90', refills: '3', condition: 'Depression', provider: 'Dr.John Peris', prescribed: '26/12/2024' }
-      ];
+      // Load prescriptions from localStorage
+      const [prescriptions, setPrescriptions] = useState([]);
+      React.useEffect(() => {
+        const keys = Object.keys(localStorage).filter(k => k.startsWith(`prescription_${id}_`));
+        const loaded = keys.map(k => {
+          try {
+            return JSON.parse(localStorage.getItem(k));
+          } catch {
+            return null;
+          }
+        }).filter(Boolean);
+        setPrescriptions(loaded);
+      }, [id]);
+
       const columns = [
-        { label: 'ID', key: 'id' },
-        { label: 'Name', key: 'name' },
-        { label: 'Dose', key: 'dose' },
-        { label: 'Frequency', key: 'frequency' },
-        { label: 'Quantity', key: 'quantity' },
-        { label: 'Refills', key: 'refills' },
-        { label: 'Condition', key: 'condition' },
-        { label: 'Provider', key: 'provider' },
-        { label: 'Prescribed', key: 'prescribed' }
-      ];      
+        { label: 'Complaint', key: 'complaint' },
+        { label: 'Doctor', key: 'doctor' },
+        { label: 'Prescribe Date', key: 'prescribeDate' },
+        { label: 'Status', key: 'status' },
+        { label: 'View', key: 'view' }
+      ];
+
+      // Map prescriptions to table rows
+      const data = prescriptions.map((p, idx) => ({
+        complaint: p.meta.complaint,
+        doctor: p.meta.doctor,
+        prescribeDate: p.meta.prescribeDate,
+        status: p.meta.status,
+        view: <button onClick={() => alert(JSON.stringify(p, null, 2))}>View</button>
+      }));
   
       const handleTabChange = (option) => {
         setSelectedFilter(option);
@@ -66,10 +77,10 @@ const MedicationsInfo = () =>{
             onChange={handleTabChange}
             />
             <TableN1
-            columns={columns}
-            data={data}
-            showHeader={false}
-            showActions={false}
+              columns={columns}
+              data={data}
+              showHeader={true}
+              showActions={false}
             />
             <div className="inlineButton" style={{ justifyContent: "flex-end" }}>
                 <SimpleButton 
