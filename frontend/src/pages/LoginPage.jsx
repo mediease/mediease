@@ -25,11 +25,40 @@ function LoginPage() {
         password,
         role: userType,
       });
+      console.log('Login response raw:', response.data);
 
-      // Save token and role to localStorage
-      const { token } = response.data;
-      localStorage.setItem('authToken', token);
+      // Save token & role
+      const token = response.data?.token || response.data?.accessToken || response.data?.jwt || response.data?.data?.token;
+      if (token) {
+        localStorage.setItem('authToken', token);
+      } else {
+        console.warn('No token field found in login response');
+      }
       localStorage.setItem('userRole', userType);
+
+      // Extract doctor related info from various possible response shapes
+      const userPayload = response.data?.user || response.data?.data?.user || response.data?.data || response.data;
+      const meta = userPayload?.metadata || response.data?.metadata || response.data?.data?.metadata || {};
+      const medicalLicenseId = userPayload?.medicalLicenseId || meta?.medicalLicenseId || response.data?.medicalLicenseId || 'MED_UNKNOWN';
+      const firstName = userPayload?.firstName || meta?.firstName || 'Doctor';
+      const lastName = userPayload?.lastName || meta?.lastName || '';
+
+      if (medicalLicenseId) {
+        localStorage.setItem('medicalLicenseId', String(medicalLicenseId));
+      } else {
+        console.warn('medicalLicenseId missing in login response');
+      }
+
+      // Only store doctor object if logging in as doctor
+      if (userType === 'doctor') {
+        const doctorObj = {
+          firstName: firstName || 'Doctor',
+          lastName: lastName || '',
+          medicalLicenseId: medicalLicenseId || 'MED_UNKNOWN',
+        };
+        localStorage.setItem('doctor', JSON.stringify(doctorObj));
+        console.log('Stored doctor object:', doctorObj);
+      }
 
       // Navigate based on user type
       if (userType === 'doctor') {
