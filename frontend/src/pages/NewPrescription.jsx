@@ -56,6 +56,7 @@ const NewPrescription = () => {
   const [selectedPeriod, setSelectedPeriod] = useState(periodOptions[0]);
   const [selectedDoseComment, setSelectedDoseComment] = useState("");
   const [drugSearch, setDrugSearch] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   const [favouriteDrugs, setFavouriteDrugs] = useState(initialFavouriteDrugs);
   const [favouriteGroups, setFavouriteGroups] = useState(initialGroups);
@@ -148,6 +149,32 @@ const NewPrescription = () => {
     const name = window.prompt("Enter a name for the new favourite group:");
     if (!name) return;
     setFavouriteGroups((prev) => [...prev, { name, drugs: [...currentGroup.drugs] }]);
+  };
+
+  const handleSavePrescription = () => {
+    const payload = {
+      meta: prescriptionMeta,
+      items: prescriptionItems,
+      savedAt: new Date().toISOString(),
+    };
+    try {
+      const key = `prescription_${id}_${Date.now()}`;
+      localStorage.setItem(key, JSON.stringify(payload));
+      alert("Prescription saved locally.");
+      navigate(`/doctor/patient/${id}/medicationsinfo`);
+    } catch (err) {
+      console.error("Failed to save prescription", err);
+      alert("Failed to save prescription. See console for details.");
+    }
+  };
+
+  const handleViewPrescriptions = () => {
+    // open preview modal showing current prescription items
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
   };
 
   const renderSelectionPanel = () => {
@@ -466,6 +493,66 @@ const NewPrescription = () => {
         </div>
 
         {renderSelectionPanel()}
+        <div className="action-bar">
+          <button className="action-btn secondary" onClick={handleViewPrescriptions} type="button">
+            View
+          </button>
+          <button className="action-btn primary" onClick={handleSavePrescription} type="button">
+            Save
+          </button>
+        </div>
+        {showPreview && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h3>Prescription Preview</h3>
+                <button className="modal-close-btn" onClick={handleClosePreview} aria-label="Close preview">×</button>
+              </div>
+              <div className="modal-body">
+                <div className="preview-meta">
+                  <div><strong>Complaint:</strong> {prescriptionMeta.complaint}</div>
+                  <div><strong>Doctor:</strong> {prescriptionMeta.doctor}</div>
+                  <div><strong>Prescribe Date:</strong> {prescriptionMeta.prescribeDate}</div>
+                  <div><strong>Status:</strong> {prescriptionMeta.status}</div>
+                </div>
+
+                <div className="modal-table-wrapper">
+                  <table className="modal-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Dose</th>
+                        <th>Frequency</th>
+                        <th>Period</th>
+                        <th>Instructions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {prescriptionItems.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="empty-row">No medicines added yet.</td>
+                        </tr>
+                      ) : (
+                        prescriptionItems.map((it) => (
+                          <tr key={it.id}>
+                            <td>{it.name}</td>
+                            <td>{it.dose}</td>
+                            <td>{it.frequency}</td>
+                            <td>{it.period}</td>
+                            <td>{it.doseComment || '-'}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button className="action-btn secondary" onClick={handleClosePreview}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
