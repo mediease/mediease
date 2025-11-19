@@ -77,7 +77,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@hospital.com\",\n  \"password\": \"Admin@123\"\n}"
+              "raw": "{\n  \"email\": \"admin@hospital.com\",\n  \"password\": \"Admin@123\",\n  \"role\": \"admin\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -225,7 +225,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"john.doe@hospital.com\",\n  \"password\": \"Doctor@123\"\n}"
+              "raw": "{\n  \"email\": \"john.doe@hospital.com\",\n  \"password\": \"Doctor@123\",\n  \"role\": \"doctor\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -261,7 +261,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nurId\": \"{{nurseId}}\",\n  \"password\": \"Nurse@123\"\n}"
+              "raw": "{\n  \"nurId\": \"{{nurseId}}\",\n  \"password\": \"Nurse@123\",\n  \"role\": \"nurse\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -297,7 +297,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"sarah.williams@hospital.com\",\n  \"password\": \"Nurse@123\"\n}"
+              "raw": "{\n  \"email\": \"sarah.williams@hospital.com\",\n  \"password\": \"Nurse@123\",\n  \"role\": \"nurse\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -769,6 +769,103 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "6. Medication Search",
+      "item": [
+        {
+          "name": "6.1 Medication Search (Doctor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.code === 200);",
+                  "const json = pm.response.json();",
+                  "pm.test('Success true', () => json.success === true);",
+                  "pm.test('Bundle resourceType', () => json.data.resourceType === 'Bundle');",
+                  "pm.test('Bundle type searchset', () => json.data.type === 'searchset');",
+                  "pm.test('Entries array', () => Array.isArray(json.data.entry));",
+                  "if (json.data.entry.length) { const r = json.data.entry[0].resource; pm.test('Medication resourceType', () => r.resourceType === 'Medication'); pm.test('Medication code text', () => r.code && r.code.text); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{doctorToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/fhir/Medication/search?query=aspirin",
+              "host": ["{{baseUrl}}"],
+              "path": ["fhir", "Medication", "search"],
+              "query": [
+                { "key": "query", "value": "aspirin" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.2 Medication Search (Nurse)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.code === 200);",
+                  "const json = pm.response.json();",
+                  "pm.test('Bundle ok', () => json.data && json.data.resourceType === 'Bundle');",
+                  "pm.test('All entries Medication', () => json.data.entry.every(e => e.resource.resourceType === 'Medication'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{nurseToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/fhir/Medication/search?query=paracetamol",
+              "host": ["{{baseUrl}}"],
+              "path": ["fhir", "Medication", "search"],
+              "query": [
+                { "key": "query", "value": "paracetamol" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.3 Medication Search Missing Query (Error)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.code === 400);",
+                  "const json = pm.response.json();",
+                  "pm.test('Error structure', () => json.success === false && json.error);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{doctorToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/fhir/Medication/search",
+              "host": ["{{baseUrl}}"],
+              "path": ["fhir", "Medication", "search"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

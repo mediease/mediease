@@ -1,23 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import SegmentedControl from "../components/SegmentedControl";
+import httpClient from "../services/httpClient";
 import "./css/style.css";
 
 const doseOptions = ["1 drop", "2 drops", "5 ml", "10 ml", "After meal", "Before meal", "As directed"];
 const frequencyOptions = ["OD", "BD", "TDS", "QID", "PRN", "Mane", "Nocte"];
 const periodOptions = ["For 3 days", "For 5 days", "1 week", "2 weeks", "1 month", "Until review"];
 
-const allDrugList = [
-  "Paracetamol 500mg Tablet",
-  "Ibuprofen 200mg Tablet",
-  "Amoxicillin 250mg Capsule",
-  "Salbutamol Inhaler",
-  "Cetirizine 10mg",
-  "Omeprazole 20mg",
-  "Metformin 500mg",
-  "Lisinopril 10mg",
-  "Atorvastatin 20mg",
-  "Vitamin D Drops",
+const allDrugList = [,
 ];
 
 const initialFavouriteDrugs = ["Paracetamol 500mg Tablet", "Salbutamol Inhaler", "Omeprazole 20mg"];
@@ -56,6 +47,9 @@ const NewPrescription = () => {
   const [selectedPeriod, setSelectedPeriod] = useState(periodOptions[0]);
   const [selectedDoseComment, setSelectedDoseComment] = useState("");
   const [drugSearch, setDrugSearch] = useState("");
+  const [filteredDrugList, setFilteredDrugList] = useState(allDrugList);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [qrUrl, setQrUrl] = useState("");
 
@@ -67,9 +61,50 @@ const NewPrescription = () => {
     () => favouriteGroups.find((group) => group.name === selectedGroup),
     [favouriteGroups, selectedGroup]
   );
-  const filteredDrugList = useMemo(() => {
-    if (!drugSearch.trim()) return allDrugList;
-    return allDrugList.filter((drug) => drug.toLowerCase().includes(drugSearch.toLowerCase()));
+  // Debounced backend search for medications
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    if (!drugSearch.trim()) {
+      setIsSearching(false);
+      setSearchError(null);
+      setFilteredDrugList(allDrugList);
+      return () => { controller.abort(); };
+    }
+
+    setIsSearching(true);
+    setSearchError(null);
+
+    const t = setTimeout(async () => {
+      try {
+        const res = await httpClient.get("/fhir/Medication/search", {
+          params: { query: drugSearch.trim() },
+          signal: controller.signal,
+        });
+        const bundle = res?.data?.data || res?.data || {};
+        const entries = Array.isArray(bundle.entry) ? bundle.entry : [];
+        const names = entries
+          .map((e) => e?.resource?.code?.text)
+          .filter((v) => typeof v === "string" && v.trim().length > 0);
+        if (!cancelled) {
+          setFilteredDrugList(names);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setSearchError("Failed to fetch medicines");
+          setFilteredDrugList([]);
+        }
+      } finally {
+        if (!cancelled) setIsSearching(false);
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [drugSearch]);
 
   const handleTabChange = (option) => {
@@ -212,7 +247,13 @@ const NewPrescription = () => {
                 />
               </div>
               <div className="selection-scroll">
-                {filteredDrugList.map((drug) => (
+                {isSearching && (
+                  <div className="selection-helper">Searching...</div>
+                )}
+                {!isSearching && searchError && (
+                  <div className="selection-helper">{searchError}</div>
+                )}
+                {!isSearching && !searchError && filteredDrugList.map((drug) => (
                   <button
                     key={drug}
                     className={`pill-button ${drug === selectedDrug ? "active" : ""}`}
@@ -221,7 +262,7 @@ const NewPrescription = () => {
                     {drug}
                   </button>
                 ))}
-                {filteredDrugList.length === 0 && (
+                {!isSearching && !searchError && filteredDrugList.length === 0 && (
                   <p className="selection-helper">No drugs match “{drugSearch}”.</p>
                 )}
               </div>

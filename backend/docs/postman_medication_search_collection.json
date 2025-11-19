@@ -1,0 +1,231 @@
+{
+  "info": {
+    "name": "MediEase Medication Search Test Suite",
+    "description": "Focused Postman collection to test /fhir/Medication/search endpoint (real-time local + external FHIR Medication search).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "doctorToken", "value": "" },
+    { "key": "nurseToken", "value": "" },
+    { "key": "invalidToken", "value": "Bearer INVALID.INVALID.INVALID" }
+  ],
+  "item": [
+    {
+      "name": "1. Success - Doctor (aspirin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.test('Success flag true', () => json.success === true);",
+              "pm.test('Bundle shape', () => json.data && json.data.resourceType === 'Bundle' && json.data.type === 'searchset');",
+              "pm.test('Entry array exists', () => Array.isArray(json.data.entry));",
+              "if (json.data.entry.length) {",
+              "  const r = json.data.entry[0].resource;",
+              "  pm.test('First entry Medication resourceType', () => r.resourceType === 'Medication');",
+              "  pm.test('Medication has code.text', () => r.code && r.code.text && typeof r.code.text === 'string');",
+              "  if (r.identifier) { pm.test('Identifier array', () => Array.isArray(r.identifier)); }",
+              "}",
+              "pm.test('Total matches entry length', () => json.data.total === json.data.entry.length);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" } ],
+        "url": {
+          "raw": "{{baseUrl}}/fhir/Medication/search?query=aspirin",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "Medication", "search"],
+          "query": [ { "key": "query", "value": "aspirin" } ]
+        }
+      }
+    },
+    {
+      "name": "2. Success - Nurse (paracetamol)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.test('Bundle', () => json.data && json.data.resourceType === 'Bundle');",
+              "pm.test('All entries Medication', () => json.data.entry.every(e => e.resource.resourceType === 'Medication'));",
+              "pm.test('Each medication has code.text', () => json.data.entry.every(e => e.resource.code && e.resource.code.text));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{nurseToken}}" } ],
+        "url": {
+          "raw": "{{baseUrl}}/fhir/Medication/search?query=paracetamol",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "Medication", "search"],
+          "query": [ { "key": "query", "value": "paracetamol" } ]
+        }
+      }
+    },
+    {
+      "name": "3. External Fallback - Rare Term",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.test('Status 200', () => pm.response.code === 200);",
+              "pm.test('Bundle exists', () => json.data && json.data.resourceType === 'Bundle');",
+              "pm.test('Not failing even if zero entries', () => json.data.total >= 0);",
+              "if (json.data.entry.length) { pm.test('Medication resourceType', () => json.data.entry[0].resource.resourceType === 'Medication'); }"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" } ],
+        "url": {
+          "raw": "{{baseUrl}}/fhir/Medication/search?query=zzqnonexistent",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "Medication", "search"],
+          "query": [ { "key": "query", "value": "zzqnonexistent" } ]
+        }
+      }
+    },
+    {
+      "name": "4. Missing Query (Error)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.code === 400);",
+              "const json = pm.response.json();",
+              "pm.test('Error structure', () => json.success === false && json.error);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" } ],
+        "url": {
+          "raw": "{{baseUrl}}/fhir/Medication/search",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "Medication", "search"]
+        }
+      }
+    },
+    {
+      "name": "5. Unauthorized (No Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 401', () => pm.response.code === 401);",
+              "const json = pm.response.json();",
+              "pm.test('Auth error message', () => json.message && json.success === false);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/fhir/Medication/search?query=aspirin",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "Medication", "search"],
+          "query": [ { "key": "query", "value": "aspirin" } ]
+        }
+      }
+    },
+    {
+      "name": "6. Invalid Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 401', () => pm.response.code === 401);",
+              "const json = pm.response.json();",
+              "pm.test('Invalid token message', () => json.message && json.success === false);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "{{invalidToken}}" } ],
+        "url": {
+          "raw": "{{baseUrl}}/fhir/Medication/search?query=aspirin",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "Medication", "search"],
+          "query": [ { "key": "query", "value": "aspirin" } ]
+        }
+      }
+    },
+    {
+      "name": "7. Rate Limit (429 on second request)",
+      "item": [
+        {
+          "name": "7.1 First Rapid Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('First request 200', () => pm.response.code === 200);"] }
+            },
+            {
+              "listen": "prerequest",
+              "script": { "exec": ["pm.environment.set('lastRapidTs', Date.now());"] }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/fhir/Medication/search?query=ibuprofen",
+              "host": ["{{baseUrl}}"],
+              "path": ["fhir", "Medication", "search"],
+              "query": [ { "key": "query", "value": "ibuprofen" } ]
+            }
+          }
+        },
+        {
+          "name": "7.2 Second Immediate Request (Expect 429)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 429', () => pm.response.code === 429);",
+                  "const json = pm.response.json();",
+                  "pm.test('Rate limit error', () => json.success === false && json.error);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{doctorToken}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/fhir/Medication/search?query=ibuprofen",
+              "host": ["{{baseUrl}}"],
+              "path": ["fhir", "Medication", "search"],
+              "query": [ { "key": "query", "value": "ibuprofen" } ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
