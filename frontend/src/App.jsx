@@ -25,6 +25,7 @@ import AdminAllAppointments from './pages/AdminAllAppointments';
 import PatientNew from './pages/PatientNew';
 import AppointmentView from './pages/AppointmentView';
 import UserRegister from './pages/UserRegister';
+import OrderNewReport from './pages/OrderNewReport';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 import { useLocation } from 'react-router-dom';
@@ -79,6 +80,7 @@ function AppRoutes() {
                 <Route path="/doctor/patient/:id" element={<ProtectedRoute allowedRoles={['doctor']}><PatientDetails /></ProtectedRoute>} />
                 <Route path="/doctor/patient/:id/visit" element={<ProtectedRoute allowedRoles={['doctor']}><Visit /></ProtectedRoute>} />
                 <Route path="/doctor/visitpatient/:id" element={<ProtectedRoute allowedRoles={['doctor']}><Visitpatient /></ProtectedRoute>} />
+                <Route path="/doctor/visitpatient/:id/order-report" element={<ProtectedRoute allowedRoles={['doctor']}><OrderNewReport /></ProtectedRoute>} />
                 <Route path="/doctor/patient/:id/reportinfo" element={<ProtectedRoute allowedRoles={['doctor']}><ReportInfo /></ProtectedRoute>} />
                 <Route path="/doctor/patient/:id/allergiesinfo" element={<ProtectedRoute allowedRoles={['doctor']}><Allergiesinfo /></ProtectedRoute>} />
                 <Route path="/doctor/patient/:id/medicationsinfo" element={<ProtectedRoute allowedRoles={['doctor']}><MedicationsInfo /></ProtectedRoute>} />
