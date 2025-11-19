@@ -10,6 +10,9 @@ const MedicationsInfo = () =>{
       const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
      
       const [selectedFilter, setSelectedFilter] = useState("Medications");
+      const handleIssuePrescription = () => {
+        navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
+      };
       const data = [
         { id: '001', name: 'Albuterol HFA', dose: '2 puffs', frequency: 'q4h prn', quantity: '-', refills: '12', condition: 'Asthma', provider: 'Dr.Nisal Rajeev', prescribed: '20/12/2024' },
         { id: '002', name: 'Aspirin', dose: '80 mg', frequency: '1 daily', quantity: '-', refills: '12', condition: 'Diabetes', provider: 'Dr.Nisal Rajeev', prescribed: '10/12/2024' },
@@ -68,8 +71,11 @@ const MedicationsInfo = () =>{
             showHeader={false}
             showActions={false}
             />
-            <div className="inlineButton">
-            
+            <div className="inlineButton" style={{ justifyContent: "flex-end" }}>
+                <SimpleButton 
+                label="Issue New Prescription" 
+                onClick={handleIssuePrescription}
+                />
             </div>
         </div>
       )

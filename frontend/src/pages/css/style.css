@@ -55,4 +55,191 @@
     justify-content: center;  
     align-items: center;
   }
+  .prescription-card{
+    margin-top: 20px;
+    background: #fff;
+    border: 1px solid #e0e7ff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  }
+  .prescription-meta{
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 18px;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .meta-row{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .meta-row label{
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #4b5563;
+    font-weight: 600;
+  }
+  .meta-row input,
+  .meta-row select{
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #cbd5f5;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .prescription-table{
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .prescription-table th,
+  .prescription-table td{
+    border: 1px solid #e6e6e6;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 14px;
+  }
+  .prescription-table th{
+    background: #f8fbff;
+    font-weight: 600;
+  }
+  .empty-row{
+    text-align: center;
+    color: #777;
+    font-style: italic;
+  }
+  .danger-link{
+    background: none;
+    border: none;
+    color: #d7263d;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .select-mode-tabs{
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .select-mode-btn{
+    border: 1px solid #d0d7ff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 500;
+    color: #4c566a;
+  }
+  .select-mode-btn.active{
+    background: #4fd9ff;
+    color: #fff;
+    border-color: #4fd9ff;
+  }
+  .selection-panel{
+    margin-top: 20px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .selection-list{
+    flex: 1;
+    min-width: 260px;
+  }
+  .selection-form{
+    flex: 2;
+    min-width: 320px;
+  }
+  .selection-scroll{
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid #edf2ff;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fefefe;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pill-button{
+    border: 1px solid #d0d7ff;
+    border-radius: 999px;
+    padding: 6px 14px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+  }
+  .pill-button.active{
+    background: #e2f5ff;
+    border-color: #4fd9ff;
+    color: #0f172a;
+    font-weight: 600;
+  }
+  .selection-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .selection-grid label{
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #4c566a;
+  }
+  .selection-grid select,
+  .selection-grid input{
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #cdd2d7;
+    border-radius: 8px;
+  }
+  .selection-add-btn{
+    margin-top: 16px;
+    padding: 10px 22px;
+    border: none;
+    background: #28a745;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .selection-secondary-btn{
+    border: 1px solid #4fd9ff;
+    background: #fff;
+    color: #2563eb;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .selection-helper{
+    color: #6b7280;
+    font-size: 14px;
+  }
+  .selection-list-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+  .group-drug-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .inline-add-btn{
+    border: none;
+    background: #4fd9ff;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
   
