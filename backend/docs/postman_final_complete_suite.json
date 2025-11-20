@@ -1,0 +1,287 @@
+{
+  "info": {
+    "name": "MediEase Complete Hospital Management API - Full Test Suite",
+    "description": "Comprehensive Postman collection for MediEase FHIR-compliant EMR system. Covers authentication, patient management, clinical workflows, lab diagnostics with reviews, prescriptions, appointments, and error scenarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "4.0.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+    { "key": "adminEmail", "value": "admin@hospital.com", "type": "string" },
+    { "key": "adminPassword", "value": "Admin@123", "type": "string" },
+    { "key": "doctorEmail", "value": "john.doe@hospital.com", "type": "string" },
+    { "key": "doctorPassword", "value": "Doctor@123", "type": "string" },
+    { "key": "doctor2Email", "value": "jane.smith@hospital.com", "type": "string" },
+    { "key": "doctor2Password", "value": "Doctor@456", "type": "string" },
+    { "key": "nurseEmail", "value": "sarah.williams@hospital.com", "type": "string" },
+    { "key": "nursePassword", "value": "Nurse@123", "type": "string" },
+    { "key": "labAssistantEmail", "value": "lab.assist@hospital.com", "type": "string" },
+    { "key": "labAssistantPassword", "value": "Lab@123", "type": "string" },
+    { "key": "medicalLicenseId", "value": "MED12345", "type": "string" },
+    { "key": "medicalLicenseId2", "value": "MED54321", "type": "string" },
+    { "key": "nurseId", "value": "NUR00001", "type": "string" },
+    { "key": "labId", "value": "LB001", "type": "string" },
+    { "key": "patientNic", "value": "987654321V", "type": "string" },
+    { "key": "patientNic2", "value": "123456789V", "type": "string" },
+    { "key": "patientPhn", "value": "", "type": "string" },
+    { "key": "patientPhn2", "value": "", "type": "string" },
+    { "key": "appointmentId", "value": "", "type": "string" },
+    { "key": "encounterId", "value": "", "type": "string" },
+    { "key": "labRequestId", "value": "", "type": "string" },
+    { "key": "labRequestId2", "value": "", "type": "string" },
+    { "key": "labReportId", "value": "", "type": "string" },
+    { "key": "labReportId2", "value": "", "type": "string" },
+    { "key": "diagnosticReportId", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "doctorToken", "value": "", "type": "string" },
+    { "key": "doctor2Token", "value": "", "type": "string" },
+    { "key": "nurseToken", "value": "", "type": "string" },
+    { "key": "labAssistantToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication & Admin Setup",
+      "description": "Admin login, user registration, role approval",
+      "item": [
+        {
+          "name": "1.1 Admin Login",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Token received', () => json.data?.token)","pm.test('✓ Role is admin', () => json.data?.user?.role === 'admin')","pm.collectionVariables.set('adminToken', json.data.token)"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"email\": \"{{adminEmail}}\",\"password\": \"{{adminPassword}}\",\"role\": \"admin\"}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+        },
+        {
+          "name": "1.2 Register Doctor #1",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Status pending', () => json.data?.user?.status === 'pending')","pm.test('✓ Medical license set', () => json.data?.user?.medicalLicenseId === 'MED12345')"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"firstName\": \"John\",\"lastName\": \"Doe\",\"email\": \"{{doctorEmail}}\",\"password\": \"{{doctorPassword}}\",\"confirmPassword\": \"{{doctorPassword}}\",\"role\": \"doctor\",\"medicalLicenseId\": \"{{medicalLicenseId}}\",\"nic\": \"199012345678\",\"division\": \"Cardiology\"}"},"url": {"raw": "{{baseUrl}}/auth/register","host": ["{{baseUrl}}"],"path": ["auth","register"]}}
+        },
+        {
+          "name": "1.3 Register Doctor #2",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"firstName\": \"Jane\",\"lastName\": \"Smith\",\"email\": \"{{doctor2Email}}\",\"password\": \"{{doctor2Password}}\",\"confirmPassword\": \"{{doctor2Password}}\",\"role\": \"doctor\",\"medicalLicenseId\": \"{{medicalLicenseId2}}\",\"nic\": \"198934567890\",\"division\": \"Neurology\"}"},"url": {"raw": "{{baseUrl}}/auth/register","host": ["{{baseUrl}}"],"path": ["auth","register"]}}
+        },
+        {
+          "name": "1.4 Register Nurse",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"firstName\": \"Sarah\",\"lastName\": \"Williams\",\"email\": \"{{nurseEmail}}\",\"password\": \"{{nursePassword}}\",\"confirmPassword\": \"{{nursePassword}}\",\"role\": \"nurse\",\"nurId\": \"{{nurseId}}\",\"nic\": \"198512345678\"}"},"url": {"raw": "{{baseUrl}}/auth/register","host": ["{{baseUrl}}"],"path": ["auth","register"]}}
+        },
+        {
+          "name": "1.5 Register Lab Assistant with LBID",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Role is lab_assistant', () => json.data?.user?.role === 'lab_assistant')","pm.test('✓ LBID is set', () => json.data?.user?.labId === 'LB001')"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"firstName\": \"Lara\",\"lastName\": \"Assist\",\"email\": \"{{labAssistantEmail}}\",\"password\": \"{{labAssistantPassword}}\",\"confirmPassword\": \"{{labAssistantPassword}}\",\"role\": \"lab_assistant\",\"labId\": \"{{labId}}\",\"nic\": \"199512345678\"}"},"url": {"raw": "{{baseUrl}}/auth/register","host": ["{{baseUrl}}"],"path": ["auth","register"]}}
+        },
+        {
+          "name": "1.6 Approve Doctor #1",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Doctor approved', () => json.data?.user?.status === 'approved')"]}}],
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/approve/doctor/{{medicalLicenseId}}","host": ["{{baseUrl}}"],"path": ["auth","approve","doctor","{{medicalLicenseId}}"]}}
+        },
+        {
+          "name": "1.7 Approve Doctor #2",
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/approve/doctor/{{medicalLicenseId2}}","host": ["{{baseUrl}}"],"path": ["auth","approve","doctor","{{medicalLicenseId2}}"]}}
+        },
+        {
+          "name": "1.8 Approve Nurse",
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/approve/nurse/{{nurseId}}","host": ["{{baseUrl}}"],"path": ["auth","approve","nurse","{{nurseId}}"]}}
+        },
+        {
+          "name": "1.9 Approve Lab Assistant by LBID",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Lab assistant approved', () => json.data?.user?.status === 'approved')"]}}],
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/approve/lab-assistant/{{labId}}","host": ["{{baseUrl}}"],"path": ["auth","approve","lab-assistant","{{labId}}"]}}
+        },
+        {
+          "name": "1.10 Doctor #1 Login",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.collectionVariables.set('doctorToken', json.data.token)"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"email\": \"{{doctorEmail}}\",\"password\": \"{{doctorPassword}}\",\"role\": \"doctor\"}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+        },
+        {
+          "name": "1.11 Doctor #2 Login",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.collectionVariables.set('doctor2Token', json.data.token)"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"email\": \"{{doctor2Email}}\",\"password\": \"{{doctor2Password}}\",\"role\": \"doctor\"}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+        },
+        {
+          "name": "1.12 Nurse Login",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.collectionVariables.set('nurseToken', json.data.token)"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"email\": \"{{nurseEmail}}\",\"password\": \"{{nursePassword}}\",\"role\": \"nurse\"}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+        },
+        {
+          "name": "1.13 Lab Assistant Login",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.collectionVariables.set('labAssistantToken', json.data.token)"]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"email\": \"{{labAssistantEmail}}\",\"password\": \"{{labAssistantPassword}}\",\"role\": \"lab_assistant\"}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+        }
+      ]
+    },
+    {
+      "name": "2. Patient Management",
+      "description": "Patient registration and retrieval",
+      "item": [
+        {
+          "name": "2.1 Create Patient #1",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ PHN generated', () => json.phn || json.data?.phn)","pm.collectionVariables.set('patientPhn', json.phn || json.data?.phn)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{nurseToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"nic\": \"{{patientNic}}\",\"firstName\": \"Jane\",\"lastName\": \"Smith\",\"gender\": \"female\",\"contactNumber\": \"+94771234567\",\"dob\": \"1990-05-15\",\"address\": \"123 Main Street, Colombo 03\"}"},"url": {"raw": "{{baseUrl}}/fhir/Patient","host": ["{{baseUrl}}"],"path": ["fhir","Patient"]}}
+        },
+        {
+          "name": "2.2 Create Patient #2",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.collectionVariables.set('patientPhn2', json.phn || json.data?.phn)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{nurseToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"nic\": \"{{patientNic2}}\",\"firstName\": \"Robert\",\"lastName\": \"Johnson\",\"gender\": \"male\",\"contactNumber\": \"+94771234568\",\"dob\": \"1985-03-20\",\"address\": \"456 Oak Avenue, Colombo 05\"}"},"url": {"raw": "{{baseUrl}}/fhir/Patient","host": ["{{baseUrl}}"],"path": ["fhir","Patient"]}}
+        },
+        {
+          "name": "2.3 Retrieve Patient #1",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Patient data retrieved', () => json.data?.firstName === 'Jane')"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Patient/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","Patient","{{patientPhn}}"]}}
+        }
+      ]
+    },
+    {
+      "name": "3. Appointments",
+      "description": "Appointment scheduling and management",
+      "item": [
+        {
+          "name": "3.1 Create Appointment",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.collectionVariables.set('appointmentId', json.data?.apid || json.apid)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{nurseToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"doctorLicense\": \"{{medicalLicenseId}}\",\"nurseId\": \"{{nurseId}}\",\"roomNo\": \"101\",\"type\": \"general\",\"appointmentDate\": \"2025-11-25T14:00:00Z\"}"},"url": {"raw": "{{baseUrl}}/fhir/Appointment","host": ["{{baseUrl}}"],"path": ["fhir","Appointment"]}}
+        },
+        {
+          "name": "3.2 Get Practitioner (Doctor)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Practitioner/{{medicalLicenseId}}","host": ["{{baseUrl}}"],"path": ["fhir","Practitioner","{{medicalLicenseId}}"]}}
+        }
+      ]
+    },
+    {
+      "name": "4. Clinical Encounters",
+      "description": "Encounter creation, prescriptions, clinical workflows",
+      "item": [
+        {
+          "name": "4.1 Start Walk-in Encounter",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Encounter ID received', () => json.data?.id)","pm.collectionVariables.set('encounterId', json.data?.id)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"complaint\": \"Chest pain and fatigue\",\"weight\": 75}"},"url": {"raw": "{{baseUrl}}/clinic/start/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["clinic","start","{{patientPhn}}"]}}
+        },
+        {
+          "name": "4.2 Get Encounter Details",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Encounter data present', () => json.data?.id)"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Encounter/{{encounterId}}","host": ["{{baseUrl}}"],"path": ["fhir","Encounter","{{encounterId}}"]}}
+        },
+        {
+          "name": "4.3 Create Single-Item Prescription",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ MedicationRequest created', () => json.data?.resourceType === 'MedicationRequest')"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"medicalLicenseId\": \"{{medicalLicenseId}}\",\"visitType\": \"OPD\",\"status\": \"Draft\",\"complaint\": \"Chest pain\",\"prescriptionItems\": [{\"name\": \"Aspirin\",\"dose\": \"75mg\",\"frequency\": \"once daily\"}]}"},"url": {"raw": "{{baseUrl}}/fhir/MedicationRequest","host": ["{{baseUrl}}"],"path": ["fhir","MedicationRequest"]}}
+        },
+        {
+          "name": "4.4 Create Multi-Item Prescription",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Multiple items prescribed', () => json.data?.dosageInstruction?.length >= 2)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"medicalLicenseId\": \"{{medicalLicenseId}}\",\"visitType\": \"Clinic\",\"status\": \"Pending\",\"prescriptionItems\": [{\"name\": \"Metformin\",\"dose\": \"500mg\",\"frequency\": \"twice daily\"},{\"name\": \"Atorvastatin\",\"dose\": \"20mg\",\"frequency\": \"nightly\"}]}"},"url": {"raw": "{{baseUrl}}/fhir/MedicationRequest","host": ["{{baseUrl}}"],"path": ["fhir","MedicationRequest"]}}
+        },
+        {
+          "name": "4.5 Get Patient Prescriptions",
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/MedicationRequest/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","MedicationRequest","{{patientPhn}}"]}}
+        },
+        {
+          "name": "4.6 Search Medications",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Bundle returned', () => json.data?.resourceType === 'Bundle')"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Medication/search?query=aspirin","host": ["{{baseUrl}}"],"path": ["fhir","Medication","search"],"query": [{"key": "query","value": "aspirin"}]}}
+        },
+        {
+          "name": "4.7 Update Encounter to Finished",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)"]}}],
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"status\": \"finished\",\"notes\": \"Patient stable, prescribed medications, follow-up in 2 weeks\"}"},"url": {"raw": "{{baseUrl}}/fhir/Encounter/{{encounterId}}","host": ["{{baseUrl}}"],"path": ["fhir","Encounter","{{encounterId}}"]}}
+        }
+      ]
+    },
+    {
+      "name": "5. Lab Management",
+      "description": "Lab requests, uploads, reports, reviews (complete workflow)",
+      "item": [
+        {
+          "name": "5.1 Create Lab Request",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Status pending', () => json.data?.status === 'pending')","pm.test('✓ Lab ID generated', () => json.data?.labId && /^LAB\\d{5}$/.test(json.data.labId))","pm.collectionVariables.set('labRequestId', json.data?.labId)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"encounterId\": \"{{encounterId}}\",\"testType\": \"cbc\"}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "5.2 Create Lab Request #2 - Different Test",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.collectionVariables.set('labRequestId2', json.data?.labId)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"encounterId\": \"{{encounterId}}\",\"testType\": \"blood_sugar\"}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "5.3 List Pending Lab Requests (Lab Assistant)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Array returned', () => Array.isArray(json.data))","pm.test('✓ At least one pending', () => json.data?.length >= 1)"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{labAssistantToken}}"}],"url": {"raw": "{{baseUrl}}/api/lab/pending","host": ["{{baseUrl}}"],"path": ["api","lab","pending"]}}
+        },
+        {
+          "name": "5.4 Upload Lab Report #1",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ LabRequest completed', () => json.data?.labRequest?.status === 'completed')","pm.test('✓ DiagnosticReport generated', () => json.data?.diagnosticReport?.resourceType === 'DiagnosticReport')","pm.test('✓ Lab ID in response', () => json.data?.labId && /^LAB\\d{5}$/.test(json.data.labId))","pm.collectionVariables.set('labReportId', json.data?.labId)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{labAssistantToken}}"}],"body": {"mode": "formdata","formdata": [{"key": "file","type": "file","src": "/C:/Users/Public/Pictures/sample.png"},{"key": "resultText","type": "text","value": "WBC 7.5, RBC 4.8, HB 14.5 - all normal"}]},"url": {"raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}","host": ["{{baseUrl}}"],"path": ["api","lab","upload","{{labRequestId}}"]}}
+        },
+        {
+          "name": "5.5 Upload Lab Report #2",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Lab ID in response', () => json.data?.labId && /^LAB\\d{5}$/.test(json.data.labId))","pm.collectionVariables.set('labReportId2', json.data?.labId)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{labAssistantToken}}"}],"body": {"mode": "formdata","formdata": [{"key": "file","type": "file","src": "/C:/Users/Public/Pictures/sample.png"},{"key": "resultText","type": "text","value": "Fasting glucose: 95 mg/dL - normal"}]},"url": {"raw": "{{baseUrl}}/api/lab/upload/{{labRequestId2}}","host": ["{{baseUrl}}"],"path": ["api","lab","upload","{{labRequestId2}}"]}}
+        },
+        {
+          "name": "5.6 Get Lab Reports for Encounter",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Lab data included', () => json.data?.reports)","pm.test('✓ Multiple reports', () => json.data?.reports?.length >= 1)","pm.collectionVariables.set('diagnosticReportId', json.data?.reports?.[0]?._id)"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/api/lab/reports?encounterId={{encounterId}}","host": ["{{baseUrl}}"],"path": ["api","lab","reports"],"query": [{"key": "encounterId","value": "{{encounterId}}"}]}}
+        },
+        {
+          "name": "5.7 Doctor Reviews Lab Report #1",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Status reviewed', () => json.data?.report?.status === 'reviewed')","pm.test('✓ Reviewed by doctor', () => json.data?.report?.reviewedBy)","pm.test('✓ Has review notes', () => json.data?.report?.reviewNotes)"]}}],
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"reviewNotes\": \"CBC results are within normal limits. Patient's hematological status is healthy. No further action needed.\"}"},"url": {"raw": "{{baseUrl}}/api/lab/review/{{diagnosticReportId}}","host": ["{{baseUrl}}"],"path": ["api","lab","review","{{diagnosticReportId}}"]}}
+        }
+      ]
+    },
+    {
+      "name": "6. Error Handling & Authorization",
+      "description": "Negative tests, invalid inputs, role violations, auth failures",
+      "item": [
+        {
+          "name": "6.1 Missing Token (401)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 401 Unauthorized', () => pm.response.code === 401)"]}}],
+          "request": {"method": "GET","header": [],"url": {"raw": "{{baseUrl}}/api/lab/pending","host": ["{{baseUrl}}"],"path": ["api","lab","pending"]}}
+        },
+        {
+          "name": "6.2 Invalid Token (401)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 401 Unauthorized', () => pm.response.code === 401)"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer invalid.token.here"}],"url": {"raw": "{{baseUrl}}/api/lab/pending","host": ["{{baseUrl}}"],"path": ["api","lab","pending"]}}
+        },
+        {
+          "name": "6.3 Nurse Creates Lab Request (403)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 403 Forbidden', () => pm.response.code === 403)","const json = pm.response.json()","pm.test('✓ Access denied message', () => /doctor|privilege/i.test(json.message))"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{nurseToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"encounterId\": \"{{encounterId}}\",\"testType\": \"cbc\"}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "6.4 Doctor Uploads Lab Report (403)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 403 Forbidden', () => pm.response.code === 403)","const json = pm.response.json()","pm.test('✓ Lab assistant required', () => /assistant|privilege/i.test(json.message))"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"body": {"mode": "formdata","formdata": [{"key": "file","type": "file","src": "/C:/Users/Public/Pictures/sample.png"}]},"url": {"raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}","host": ["{{baseUrl}}"],"path": ["api","lab","upload","{{labRequestId}}"]}}
+        },
+        {
+          "name": "6.5 Missing Required Field (400)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 400 Bad Request', () => pm.response.code === 400)","const json = pm.response.json()","pm.test('✓ Error message present', () => json.message)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\"}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "6.6 Invalid Test Type (400)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 400 Bad Request', () => pm.response.code === 400)","const json = pm.response.json()","pm.test('✓ Invalid testType error', () => /testType|invalid/i.test(json.message))"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"encounterId\": \"{{encounterId}}\",\"testType\": \"invalid_test\"}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "6.7 Non-Existent Encounter (404)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 404 Not Found', () => pm.response.code === 404)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"encounterId\": \"ENC99999\",\"testType\": \"cbc\"}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "6.8 Review Without Completed Report (400)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 400 Bad Request', () => pm.response.code === 400)","const json = pm.response.json()","pm.test('✓ Completed check error', () => /completed|review/i.test(json.message))"]}}],
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"reviewNotes\": \"Cannot review incomplete report\"}"},"url": {"raw": "{{baseUrl}}/api/lab/review/invalid_id","host": ["{{baseUrl}}"],"path": ["api","lab","review","invalid_id"]}}
+        }
+      ]
+    },
+    {
+      "name": "7. System Health & Endpoints",
+      "description": "System status and general endpoints",
+      "item": [
+        {
+          "name": "7.1 Health Check",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Server running', () => json.success === true)","pm.test('✓ Has message', () => json.message)"]}}],
+          "request": {"method": "GET","header": [],"url": {"raw": "{{baseUrl}}/health","host": ["{{baseUrl}}"],"path": ["health"]}}
+        }
+      ]
+    }
+  ]
+}

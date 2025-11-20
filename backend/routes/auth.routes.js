@@ -4,6 +4,7 @@ import {
   login,
   approveDoctor,
   approveNurse,
+  approveLabAssistant,
   rejectUser,
   getPendingUsers
 } from '../controllers/auth.controller.js';
@@ -16,10 +17,10 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', (req, res, next) => {
   const { role } = req.body;
-  if (!role || !['doctor', 'nurse', 'admin'].includes(role)) {
+  if (!role || !['doctor', 'nurse', 'admin', 'lab_assistant'].includes(role)) {
     return res.status(400).json({
       success: false,
-      message: 'Role is required and must be doctor, nurse, or admin'
+      message: 'Role is required and must be doctor, nurse, lab_assistant, or admin'
     });
   }
   next();
@@ -28,6 +29,7 @@ router.post('/login', (req, res, next) => {
 // Admin routes
 router.put('/approve/doctor/:medicalLicenseId', protect, adminOnly, approveDoctor);
 router.put('/approve/nurse/:nurId', protect, adminOnly, approveNurse);
+router.put('/approve/lab-assistant/:labId', protect, adminOnly, approveLabAssistant);
 router.put('/reject/:userId', protect, adminOnly, rejectUser);
 router.get('/pending-users', protect, adminOnly, getPendingUsers);
 

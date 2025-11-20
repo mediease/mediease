@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
 import fhirPatientRoutes from './routes/fhirPatient.routes.js';
@@ -7,6 +8,7 @@ import fhirAppointmentRoutes from './routes/fhirAppointment.routes.js';
 import fhirEncounterRoutes from './routes/fhirEncounter.routes.js';
 import fhirMedicationRoutes from './routes/fhirMedication.routes.js';
 import fhirPrescriptionRoutes from './routes/fhirPrescription.routes.js';
+import labRoutes from './routes/lab.routes.js';
 
 const app = express();
 
@@ -23,6 +25,7 @@ app.use('/fhir', fhirAppointmentRoutes);
 app.use('/fhir', fhirEncounterRoutes);
 app.use('/fhir', fhirMedicationRoutes);
 app.use('/fhir', fhirPrescriptionRoutes);
+app.use('/api/lab', labRoutes);
 app.use('/admin', fhirAppointmentRoutes); // admin appointment routes
 app.use('/admin', authRoutes); // admin approval routes
 app.use('/clinic', fhirEncounterRoutes); // clinic encounter routes
@@ -32,6 +35,9 @@ app.use('/doctor', fhirAppointmentRoutes); // doctor appointment routes
 app.get('/health', (req, res) => {
   res.json({ success: true, message: 'FHIR EMR Server is running', timestamp: new Date() });
 });
+
+// Static serving for uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // 404 handler
 app.use((req, res) => {

@@ -10,7 +10,7 @@ import { createFHIRPractitionerDoctor, createFHIRPractitionerNurse } from '../ut
  * @access  Public
  */
 export const register = asyncHandler(async (req, res) => {
-  const { firstName, lastName, email, password, confirmPassword, role, medicalLicenseId, nurId, nic, division } = req.body;
+  const { firstName, lastName, email, password, confirmPassword, role, medicalLicenseId, nurId, labId, nic, division } = req.body;
 
   // Validate required fields
   if (!firstName || !lastName || !email || !password || !confirmPassword || !role || !nic) {
@@ -20,11 +20,11 @@ export const register = asyncHandler(async (req, res) => {
     });
   }
 
-  // Validate role
-  if (!['doctor', 'nurse'].includes(role)) {
+  // Validate role (now includes lab_assistant)
+  if (!['doctor', 'nurse', 'lab_assistant'].includes(role)) {
     return res.status(400).json({
       success: false,
-      message: 'Role must be either doctor or nurse'
+      message: 'Role must be doctor, nurse, or lab_assistant'
     });
   }
 
@@ -49,6 +49,14 @@ export const register = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: 'Nurse ID is required for nurses'
+    });
+  }
+
+  // Check if lab assistant and validate labId
+  if (role === 'lab_assistant' && !labId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Lab Assistant ID (LBID) is required for lab assistants'
     });
   }
 
@@ -83,6 +91,17 @@ export const register = asyncHandler(async (req, res) => {
     }
   }
 
+  // Check if labId already exists (for lab assistants)
+  if (role === 'lab_assistant') {
+    const existingLabId = await User.findOne({ labId });
+    if (existingLabId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Lab Assistant ID (LBID) already registered'
+      });
+    }
+  }
+
   // Create user
   const userData = {
     firstName,
@@ -105,6 +124,10 @@ export const register = asyncHandler(async (req, res) => {
     userData.nurId = nurId;
   }
 
+  if (role === 'lab_assistant') {
+    userData.labId = labId;
+  }
+
   const user = await User.create(userData);
 
   res.status(201).json({
@@ -119,7 +142,8 @@ export const register = asyncHandler(async (req, res) => {
         role: user.role,
         status: user.status,
         ...(role === 'doctor' && { medicalLicenseId: user.medicalLicenseId }),
-        ...(role === 'nurse' && { nurId: user.nurId })
+        ...(role === 'nurse' && { nurId: user.nurId }),
+        ...(role === 'lab_assistant' && { labId: user.labId })
       }
     }
   });
@@ -142,10 +166,10 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   // Validate role
-  if (!['doctor', 'nurse', 'admin'].includes(role)) {
+  if (!['doctor', 'nurse', 'admin', 'lab_assistant'].includes(role)) {
     return res.status(400).json({
       success: false,
-      message: 'Role must be one of doctor, nurse, or admin'
+      message: 'Role must be one of doctor, nurse, lab_assistant, or admin'
     });
   }
 
@@ -169,7 +193,7 @@ export const login = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check if user is approved (only for doctors and nurses, admins can always login)
+  // Check if user is approved (only for clinical/support roles; admins can always login)
   if (user.role !== 'admin' && user.status !== 'approved') {
     return res.status(403).json({
       success: false,
@@ -199,7 +223,8 @@ export const login = asyncHandler(async (req, res) => {
         role: user.role,
         status: user.status,
         ...(user.role === 'doctor' && { medicalLicenseId: user.medicalLicenseId }),
-        ...(user.role === 'nurse' && user.nurId && { nurId: user.nurId })
+        ...(user.role === 'nurse' && user.nurId && { nurId: user.nurId }),
+        ...(user.role === 'lab_assistant' && user.labId && { labId: user.labId })
       }
     }
   });
@@ -334,6 +359,51 @@ export const approveNurse = asyncHandler(async (req, res) => {
       practitioner: {
         id: practitioner._id,
         resource: practitioner.resource
+      }
+    }
+  });
+});
+
+/**
+ * @desc    Approve lab assistant by labId
+ * @route   PUT /admin/approve/lab-assistant/:labId
+ * @access  Private/Admin
+ */
+export const approveLabAssistant = asyncHandler(async (req, res) => {
+  const { labId } = req.params;
+
+  const user = await User.findOne({ labId, role: 'lab_assistant' });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'Lab Assistant not found with this LBID'
+    });
+  }
+
+  if (user.status === 'approved') {
+    return res.status(400).json({
+      success: false,
+      message: 'Lab Assistant is already approved'
+    });
+  }
+
+  // Update user status
+  user.status = 'approved';
+  await user.save();
+
+  res.json({
+    success: true,
+    message: 'Lab Assistant approved successfully',
+    data: {
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        labId: user.labId
       }
     }
   });

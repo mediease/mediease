@@ -4,6 +4,8 @@ import FHIRAppointment from '../models/fhirAppointment.model.js';
 import FHIRPatient from '../models/fhirPatient.model.js';
 import { createFHIREncounter } from '../utils/fhirHelpers.js';
 import { createENCID } from '../utils/idGenerators.js';
+import LabRequest from '../models/labRequest.model.js';
+import FHIRDiagnosticReport from '../models/fhirDiagnosticReport.model.js';
 
 /**
  * @desc    Start clinic visit for walk-in patient (no appointment)
@@ -292,7 +294,12 @@ export const getEncounter = asyncHandler(async (req, res) => {
         complaint: encounter.complaint,
         weight: encounter.weight,
         notes: encounter.notes
-      }
+      },
+      lab: await (async () => {
+        const requests = await LabRequest.find({ encounterId: encounter._id }).lean();
+        const reports = await FHIRDiagnosticReport.find({ encounterEncId: encounter.encId }).lean();
+        return { requests, reports: reports.map(r => r.resource) };
+      })()
     }
   });
 });

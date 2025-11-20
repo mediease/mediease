@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'doctor', 'nurse'],
+    enum: ['admin', 'doctor', 'nurse', 'lab_assistant'],
     required: [true, 'Role is required']
   },
   status: {
@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
   nic: {
     type: String,
     required: function() {
-      return this.role === 'doctor' || this.role === 'nurse';
+      return ['doctor','nurse','lab_assistant'].includes(this.role);
     }
   },
   division: {
@@ -61,6 +61,15 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: function() {
       return this.role === 'nurse';
+    }
+  },
+  // Lab assistant specific - unique lab ID
+  labId: {
+    type: String,
+    sparse: true,
+    unique: true,
+    required: function() {
+      return this.role === 'lab_assistant';
     }
   }
 }, {

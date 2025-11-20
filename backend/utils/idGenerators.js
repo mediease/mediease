@@ -1,6 +1,7 @@
 import FHIRPatient from '../models/fhirPatient.model.js';
 import FHIRAppointment from '../models/fhirAppointment.model.js';
 import User from '../models/user.model.js';
+import LabRequest from '../models/labRequest.model.js';
 
 /**
  * Generate unique PHN (Patient Health Number) - Format: PH + 5 digits
@@ -65,6 +66,22 @@ export const createENCID = async () => {
 };
 
 /**
+ * Generate unique LABID (Lab Report ID) - Format: LAB + 5 digits
+ * @returns {Promise<string>} Generated LABID (e.g., LAB00001)
+ */
+export const createLABID = async () => {
+  const lastLabRequest = await LabRequest.findOne().sort({ labId: -1 }).select('labId');
+  
+  if (!lastLabRequest || !lastLabRequest.labId) {
+    return 'LAB00001';
+  }
+  
+  const lastNumber = parseInt(lastLabRequest.labId.substring(3));
+  const nextNumber = lastNumber + 1;
+  return `LAB${String(nextNumber).padStart(5, '0')}`;
+};
+
+/**
  * Validate PHN format
  * @param {string} phn - Patient Health Number to validate
  * @returns {boolean} True if valid format
@@ -98,4 +115,13 @@ export const isValidAPID = (apid) => {
  */
 export const isValidMedicalLicense = (licenseId) => {
   return /^[A-Z0-9]{6,20}$/.test(licenseId);
+};
+
+/**
+ * Validate LABID format
+ * @param {string} labId - Lab Report ID to validate
+ * @returns {boolean} True if valid format
+ */
+export const isValidLABID = (labId) => {
+  return /^LAB\d{5}$/.test(labId);
 };
