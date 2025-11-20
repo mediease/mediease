@@ -49,6 +49,24 @@ const fhirEncounterSchema = new mongoose.Schema({
   complaint: String,
   weight: Number,
   notes: String
+  ,
+  // Prescription linkage fields
+  hasPrescription: {
+    type: Boolean,
+    default: false
+  },
+  prescriptions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Prescription'
+    }
+  ],
+  // Active flag for quick checks (true while encounter in progress and not finished/cancelled)
+  isActive: {
+    type: Boolean,
+    default: true,
+    index: true
+  }
 }, {
   timestamps: true
 });
@@ -58,6 +76,12 @@ fhirEncounterSchema.pre('save', async function(next) {
   if (!this.encId) {
     this.encId = await createENCID();
   }
+  // Derive isActive from status
+  if (['finished', 'cancelled'].includes(this.status)) {
+    this.isActive = false;
+  } else {
+    this.isActive = true;
+  }
   next();
 });
 
@@ -66,6 +90,7 @@ fhirEncounterSchema.index({ patientPhn: 1 });
 fhirEncounterSchema.index({ doctorLicense: 1 });
 fhirEncounterSchema.index({ apid: 1 });
 fhirEncounterSchema.index({ status: 1 });
+fhirEncounterSchema.index({ hasPrescription: 1 });
 
 const FHIREncounter = mongoose.model('FHIREncounter', fhirEncounterSchema);
 

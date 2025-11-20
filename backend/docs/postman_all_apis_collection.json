@@ -1,0 +1,203 @@
+{
+  "info": {
+    "name": "MediEase Full API Collection",
+    "description": "Unified Postman collection covering all MediEase backend endpoints (Auth, Patients, Practitioners, Appointments, Encounters, Prescriptions, Medication Search, Health). Includes test scripts and token management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2.0.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "adminEmail", "value": "admin@hospital.com" },
+    { "key": "adminPassword", "value": "Admin@123" },
+    { "key": "doctorEmail", "value": "john.doe@hospital.com" },
+    { "key": "doctorPassword", "value": "Doctor@123" },
+    { "key": "nurseEmail", "value": "sarah.williams@hospital.com" },
+    { "key": "nursePassword", "value": "Nurse@123" },
+    { "key": "medicalLicenseId", "value": "MED12345" },
+    { "key": "nurseId", "value": "NUR00001" },
+    { "key": "patientPhn", "value": "PH00001" },
+    { "key": "apid", "value": "AP00001" },
+    { "key": "encounterId", "value": "" },
+    { "key": "prescriptionId", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "doctorToken", "value": "" },
+    { "key": "nurseToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "1.1 Admin Login",
+          "event": [
+            {"listen": "test", "script": {"exec": [
+              "pm.test('Status 200', () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.test('Success true', () => json.success === true);",
+              "pm.collectionVariables.set('adminToken', json.data.token);",
+              "pm.test('Role admin', () => JSON.parse(atob(json.data.token.split('.')[1])).role === 'admin');"
+            ]}}
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ {"key": "Content-Type", "value": "application/json"} ],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\",\n  \"role\": \"admin\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"]}
+          }
+        },
+        {
+          "name": "1.2 Register Doctor",
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('201 Created', () => pm.response.code === 201);",
+            "const json = pm.response.json();",
+            "pm.test('User role doctor', () => json.data.user.role === 'doctor');"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{doctorEmail}}\",\n  \"password\": \"{{doctorPassword}}\",\n  \"confirmPassword\": \"{{doctorPassword}}\",\n  \"role\": \"doctor\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"nic\": \"199012345678\",\n  \"division\": \"Cardiology\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"]}
+          }
+        },
+        {
+          "name": "1.3 Register Nurse",
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('201 Created', () => pm.response.code === 201);",
+            "const json = pm.response.json();",
+            "pm.test('User role nurse', () => json.data.user.role === 'nurse');"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"firstName\": \"Sarah\",\n  \"lastName\": \"Williams\",\n  \"email\": \"{{nurseEmail}}\",\n  \"password\": \"{{nursePassword}}\",\n  \"confirmPassword\": \"{{nursePassword}}\",\n  \"role\": \"nurse\",\n  \"nurId\": \"{{nurseId}}\",\n  \"nic\": \"198512345678\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"]}
+          }
+        },
+        {
+          "name": "1.4 Admin: Pending Users",
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/pending-users","host": ["{{baseUrl}}"],"path": ["auth","pending-users"]}}
+        },
+        {
+          "name": "1.5 Admin: Approve Doctor",
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/approve/doctor/{{medicalLicenseId}}","host": ["{{baseUrl}}"],"path": ["auth","approve","doctor","{{medicalLicenseId}}"]}}
+        },
+        {
+          "name": "1.6 Admin: Approve Nurse",
+          "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/approve/nurse/{{nurseId}}","host": ["{{baseUrl}}"],"path": ["auth","approve","nurse","{{nurseId}}"]}}
+        },
+        {
+          "name": "1.7 Doctor Login",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 200', () => pm.response.code === 200);",
+            "const json = pm.response.json();",
+            "pm.collectionVariables.set('doctorToken', json.data.token);",
+            "pm.test('Role doctor', () => JSON.parse(atob(json.data.token.split('.')[1])).role === 'doctor');"
+          ]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\n  \"email\": \"{{doctorEmail}}\",\n  \"password\": \"{{doctorPassword}}\",\n  \"role\": \"doctor\"\n}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+        },
+        {
+          "name": "1.8 Nurse Login",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 200', () => pm.response.code === 200);",
+            "const json = pm.response.json();",
+            "pm.collectionVariables.set('nurseToken', json.data.token);",
+            "pm.test('Role nurse', () => JSON.parse(atob(json.data.token.split('.')[1])).role === 'nurse');"
+          ]}}],
+          "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\n  \"email\": \"{{nurseEmail}}\",\n  \"password\": \"{{nursePassword}}\",\n  \"role\": \"nurse\"\n}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+        }
+      ]
+    },
+    {
+      "name": "2. Patients",
+      "item": [
+        {
+          "name": "2.1 Create Patient (Nurse)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('201 Created', () => pm.response.code === 201);",
+            "const json = pm.response.json();",
+            "pm.collectionVariables.set('patientPhn', json.phn || json.data?.phn || pm.collectionVariables.get('patientPhn'));"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{nurseToken}}"},
+            {"key": "Content-Type","value": "application/json"}
+          ],"body": {"mode": "raw","raw": "{\n  \"nic\": \"987654321V\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"gender\": \"female\",\n  \"contactNumber\": \"+94771234567\",\n  \"dob\": \"1990-05-15\",\n  \"address\": \"123 Main Street, Colombo 03\"\n}"},"url": {"raw": "{{baseUrl}}/fhir/Patient","host": ["{{baseUrl}}"],"path": ["fhir","Patient"]}}
+        },
+        {"name": "2.2 Get Patient","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Patient/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","Patient","{{patientPhn}}"]}}},
+        {"name": "2.3 Search Patients","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Patient?name=Jane","host": ["{{baseUrl}}"],"path": ["fhir","Patient"],"query": [{"key": "name","value": "Jane"}]}}},
+        {"name": "2.4 Update Patient","request": {"method": "PUT","header": [
+          {"key": "Authorization","value": "Bearer {{nurseToken}}"},
+          {"key": "Content-Type","value": "application/json"}
+        ],"body": {"mode": "raw","raw": "{\n  \"address\": \"456 New Street\"\n}"},"url": {"raw": "{{baseUrl}}/fhir/Patient/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","Patient","{{patientPhn}}"]}}},
+        {"name": "2.5 Delete Patient (Admin)","request": {"method": "DELETE","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Patient/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","Patient","{{patientPhn}}"]}}}
+      ]
+    },
+    {
+      "name": "3. Practitioners",
+      "item": [
+        {"name": "3.1 Search Practitioners","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Practitioner?role=doctor","host": ["{{baseUrl}}"],"path": ["fhir","Practitioner"],"query": [{"key": "role","value": "doctor"}]}}},
+        {"name": "3.2 Get Practitioner","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Practitioner/{{medicalLicenseId}}","host": ["{{baseUrl}}"],"path": ["fhir","Practitioner","{{medicalLicenseId}}"]}}}
+      ]
+    },
+    {
+      "name": "4. Appointments",
+      "item": [
+        {"name": "4.1 Create Appointment (Nurse)","event": [{"listen": "test","script": {"exec": ["const j=pm.response.json(); if(pm.response.code===201){pm.collectionVariables.set('apid', j.apid || j.data?.apid || pm.collectionVariables.get('apid'));}" ]}}],"request": {"method": "POST","header": [
+          {"key": "Authorization","value": "Bearer {{nurseToken}}"},
+          {"key": "Content-Type","value": "application/json"}
+        ],"body": {"mode": "raw","raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"doctorLicense\": \"{{medicalLicenseId}}\",\n  \"nurseId\": \"{{nurseId}}\",\n  \"roomNo\": \"101\",\n  \"type\": \"general\",\n  \"appointmentDate\": \"2025-11-20T10:00:00Z\"\n}"},"url": {"raw": "{{baseUrl}}/fhir/Appointment","host": ["{{baseUrl}}"],"path": ["fhir","Appointment"]}}},
+        {"name": "4.2 Get Appointment","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Appointment/{{apid}}","host": ["{{baseUrl}}"],"path": ["fhir","Appointment","{{apid}}"]}}},
+        {"name": "4.3 Update Appointment","request": {"method": "PUT","header": [
+          {"key": "Authorization","value": "Bearer {{nurseToken}}"},
+          {"key": "Content-Type","value": "application/json"}
+        ],"body": {"mode": "raw","raw": "{\n  \"status\": \"booked\"\n}"},"url": {"raw": "{{baseUrl}}/fhir/Appointment/{{apid}}","host": ["{{baseUrl}}"],"path": ["fhir","Appointment","{{apid}}"]}}},
+        {"name": "4.4 Cancel Appointment","request": {"method": "DELETE","header": [{"key": "Authorization","value": "Bearer {{nurseToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Appointment/{{apid}}","host": ["{{baseUrl}}"],"path": ["fhir","Appointment","{{apid}}"]}}}
+      ]
+    },
+    {
+      "name": "5. Encounters",
+      "item": [
+        {"name": "5.1 Start Walk-in Encounter","event": [{"listen": "test","script": {"exec": ["const j=pm.response.json(); if(pm.response.code===201){pm.collectionVariables.set('encounterId', j.data?.id || j.data?.encounter?.id || pm.collectionVariables.get('encounterId'));}" ]}}],"request": {"method": "POST","header": [
+          {"key": "Authorization","value": "Bearer {{doctorToken}}"},
+          {"key": "Content-Type","value": "application/json"}
+        ],"body": {"mode": "raw","raw": "{\n  \"complaint\": \"Headache\",\n  \"weight\": 70\n}"},"url": {"raw": "{{baseUrl}}/clinic/start/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["clinic","start","{{patientPhn}}"]}}},
+        {"name": "5.2 Get Patient Encounters","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Encounter?patient={{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","Encounter"],"query": [{"key": "patient","value": "{{patientPhn}}"}]}}},
+        {"name": "5.3 Update Encounter (Finish)","request": {"method": "PUT","header": [
+          {"key": "Authorization","value": "Bearer {{doctorToken}}"},
+          {"key": "Content-Type","value": "application/json"}
+        ],"body": {"mode": "raw","raw": "{\n  \"status\": \"finished\"\n}"},"url": {"raw": "{{baseUrl}}/fhir/Encounter/{{encounterId}}","host": ["{{baseUrl}}"],"path": ["fhir","Encounter","{{encounterId}}"]}}}
+      ]
+    },
+    {
+      "name": "6. Prescriptions",
+      "item": [
+        {"name": "6.1 Create Prescription (Single Item)","event": [{"listen": "test","script": {"exec": [
+          "pm.test('Status 201', () => pm.response.code === 201);",
+          "const json = pm.response.json();",
+          "pm.test('MedicationRequest', () => json.data.resourceType==='MedicationRequest');"
+        ]}}],"request": {"method": "POST","header": [
+          {"key": "Authorization","value": "Bearer {{doctorToken}}"},
+          {"key": "Content-Type","value": "application/json"}
+        ],"body": {"mode": "raw","raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"visitType\": \"OPD\",\n  \"status\": \"Draft\",\n  \"complaint\": \"Headache\",\n  \"prescriptionItems\": [ { \"name\": \"Aspirin\", \"dose\": \"75mg\", \"frequency\": \"once daily\" } ]\n}"},"url": {"raw": "{{baseUrl}}/fhir/MedicationRequest","host": ["{{baseUrl}}"],"path": ["fhir","MedicationRequest"]}}},
+        {"name": "6.2 Create Prescription (Multiple Items)","request": {"method": "POST","header": [
+          {"key": "Authorization","value": "Bearer {{doctorToken}}"},
+          {"key": "Content-Type","value": "application/json"}
+        ],"body": {"mode": "raw","raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"visitType\": \"Clinic\",\n  \"status\": \"Pending\",\n  \"prescriptionItems\": [ { \"name\": \"Metformin\", \"dose\": \"500mg\" }, { \"name\": \"Atorvastatin\", \"dose\": \"20mg\" } ]\n}"},"url": {"raw": "{{baseUrl}}/fhir/MedicationRequest","host": ["{{baseUrl}}"],"path": ["fhir","MedicationRequest"]}}},
+        {"name": "6.3 Get Patient Prescriptions","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/MedicationRequest/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","MedicationRequest","{{patientPhn}}"]}}},
+        {"name": "6.4 Get Doctor Prescriptions","request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/MedicationRequest/doctor/{{medicalLicenseId}}","host": ["{{baseUrl}}"],"path": ["fhir","MedicationRequest","doctor","{{medicalLicenseId}}"]}}}
+      ]
+    },
+    {
+      "name": "7. Medication Search",
+      "item": [
+        {"name": "7.1 Search Aspirin (Doctor)","event": [{"listen": "test","script": {"exec": ["pm.test('200',()=>pm.response.code===200); const j=pm.response.json(); pm.test('Bundle',()=>j.data.resourceType==='Bundle');" ]}}],"request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Medication/search?query=aspirin","host": ["{{baseUrl}}"],"path": ["fhir","Medication","search"],"query": [{"key": "query","value": "aspirin"}]}}},
+        {"name": "7.2 Missing Query Error","event": [{"listen": "test","script": {"exec": ["pm.test('400',()=>pm.response.code===400);" ]}}],"request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/Medication/search","host": ["{{baseUrl}}"],"path": ["fhir","Medication","search"]}}}
+      ]
+    },
+    {
+      "name": "8. Health",
+      "item": [
+        {"name": "8.1 Health Check","request": {"method": "GET","header": [],"url": {"raw": "{{baseUrl}}/health","host": ["{{baseUrl}}"],"path": ["health"]}}}
+      ]
+    }
+  ]
+}

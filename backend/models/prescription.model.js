@@ -14,7 +14,20 @@ const prescriptionSchema = new mongoose.Schema({
   subject: { type: String, required: true, index: true }, // patient PHN
   requester: { type: String, required: true, index: true }, // doctor medicalLicenseId
   authoredOn: { type: String, required: true }, // ISO date string
-  status: { type: String, enum: ['Draft', 'Pending', 'Completed'], default: 'Draft' },
+  // Accept both UI (capitalized) and potential lowercase/FHIR forms; normalize to capitalized variant
+  status: { 
+    type: String, 
+    enum: ['Draft', 'Pending', 'Completed'], 
+    default: 'Draft',
+    set: (v) => {
+      if (!v) return 'Draft';
+      const s = String(v).trim().toLowerCase();
+      if (s === 'completed' || s === 'complete') return 'Completed';
+      if (s === 'pending') return 'Pending';
+      // treat any other value (including 'draft') as Draft
+      return 'Draft';
+    }
+  },
   visitType: { type: String, enum: ['OPD', 'IPD', 'Clinic'], required: true },
   complaint: { type: String },
   dosageInstruction: { type: [dosageInstructionSchema], required: true },
