@@ -42,8 +42,8 @@ export const checkApprovalStatus = (req, res, next) => {
     return next();
   }
 
-  // Check if doctor or nurse is approved
-  if ((req.user.role === 'doctor' || req.user.role === 'nurse') && req.user.status !== 'approved') {
+  // Check if doctor, nurse, or lab assistant is approved
+  if ((req.user.role === 'doctor' || req.user.role === 'nurse' || req.user.role === 'lab_assistant') && req.user.status !== 'approved') {
     return res.status(403).json({
       success: false,
       message: `Your account is ${req.user.status}. Please wait for admin approval.`,
@@ -119,6 +119,35 @@ export const nurseOnly = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: 'Access denied. Nurse privileges required.'
+    });
+  }
+
+  if (req.user.status !== 'approved') {
+    return res.status(403).json({
+      success: false,
+      message: `Your account is ${req.user.status}. Please wait for admin approval.`,
+      status: req.user.status
+    });
+  }
+
+  next();
+};
+
+/**
+ * Lab assistant only middleware (with approval check)
+ */
+export const labAssistantOnly = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Not authorized, please login'
+    });
+  }
+
+  if (req.user.role !== 'lab_assistant') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Lab assistant privileges required.'
     });
   }
 

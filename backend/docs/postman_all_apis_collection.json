@@ -10,18 +10,174 @@
     { "key": "adminEmail", "value": "admin@hospital.com" },
     { "key": "adminPassword", "value": "Admin@123" },
     { "key": "doctorEmail", "value": "john.doe@hospital.com" },
+    {
+      "name": "9. Lab Management",
+      "item": [
+        {
+          "name": "9.1 Create Lab Request (Doctor)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('201 Created', () => pm.response.code === 201);",
+            "const json = pm.response.json();",
+            "pm.collectionVariables.set('labRequestId', json.data._id);",
+            "pm.test('Status pending', () => json.data.status==='pending');"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{doctorToken}}"},
+            {"key": "Content-Type","value": "application/json"}
+          ],"body": {"mode": "raw","raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"cbc\"\n}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "9.2 List Pending Lab Requests (Lab Assistant)",
+          "request": {"method": "GET","header": [
+            {"key": "Authorization","value": "Bearer {{labAssistantToken}}"}
+          ],"url": {"raw": "{{baseUrl}}/api/lab/pending","host": ["{{baseUrl}}"],"path": ["api","lab","pending"]}}
+        },
+        {
+          "name": "9.3 Upload Lab Report (Lab Assistant)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('201 Created', () => pm.response.code === 201);",
+            "const j = pm.response.json();",
+            "pm.test('LabRequest completed', () => j.data.labRequest.status==='completed');",
+            "pm.test('Has DiagnosticReport', () => j.data.diagnosticReport && j.data.diagnosticReport.resourceType==='DiagnosticReport');"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{labAssistantToken}}"}
+          ],"body": {"mode": "formdata","formdata": [
+            {"key": "file","type": "file","src": "C:/path/to/sample-report.png"},
+            {"key": "resultText","type": "text","value": "Normal CBC values"}
+          ]},"url": {"raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}","host": ["{{baseUrl}}"],"path": ["api","lab","upload","{{labRequestId}}"]}}
+        },
+        {
+          "name": "9.4 Get Lab Reports For Encounter (Doctor)",
+          "request": {"method": "GET","header": [
+            {"key": "Authorization","value": "Bearer {{doctorToken}}"}
+          ],"url": {"raw": "{{baseUrl}}/api/lab/reports?encounterId={{encounterId}}","host": ["{{baseUrl}}"],"path": ["api","lab","reports"],"query": [
+            {"key": "encounterId","value": "{{encounterId}}"}
+          ]}}
+        }
+      ]
+    }
+    ,
+    {
+      "name": "10. Negative & Edge Tests",
+      "item": [
+        {
+          "name": "10.1 Create Lab Request Missing testType (400)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 400', () => pm.response.code === 400);",
+            "const j = pm.response.json();",
+            "pm.test('Error message', () => j.message && j.success === false);"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{doctorToken}}"},
+            {"key": "Content-Type","value": "application/json"}
+          ],"body": {"mode": "raw","raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\"\n}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "10.2 Create Lab Request Invalid testType (400)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 400', () => pm.response.code === 400);",
+            "const j = pm.response.json();",
+            "pm.test('Invalid testType message', () => /Invalid testType/i.test(j.message));"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{doctorToken}}"},
+            {"key": "Content-Type","value": "application/json"}
+          ],"body": {"mode": "raw","raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"invalid_test\"\n}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "10.3 Nurse Attempts Lab Request (403)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 403', () => pm.response.code === 403);",
+            "const j = pm.response.json();",
+            "pm.test('Access denied', () => /Only doctor/i.test(j.message));"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{nurseToken}}"},
+            {"key": "Content-Type","value": "application/json"}
+          ],"body": {"mode": "raw","raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"cbc\"\n}"},"url": {"raw": "{{baseUrl}}/api/lab/request","host": ["{{baseUrl}}"],"path": ["api","lab","request"]}}
+        },
+        {
+          "name": "10.4 Pending Lab Requests Without Token (401)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 401', () => pm.response.code === 401);",
+            "const j = pm.response.json();",
+            "pm.test('Auth message', () => j.message && j.success === false);"
+          ]}}],
+          "request": {"method": "GET","header": [],"url": {"raw": "{{baseUrl}}/api/lab/pending","host": ["{{baseUrl}}"],"path": ["api","lab","pending"]}}
+        },
+        {
+          "name": "10.5 Upload Report Missing File (400)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 400', () => pm.response.code === 400);",
+            "const j = pm.response.json();",
+            "pm.test('File required message', () => /File is required/i.test(j.message));"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{labAssistantToken}}"}
+          ],"body": {"mode": "formdata","formdata": [
+            {"key": "resultText","type": "text","value": "Attempt without file"}
+          ]},"url": {"raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}","host": ["{{baseUrl}}"],"path": ["api","lab","upload","{{labRequestId}}"]}}
+        },
+        {
+          "name": "10.6 Doctor Attempts Upload (403)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 403', () => pm.response.code === 403);",
+            "const j = pm.response.json();",
+            "pm.test('Access denied message', () => /Lab assistant privileges/i.test(j.message));"
+          ]}}],
+          "request": {"method": "POST","header": [
+            {"key": "Authorization","value": "Bearer {{doctorToken}}"}
+          ],"body": {"mode": "formdata","formdata": [
+            {"key": "file","type": "file","src": "C:/path/to/sample-report.png"},
+            {"key": "resultText","type": "text","value": "Should fail"}
+          ]},"url": {"raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}","host": ["{{baseUrl}}"],"path": ["api","lab","upload","{{labRequestId}}"]}}
+        },
+        {
+          "name": "10.7 Get Reports With Invalid Encounter (404)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 404 or 400', () => pm.response.code === 404 || pm.response.code === 400);",
+            "const j = pm.response.json();",
+            "pm.test('Error message present', () => j.message);"
+          ]}}],
+          "request": {"method": "GET","header": [
+            {"key": "Authorization","value": "Bearer {{doctorToken}}"}
+          ],"url": {"raw": "{{baseUrl}}/api/lab/reports?encounterId=656565656565656565656565","host": ["{{baseUrl}}"],"path": ["api","lab","reports"],"query": [
+            {"key": "encounterId","value": "656565656565656565656565"}
+          ]}}
+        },
+        {
+          "name": "10.8 Nurse Fetch Lab Reports (403)",
+          "event": [{"listen": "test","script": {"exec": [
+            "pm.test('Status 403', () => pm.response.code === 403);",
+            "const j = pm.response.json();",
+            "pm.test('Access denied message', () => /Access denied/i.test(j.message));"
+          ]}}],
+          "request": {"method": "GET","header": [
+            {"key": "Authorization","value": "Bearer {{nurseToken}}"}
+          ],"url": {"raw": "{{baseUrl}}/api/lab/reports?encounterId={{encounterId}}","host": ["{{baseUrl}}"],"path": ["api","lab","reports"],"query": [
+            {"key": "encounterId","value": "{{encounterId}}"}
+          ]}}
+        }
+      ]
+    }
     { "key": "doctorPassword", "value": "Doctor@123" },
     { "key": "nurseEmail", "value": "sarah.williams@hospital.com" },
     { "key": "nursePassword", "value": "Nurse@123" },
+    { "key": "labAssistantEmail", "value": "lab.assist@hospital.com" },
+    { "key": "labAssistantPassword", "value": "Lab@123" },
     { "key": "medicalLicenseId", "value": "MED12345" },
     { "key": "nurseId", "value": "NUR00001" },
     { "key": "patientPhn", "value": "PH00001" },
     { "key": "apid", "value": "AP00001" },
     { "key": "encounterId", "value": "" },
     { "key": "prescriptionId", "value": "" },
+    { "key": "labRequestId", "value": "" },
     { "key": "adminToken", "value": "" },
     { "key": "doctorToken", "value": "" },
-    { "key": "nurseToken", "value": "" }
+    { "key": "nurseToken", "value": "" },
+    { "key": "labAssistantToken", "value": "" },
+    { "key": "labAssistantUserId", "value": "" }
   ],
   "item": [
     {
@@ -29,20 +185,39 @@
       "item": [
         {
           "name": "1.1 Admin Login",
-          "event": [
-            {"listen": "test", "script": {"exec": [
+          {
+            "name": "1.4 Register Lab Assistant",
+            "event": [{"listen": "test", "script": {"exec": [
+              "pm.test('201 Created', () => pm.response.code === 201);",
+              "const json = pm.response.json();",
+              "pm.test('Role lab_assistant', () => json.data.user.role === 'lab_assistant');",
+              "pm.collectionVariables.set('labAssistantUserId', json.data.user.id);"
+            ]}}],
+            "request": {
+              "method": "POST",
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": {"mode": "raw", "raw": "{\n  \"firstName\": \"Lara\",\n  \"lastName\": \"Assist\",\n  \"email\": \"{{labAssistantEmail}}\",\n  \"password\": \"{{labAssistantPassword}}\",\n  \"confirmPassword\": \"{{labAssistantPassword}}\",\n  \"role\": \"lab_assistant\",\n  \"nic\": \"199512345678\"\n}"},
+              "url": {"raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"]}
+            }
+          },
+          {
+            "name": "1.5 Admin: Approve Lab Assistant",
+            "request": {"method": "PUT","header": [{"key": "Authorization","value": "Bearer {{adminToken}}"}],"url": {"raw": "{{baseUrl}}/auth/approve/lab-assistant/{{labAssistantUserId}}","host": ["{{baseUrl}}"],"path": ["auth","approve","lab-assistant","{{labAssistantUserId}}"]}}
+          },
+          {
+            "name": "1.6 Admin: Pending Users",
               "pm.test('Status 200', () => pm.response.code === 200);",
               "const json = pm.response.json();",
-              "pm.test('Success true', () => json.success === true);",
-              "pm.collectionVariables.set('adminToken', json.data.token);",
+          {
+            "name": "1.7 Admin: Approve Doctor",
               "pm.test('Role admin', () => JSON.parse(atob(json.data.token.split('.')[1])).role === 'admin');"
             ]}}
-          ],
-          "request": {
+          {
+            "name": "1.8 Admin: Approve Nurse",
             "method": "POST",
             "header": [ {"key": "Content-Type", "value": "application/json"} ],
-            "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\",\n  \"role\": \"admin\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"]}
+          {
+            "name": "1.9 Doctor Login",
           }
         },
         {
@@ -51,8 +226,8 @@
             "pm.test('201 Created', () => pm.response.code === 201);",
             "const json = pm.response.json();",
             "pm.test('User role doctor', () => json.data.user.role === 'doctor');"
-          ]}}],
-          "request": {
+          {
+            "name": "1.10 Nurse Login",
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {"mode": "raw", "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{doctorEmail}}\",\n  \"password\": \"{{doctorPassword}}\",\n  \"confirmPassword\": \"{{doctorPassword}}\",\n  \"role\": \"doctor\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"nic\": \"199012345678\",\n  \"division\": \"Cardiology\"\n}"},
@@ -61,6 +236,16 @@
         },
         {
           "name": "1.3 Register Nurse",
+          {
+            "name": "1.11 Lab Assistant Login",
+            "event": [{"listen": "test","script": {"exec": [
+              "pm.test('Status 200', () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('labAssistantToken', json.data.token);",
+              "pm.test('Role lab_assistant', () => JSON.parse(atob(json.data.token.split('.')[1])).role === 'lab_assistant');"
+            ]}}],
+            "request": {"method": "POST","header": [{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\n  \"email\": \"{{labAssistantEmail}}\",\n  \"password\": \"{{labAssistantPassword}}\",\n  \"role\": \"lab_assistant\"\n}"},"url": {"raw": "{{baseUrl}}/auth/login","host": ["{{baseUrl}}"],"path": ["auth","login"]}}
+          }
           "event": [{"listen": "test", "script": {"exec": [
             "pm.test('201 Created', () => pm.response.code === 201);",
             "const json = pm.response.json();",
