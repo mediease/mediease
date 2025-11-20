@@ -161,6 +161,29 @@ const PatientDetails = () => {
     return () => { cancelled = true; };
   }, [id]);
 
+  // Guard: if an active clinic visit exists and is not closed, redirect to visit page
+  useEffect(() => {
+    let cancelled = false;
+    const checkActiveVisit = async () => {
+      try {
+        const res = await httpClient.get(`/clinic/start/${encodeURIComponent(id)}`);
+        const payload = res?.data?.data || res?.data || {};
+        const status = (payload.status || payload.visitStatus || '').toLowerCase();
+        if (!cancelled && status && status !== 'closed') {
+          // Redirect doctor to ongoing visit handling page
+          navigate(`/doctor/visitpatient/${id}`);
+        }
+      } catch (err) {
+        // 404 (no active visit) -> allow staying; other errors ignored for now
+        if (err.response?.status && err.response.status !== 404) {
+          console.warn('Visit status check error', err.response.status);
+        }
+      }
+    };
+    checkActiveVisit();
+    return () => { cancelled = true; };
+  }, [id, navigate]);
+
   return (
     <div className="patientDetailsMain">
       <h2 className="patientDetailsHeder">Patients - {patientData?.fullName || (loading ? 'Loading...' : 'Unknown')}</h2>

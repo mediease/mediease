@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Prescription from '../models/prescription.model.js';
 import FHIRPatient from '../models/fhirPatient.model.js';
 import User from '../models/user.model.js';
+import { validateEncounterBeforePrescription, attachPrescriptionToEncounter } from '../services/prescriptionEncounter.service.js';
 
 // Map UI status to FHIR-compliant status values
 const mapStatusToFHIR = (status) => {
@@ -46,12 +47,20 @@ export const createPrescription = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Doctor not found' });
   }
 
+  // Validate active encounter exists first
+  const encounterCheck = await validateEncounterBeforePrescription(patientPhn, medicalLicenseId);
+  if (!encounterCheck.valid) {
+    return res.status(400).json({ success: false, message: encounterCheck.message });
+  }
+
   // Build dosageInstruction array per specification
   const dosageInstruction = [];
   for (const item of prescriptionItems) {
-    const { name, dose, frequency, period, doseComment } = item;
-    if (!name) {
-      return res.status(400).json({ success: false, message: 'Each prescription item must include name' });
+    // Backward compatibility: accept either 'name' or 'drugName'
+    const { name, drugName, dose, frequency, period, doseComment } = item;
+    const medicationName = name || drugName; // prioritize 'name'
+    if (!medicationName) {
+      return res.status(400).json({ success: false, message: 'Each prescription item must include name or drugName' });
     }
     const textParts = [];
     if (dose) textParts.push(`Dose: ${dose}`);
@@ -59,7 +68,7 @@ export const createPrescription = asyncHandler(async (req, res) => {
     if (period) textParts.push(`Period: ${period}`);
     if (doseComment) textParts.push(`Comment: ${doseComment}`);
     dosageInstruction.push({
-      medication: name,
+      medication: medicationName,
       dose,
       frequency,
       period,
@@ -109,6 +118,16 @@ export const createPrescription = asyncHandler(async (req, res) => {
   prescDoc.resource = resource;
   // Persist
   await prescDoc.save();
+
+  // Attach prescription to encounter
+  await attachPrescriptionToEncounter(encounterCheck.encounter._id, prescDoc._id);
+
+  // Add encounter reference extension for convenience if not already
+  resource.extension = resource.extension || [];
+  resource.extension.push({
+    url: 'http://example.org/fhir/StructureDefinition/encounter-reference',
+    valueString: encounterCheck.encounter.encId
+  });
 
   return res.status(201).json({ success: true, message: 'Prescription created', data: resource });
 });

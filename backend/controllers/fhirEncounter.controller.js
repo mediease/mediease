@@ -344,6 +344,7 @@ export const updateEncounter = asyncHandler(async (req, res) => {
     if (encounter.resource.period) {
       encounter.resource.period.end = encounter.endTime.toISOString();
     }
+    encounter.isActive = false;
   }
 
   await encounter.save();
