@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const diagnosticReportSchema = new mongoose.Schema({
-  labId: { type: String, unique: true, index: true }, // Unique Lab Report ID (LAB00001)
+  labId: { type: String, unique: true }, // Unique Lab Report ID (LAB00001)
   patientPhn: { type: String, required: true, index: true },
   encounterEncId: { type: String, required: true, index: true },
   labRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'LabRequest', required: true, index: true },
