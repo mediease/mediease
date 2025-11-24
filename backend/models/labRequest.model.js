@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { createLABID } from '../utils/idGenerators.js';
 
 const labRequestSchema = new mongoose.Schema({
-  labId: { type: String, unique: true, index: true }, // Format: LAB00001
+  labId: { type: String, unique: true }, // Format: LAB00001
   patientPhn: { type: String, required: true, index: true },
   doctorLicense: { type: String, required: true, index: true },
   encounterId: { type: mongoose.Schema.Types.ObjectId, ref: 'FHIREncounter', required: true, index: true },
@@ -20,9 +20,6 @@ labRequestSchema.pre('save', async function(next) {
   }
   next();
 });
-
-// Index for quick lookup by labId
-labRequestSchema.index({ labId: 1 });
 
 const LabRequest = mongoose.model('LabRequest', labRequestSchema);
 export default LabRequest;
