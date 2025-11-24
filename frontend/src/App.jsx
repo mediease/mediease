@@ -92,6 +92,7 @@ function AppRoutes() {
                 <Route path="/admin/docappointments/:id" element={<ProtectedRoute allowedRoles={['admin']}><DocAllAppointment /></ProtectedRoute>} />
                 <Route path="/admin/allappointments" element={<ProtectedRoute allowedRoles={['admin']}><AdminAllAppointments /></ProtectedRoute>} />
                 <Route path="/admin/userregister" element={<ProtectedRoute allowedRoles={['admin']}><UserRegister /></ProtectedRoute>} />
+                <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><Settings /></ProtectedRoute>} />
               </Routes>
             </MainLayout>
           }
