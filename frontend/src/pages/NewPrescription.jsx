@@ -4,16 +4,17 @@ import SegmentedControl from "../components/SegmentedControl";
 import httpClient from "../services/httpClient";
 import "./css/style.css";
 
-const doseOptions = ["1 drop", "2 drops", "5 ml", "10 ml", "After meal", "Before meal", "As directed"];
-const frequencyOptions = ["OD", "BD", "TDS", "QID", "PRN", "Mane", "Nocte"];
-const periodOptions = ["For 3 days", "For 5 days", "1 week", "2 weeks", "1 month", "Until review"];
+const DOSE_OPTIONS = ["1 drop", "2 drops", "5 ml", "10 ml", "After meal", "Before meal", "As directed"];
+const FREQUENCY_OPTIONS = ["OD", "BD", "TDS", "QID", "PRN", "Mane", "Nocte"];
+const PERIOD_OPTIONS = ["For 3 days", "For 5 days", "1 week", "2 weeks", "1 month", "Until review"];
 
-const allDrugList = [,
+const INITIAL_FAVOURITE_DRUGS = [
+  "Paracetamol 500mg Tablet",
+  "Salbutamol Inhaler",
+  "Omeprazole 20mg",
 ];
 
-const initialFavouriteDrugs = ["Paracetamol 500mg Tablet", "Salbutamol Inhaler", "Omeprazole 20mg"];
-
-const initialGroups = [
+const INITIAL_GROUPS = [
   {
     name: "Fever",
     drugs: ["Paracetamol 500mg Tablet", "Ibuprofen 200mg Tablet"],
@@ -25,43 +26,103 @@ const initialGroups = [
 ];
 
 const NewPrescription = () => {
-  const { id } = useParams();
+  const { id: patientPhn } = useParams();
   const navigate = useNavigate();
   const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
 
+  // --- Tabs ---
   const [selectedFilter, setSelectedFilter] = useState("Medications");
-  const [prescriptionItems, setPrescriptionItems] = useState([]);
+
+  // --- Patient / Doctor context ---
+  const [patientName, setPatientName] = useState("Loading...");
+  const [doctorLicense, setDoctorLicense] = useState(null);
+  const [doctorDisplayName, setDoctorDisplayName] = useState("");
+
+  // --- Prescription meta & items ---
   const [prescriptionMeta, setPrescriptionMeta] = useState({
-    complaint: "Fever",
-    onsetDate: "2020-12-11",
+    complaint: "",
+    onsetDate: "",
     visitType: "OPD",
     status: "Draft",
-    doctor: "Dr. Nisanshan",
+    doctor: "",
     prescribeDate: new Date().toISOString().slice(0, 10),
   });
-  const [selectMode, setSelectMode] = useState("byName");
+  const [prescriptionItems, setPrescriptionItems] = useState([]);
 
-  const [selectedDrug, setSelectedDrug] = useState(allDrugList[0]);
-  const [selectedDose, setSelectedDose] = useState(doseOptions[0]);
-  const [selectedFrequency, setSelectedFrequency] = useState(frequencyOptions[0]);
-  const [selectedPeriod, setSelectedPeriod] = useState(periodOptions[0]);
+  // --- Drug selection state ---
+  const [selectMode, setSelectMode] = useState("byName"); // "byName" | "favouriteList" | "favouriteGroup"
+  const [allDrugList] = useState([]); // reserved if you later want static list
+
+  const [selectedDrug, setSelectedDrug] = useState("");
+  const [selectedDose, setSelectedDose] = useState(DOSE_OPTIONS[0]);
+  const [selectedFrequency, setSelectedFrequency] = useState(FREQUENCY_OPTIONS[0]);
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIOD_OPTIONS[0]);
   const [selectedDoseComment, setSelectedDoseComment] = useState("");
+
   const [drugSearch, setDrugSearch] = useState("");
   const [filteredDrugList, setFilteredDrugList] = useState(allDrugList);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [qrUrl, setQrUrl] = useState("");
 
-  const [favouriteDrugs, setFavouriteDrugs] = useState(initialFavouriteDrugs);
-  const [favouriteGroups, setFavouriteGroups] = useState(initialGroups);
-  const [selectedGroup, setSelectedGroup] = useState(initialGroups[0]?.name ?? "");
+  // --- Favourites / Groups ---
+  const [favouriteDrugs, setFavouriteDrugs] = useState(INITIAL_FAVOURITE_DRUGS);
+  const [favouriteGroups, setFavouriteGroups] = useState(INITIAL_GROUPS);
+  const [selectedGroup, setSelectedGroup] = useState(INITIAL_GROUPS[0]?.name ?? "");
 
   const currentGroup = useMemo(
     () => favouriteGroups.find((group) => group.name === selectedGroup),
     [favouriteGroups, selectedGroup]
   );
-  // Debounced backend search for medications
+
+  // --- Preview & QR ---
+  const [showPreview, setShowPreview] = useState(false);
+  const [qrUrl, setQrUrl] = useState("");
+
+  // ============================
+  //  LOAD PATIENT + DOCTOR DATA
+  // ============================
+  useEffect(() => {
+    const loadContext = async () => {
+      // doctor from localStorage
+      try {
+        const doctorRaw = localStorage.getItem("doctor");
+        if (doctorRaw) {
+          const doctorObj = JSON.parse(doctorRaw);
+          setDoctorLicense(doctorObj?.medicalLicenseId || null);
+          const name = doctorObj?.name || doctorObj?.fullName || "";
+          setDoctorDisplayName(name);
+          setPrescriptionMeta((prev) => ({
+            ...prev,
+            doctor: name || prev.doctor || "Doctor",
+          }));
+        }
+      } catch (e) {
+        console.warn("Failed to parse doctor from localStorage", e);
+      }
+
+      // patient from backend
+      try {
+        const res = await httpClient.get(`/fhir/Patient/${patientPhn}`);
+        const payload = res?.data?.data || res?.data || {};
+        const nameRes = payload?.metadata?.firstName || payload?.metadata?.lastName
+          ? `${payload.metadata.firstName || ""} ${payload.metadata.lastName || ""}`.trim()
+          : (() => {
+              const name = payload?.resource?.name?.[0];
+              return [name?.given?.[0], name?.family].filter(Boolean).join(" ");
+            })();
+        setPatientName(nameRes || patientPhn);
+      } catch (err) {
+        console.error("Failed to load patient", err);
+        setPatientName(patientPhn);
+      }
+    };
+
+    loadContext();
+  }, [patientPhn]);
+
+  // ============================
+  //  MEDICATION SEARCH (FHIR)
+  // ============================
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
@@ -70,13 +131,13 @@ const NewPrescription = () => {
       setIsSearching(false);
       setSearchError(null);
       setFilteredDrugList(allDrugList);
-      return () => { controller.abort(); };
+      return () => controller.abort();
     }
 
     setIsSearching(true);
     setSearchError(null);
 
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const res = await httpClient.get("/fhir/Medication/search", {
           params: { query: drugSearch.trim() },
@@ -89,9 +150,11 @@ const NewPrescription = () => {
           .filter((v) => typeof v === "string" && v.trim().length > 0);
         if (!cancelled) {
           setFilteredDrugList(names);
+          if (!selectedDrug && names.length > 0) setSelectedDrug(names[0]);
         }
       } catch (err) {
         if (!cancelled) {
+          console.error("Medicine search error", err);
           setSearchError("Failed to fetch medicines");
           setFilteredDrugList([]);
         }
@@ -102,32 +165,34 @@ const NewPrescription = () => {
 
     return () => {
       cancelled = true;
-      clearTimeout(t);
+      clearTimeout(timer);
       controller.abort();
     };
-  }, [drugSearch]);
+  }, [drugSearch, allDrugList, selectedDrug]);
 
+  // ============================
+  //  GENERAL HELPERS
+  // ============================
   const handleTabChange = (option) => {
     setSelectedFilter(option);
-
     switch (option) {
       case "Basic":
-        navigate(`/doctor/patient/${id}`);
+        navigate(`/doctor/patient/${patientPhn}`);
         break;
       case "Report":
-        navigate(`/doctor/patient/${id}/reportinfo`);
+        navigate(`/doctor/patient/${patientPhn}/reportinfo`);
         break;
       case "Allergies":
-        navigate(`/doctor/patient/${id}/allergiesinfo`);
+        navigate(`/doctor/patient/${patientPhn}/allergiesinfo`);
         break;
       case "Medications":
-        navigate(`/doctor/patient/${id}/medicationsinfo`);
+        navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
         break;
       case "Visit History":
-        navigate(`/doctor/patient/${id}/historyinfo`);
+        navigate(`/doctor/patient/${patientPhn}/historyinfo`);
         break;
       default:
-        navigate(`/doctor/patient/${id}`);
+        navigate(`/doctor/patient/${patientPhn}`);
     }
   };
 
@@ -135,6 +200,9 @@ const NewPrescription = () => {
     setPrescriptionMeta((prev) => ({ ...prev, [field]: value }));
   };
 
+  // ============================
+  //  PRESCRIPTION ITEMS HELPERS
+  // ============================
   const handleAddPrescriptionItem = (drugName, overrides = {}) => {
     if (!drugName) return;
     setPrescriptionItems((prev) => [
@@ -163,65 +231,118 @@ const NewPrescription = () => {
     );
   };
 
+  // ============================
+  //  FAVOURITES / GROUPS
+  // ============================
   const handleAddFavourite = () => {
     if (!selectedDrug) return;
     setFavouriteDrugs((prev) => (prev.includes(selectedDrug) ? prev : [...prev, selectedDrug]));
   };
 
-  const handlePrescribeAll = () => {
+  const handlePrescribeAllFromGroup = () => {
     if (!currentGroup) return;
-    const payload = currentGroup.drugs.map((drug) => ({
-      dose: doseOptions[0],
-      frequency: frequencyOptions[0],
-      period: periodOptions[0],
-      doseComment: "",
-      drugName: drug,
-    }));
-    payload.forEach((entry) => handleAddPrescriptionItem(entry.drugName, entry));
+    currentGroup.drugs.forEach((drug) =>
+      handleAddPrescriptionItem(drug, {
+        dose: DOSE_OPTIONS[0],
+        frequency: FREQUENCY_OPTIONS[0],
+        period: PERIOD_OPTIONS[0],
+        doseComment: "",
+      })
+    );
   };
 
   const handleCreateGroupFromCurrent = () => {
-    if (!currentGroup) return;
+    if (!prescriptionItems.length) {
+      alert("Add some medicines to prescription first to create a group.");
+      return;
+    }
     const name = window.prompt("Enter a name for the new favourite group:");
     if (!name) return;
-    setFavouriteGroups((prev) => [...prev, { name, drugs: [...currentGroup.drugs] }]);
+    const uniqueDrugNames = [
+      ...new Set(prescriptionItems.map((p) => p.name).filter(Boolean)),
+    ];
+    setFavouriteGroups((prev) => [...prev, { name, drugs: uniqueDrugNames }]);
+    setSelectedGroup(name);
   };
 
-  const handleSavePrescription = () => {
-    const payload = {
-      meta: prescriptionMeta,
-      items: prescriptionItems,
-      savedAt: new Date().toISOString(),
-    };
+  // ============================
+  //  BACKEND: SAVE PRESCRIPTION
+  // ============================
+  const handleSavePrescription = async () => {
     try {
-      const key = `prescription_${id}_${Date.now()}`;
-      localStorage.setItem(key, JSON.stringify(payload));
-      alert("Prescription saved locally.");
-      navigate(`/doctor/patient/${id}/medicationsinfo`);
+      if (!doctorLicense) {
+        alert("Doctor license not found. Please login again.");
+        return;
+      }
+
+      if (!prescriptionItems.length) {
+        alert("Add at least one medicine before saving.");
+        return;
+      }
+
+      // Find active encounter for this doctor + patient
+      const encRes = await httpClient.get("/fhir/Encounter", {
+        params: { patient: patientPhn },
+      });
+
+      const encounters = encRes?.data?.data || [];
+      const activeEncounter = encounters.find(
+        (enc) =>
+          enc.metadata?.status === "in-progress" &&
+          enc.metadata?.doctorLicense === doctorLicense
+      );
+
+      if (!activeEncounter) {
+        alert("No active clinic visit found. Please start a visit first.");
+        return;
+      }
+
+      const encounterId = activeEncounter.encId; // IMPORTANT: FHIR encounter identifier
+
+      const itemsPayload = prescriptionItems.map((item) => ({
+        name: item.name,
+        dose: item.dose,
+        frequency: item.frequency,
+        period: item.period,
+        comment: item.doseComment,
+      }));
+
+      const payload = {
+        patientPhn,
+        medicalLicenseId: doctorLicense,
+        visitType: prescriptionMeta.visitType,
+        status: prescriptionMeta.status,
+        complaint: prescriptionMeta.complaint,
+        encounterId,
+        prescriptionItems: itemsPayload,
+      };
+
+      const res = await httpClient.post("/fhir/MedicationRequest", payload);
+      console.log("MedicationRequest created:", res.data);
+
+      alert("Prescription created successfully.");
+      navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
     } catch (err) {
-      console.error("Failed to save prescription", err);
-      alert("Failed to save prescription. See console for details.");
+      console.error("Failed to save prescription", err?.response?.data || err);
+      alert("Failed to create prescription.");
     }
   };
 
-  const handleViewPrescriptions = () => {
-    // open preview modal showing current prescription items
-    setShowPreview(true);
-  };
-
-  const handleClosePreview = () => {
-    setShowPreview(false);
-  };
+  // ============================
+  //  PREVIEW & QR
+  // ============================
+  const handleViewPrescriptions = () => setShowPreview(true);
+  const handleClosePreview = () => setShowPreview(false);
 
   const generateQRCode = () => {
     try {
       const payload = {
         meta: prescriptionMeta,
         items: prescriptionItems,
+        patientPhn,
+        doctor: doctorDisplayName,
       };
-      const text = JSON.stringify(payload);
-      const encoded = encodeURIComponent(text);
-      // Use Google Chart API to generate a QR code image URL (quick solution without adding deps)
+      const encoded = encodeURIComponent(JSON.stringify(payload));
       const size = 300;
       const url = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encoded}`;
       setQrUrl(url);
@@ -231,172 +352,232 @@ const NewPrescription = () => {
     }
   };
 
+  // ============================
+  //  RENDER SELECTION PANEL
+  // ============================
   const renderSelectionPanel = () => {
-    switch (selectMode) {
-      case "byName":
-        return (
-          <div className="selection-panel">
-            <div className="selection-list">
-              <h4>All Drugs</h4>
-              <div className="selection-search">
+    if (selectMode === "byName") {
+      return (
+        <div className="selection-panel">
+          <div className="selection-list">
+            <h4>All Drugs</h4>
+            <div className="selection-search">
+              <input
+                type="text"
+                placeholder="Search medicine..."
+                value={drugSearch}
+                onChange={(e) => setDrugSearch(e.target.value)}
+              />
+            </div>
+            <div className="selection-scroll">
+              {isSearching && <div className="selection-helper">Searching...</div>}
+              {!isSearching && searchError && (
+                <div className="selection-helper">{searchError}</div>
+              )}
+              {!isSearching &&
+                !searchError &&
+                filteredDrugList.map((drug) => (
+                  <button
+                    key={drug}
+                    className={`pill-button ${drug === selectedDrug ? "active" : ""}`}
+                    onClick={() => setSelectedDrug(drug)}
+                  >
+                    {drug}
+                  </button>
+                ))}
+              {!isSearching &&
+                !searchError &&
+                filteredDrugList.length === 0 && (
+                  <p className="selection-helper">
+                    No drugs match “{drugSearch}”.
+                  </p>
+                )}
+            </div>
+          </div>
+
+          <div className="selection-form">
+            <div className="selection-grid">
+              <div>
+                <label>Dose</label>
+                <select
+                  value={selectedDose}
+                  onChange={(e) => setSelectedDose(e.target.value)}
+                >
+                  {DOSE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Frequency</label>
+                <select
+                  value={selectedFrequency}
+                  onChange={(e) => setSelectedFrequency(e.target.value)}
+                >
+                  {FREQUENCY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Period</label>
+                <select
+                  value={selectedPeriod}
+                  onChange={(e) => setSelectedPeriod(e.target.value)}
+                >
+                  {PERIOD_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Dose Comment</label>
                 <input
                   type="text"
-                  placeholder="Search medicine..."
-                  value={drugSearch}
-                  onChange={(e) => setDrugSearch(e.target.value)}
+                  value={selectedDoseComment}
+                  onChange={(e) => setSelectedDoseComment(e.target.value)}
+                  placeholder="e.g. After meals"
                 />
               </div>
-              <div className="selection-scroll">
-                {isSearching && (
-                  <div className="selection-helper">Searching...</div>
-                )}
-                {!isSearching && searchError && (
-                  <div className="selection-helper">{searchError}</div>
-                )}
-                {!isSearching && !searchError && filteredDrugList.map((drug) => (
-                  <button
-                    key={drug}
-                    className={`pill-button ${drug === selectedDrug ? "active" : ""}`}
-                    onClick={() => setSelectedDrug(drug)}
-                  >
-                    {drug}
-                  </button>
-                ))}
-                {!isSearching && !searchError && filteredDrugList.length === 0 && (
-                  <p className="selection-helper">No drugs match “{drugSearch}”.</p>
-                )}
-              </div>
             </div>
-            <div className="selection-form">
-              <div className="selection-grid">
-                <div>
-                  <label>Dose</label>
-                  <select value={selectedDose} onChange={(e) => setSelectedDose(e.target.value)}>
-                    {doseOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label>Frequency</label>
-                  <select value={selectedFrequency} onChange={(e) => setSelectedFrequency(e.target.value)}>
-                    {frequencyOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label>Period</label>
-                  <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
-                    {periodOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label>Dose Comment</label>
-                  <input
-                    type="text"
-                    value={selectedDoseComment}
-                    onChange={(e) => setSelectedDoseComment(e.target.value)}
-                    placeholder="e.g. After meals"
-                  />
-                </div>
-              </div>
-              <button className="selection-add-btn" onClick={() => handleAddPrescriptionItem(selectedDrug)}>
-                + Add
-              </button>
-            </div>
+
+            <button
+              className="selection-add-btn"
+              onClick={() => handleAddPrescriptionItem(selectedDrug)}
+              disabled={!selectedDrug}
+            >
+              + Add
+            </button>
           </div>
-        );
-      case "favouriteList":
-        return (
-          <div className="selection-panel">
-            <div className="selection-list">
-              <div className="selection-list-header">
-                <h4>My Favourite</h4>
-                <button className="selection-secondary-btn" onClick={handleAddFavourite}>
-                  Add above list to My favourites
-                </button>
-              </div>
-              <div className="selection-scroll">
-                {favouriteDrugs.map((drug) => (
-                  <button
-                    key={drug}
-                    className={`pill-button ${drug === selectedDrug ? "active" : ""}`}
-                    onClick={() => setSelectedDrug(drug)}
-                  >
-                    {drug}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="selection-form">
-              <p className="selection-helper">Selected drug: {selectedDrug || "Pick a drug"}</p>
-              <button className="selection-add-btn" onClick={() => handleAddPrescriptionItem(selectedDrug)}>
-                Add to prescription
-              </button>
-            </div>
-          </div>
-        );
-      case "favouriteGroup":
-        return (
-          <div className="selection-panel">
-            <div className="selection-list">
-              <div className="selection-list-header">
-                <h4>Favourite Groups</h4>
-                <button className="selection-secondary-btn" onClick={handleCreateGroupFromCurrent}>
-                  Add above list to My favourites
-                </button>
-              </div>
-              <div className="selection-scroll">
-                {favouriteGroups.map((group) => (
-                  <button
-                    key={group.name}
-                    className={`pill-button ${group.name === selectedGroup ? "active" : ""}`}
-                    onClick={() => setSelectedGroup(group.name)}
-                  >
-                    {group.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="selection-form">
-              <h4>{selectedGroup || "Select a group"}</h4>
-              <div className="selection-scroll">
-                {(currentGroup?.drugs ?? []).map((drug) => (
-                  <div key={drug} className="group-drug-row">
-                    <span>{drug}</span>
-                    <button className="inline-add-btn" onClick={() => handleAddPrescriptionItem(drug)}>
-                      + Add
-                    </button>
-                  </div>
-                ))}
-                {(currentGroup?.drugs?.length ?? 0) === 0 && <p className="selection-helper">No drugs in this group.</p>}
-              </div>
-              <button className="selection-add-btn" onClick={handlePrescribeAll} disabled={!currentGroup}>
-                Prescribe All
-              </button>
-            </div>
-          </div>
-        );
-      default:
-        return null;
+        </div>
+      );
     }
+
+    if (selectMode === "favouriteList") {
+      return (
+        <div className="selection-panel">
+          <div className="selection-list">
+            <div className="selection-list-header">
+              <h4>My Favourite</h4>
+              <button
+                className="selection-secondary-btn"
+                onClick={handleAddFavourite}
+              >
+                Add above drug to favourites
+              </button>
+            </div>
+            <div className="selection-scroll">
+              {favouriteDrugs.map((drug) => (
+                <button
+                  key={drug}
+                  className={`pill-button ${drug === selectedDrug ? "active" : ""}`}
+                  onClick={() => setSelectedDrug(drug)}
+                >
+                  {drug}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="selection-form">
+            <p className="selection-helper">
+              Selected drug: {selectedDrug || "Pick a drug"}
+            </p>
+            <button
+              className="selection-add-btn"
+              onClick={() => handleAddPrescriptionItem(selectedDrug)}
+              disabled={!selectedDrug}
+            >
+              Add to prescription
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (selectMode === "favouriteGroup") {
+      return (
+        <div className="selection-panel">
+          <div className="selection-list">
+            <div className="selection-list-header">
+              <h4>Favourite Groups</h4>
+              <button
+                className="selection-secondary-btn"
+                onClick={handleCreateGroupFromCurrent}
+              >
+                Create group from current prescription
+              </button>
+            </div>
+            <div className="selection-scroll">
+              {favouriteGroups.map((group) => (
+                <button
+                  key={group.name}
+                  className={`pill-button ${
+                    group.name === selectedGroup ? "active" : ""
+                  }`}
+                  onClick={() => setSelectedGroup(group.name)}
+                >
+                  {group.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="selection-form">
+            <h4>{selectedGroup || "Select a group"}</h4>
+            <div className="selection-scroll">
+              {(currentGroup?.drugs ?? []).map((drug) => (
+                <div key={drug} className="group-drug-row">
+                  <span>{drug}</span>
+                  <button
+                    className="inline-add-btn"
+                    onClick={() => handleAddPrescriptionItem(drug)}
+                  >
+                    + Add
+                  </button>
+                </div>
+              ))}
+              {(currentGroup?.drugs?.length ?? 0) === 0 && (
+                <p className="selection-helper">No drugs in this group.</p>
+              )}
+            </div>
+            <button
+              className="selection-add-btn"
+              onClick={handlePrescribeAllFromGroup}
+              disabled={!currentGroup}
+            >
+              Prescribe All
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
 
+  // ============================
+  //  MAIN RENDER
+  // ============================
   return (
     <div className="patientDetailsMain">
-      <h2 className="patientDetailsHeder">Issuing a Prescription - Naveen Bimsara</h2>
-      <SegmentedControl options={filterOptions} selected={selectedFilter} onChange={handleTabChange} />
+      <h2 className="patientDetailsHeder">
+        Issuing a Prescription - {patientName}
+      </h2>
+
+      <SegmentedControl
+        options={filterOptions}
+        selected={selectedFilter}
+        onChange={handleTabChange}
+      />
 
       <div className="prescription-card">
+        {/* Meta */}
         <div className="prescription-meta">
           <div className="meta-row">
             <div>
@@ -404,7 +585,9 @@ const NewPrescription = () => {
               <input
                 type="text"
                 value={prescriptionMeta.complaint}
-                onChange={(e) => handleMetaChange("complaint", e.target.value)}
+                onChange={(e) =>
+                  handleMetaChange("complaint", e.target.value)
+                }
               />
             </div>
             <div>
@@ -412,12 +595,19 @@ const NewPrescription = () => {
               <input
                 type="date"
                 value={prescriptionMeta.onsetDate}
-                onChange={(e) => handleMetaChange("onsetDate", e.target.value)}
+                onChange={(e) =>
+                  handleMetaChange("onsetDate", e.target.value)
+                }
               />
             </div>
             <div>
               <label>Visit Type</label>
-              <select value={prescriptionMeta.visitType} onChange={(e) => handleMetaChange("visitType", e.target.value)}>
+              <select
+                value={prescriptionMeta.visitType}
+                onChange={(e) =>
+                  handleMetaChange("visitType", e.target.value)
+                }
+              >
                 <option value="OPD">OPD</option>
                 <option value="IPD">IPD</option>
                 <option value="Clinic">Clinic</option>
@@ -428,7 +618,12 @@ const NewPrescription = () => {
           <div className="meta-row">
             <div>
               <label>Status</label>
-              <select value={prescriptionMeta.status} onChange={(e) => handleMetaChange("status", e.target.value)}>
+              <select
+                value={prescriptionMeta.status}
+                onChange={(e) =>
+                  handleMetaChange("status", e.target.value)
+                }
+              >
                 <option value="Draft">Draft</option>
                 <option value="Pending">Pending</option>
                 <option value="Completed">Completed</option>
@@ -439,7 +634,9 @@ const NewPrescription = () => {
               <input
                 type="text"
                 value={prescriptionMeta.doctor}
-                onChange={(e) => handleMetaChange("doctor", e.target.value)}
+                onChange={(e) =>
+                  handleMetaChange("doctor", e.target.value)
+                }
               />
             </div>
             <div>
@@ -447,12 +644,15 @@ const NewPrescription = () => {
               <input
                 type="date"
                 value={prescriptionMeta.prescribeDate}
-                onChange={(e) => handleMetaChange("prescribeDate", e.target.value)}
+                onChange={(e) =>
+                  handleMetaChange("prescribeDate", e.target.value)
+                }
               />
             </div>
           </div>
         </div>
 
+        {/* Table */}
         <div className="prescription-table-wrapper">
           <table className="prescription-table">
             <thead>
@@ -470,7 +670,8 @@ const NewPrescription = () => {
               {prescriptionItems.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="empty-row">
-                    No prescriptions added yet. Use the selector below to add items.
+                    No prescriptions added yet. Use the selector below to add
+                    items.
                   </td>
                 </tr>
               ) : (
@@ -480,9 +681,11 @@ const NewPrescription = () => {
                     <td>
                       <select
                         value={item.dose}
-                        onChange={(e) => handleItemChange(item.id, "dose", e.target.value)}
+                        onChange={(e) =>
+                          handleItemChange(item.id, "dose", e.target.value)
+                        }
                       >
-                        {doseOptions.map((option) => (
+                        {DOSE_OPTIONS.map((option) => (
                           <option key={option} value={option}>
                             {option}
                           </option>
@@ -492,9 +695,15 @@ const NewPrescription = () => {
                     <td>
                       <select
                         value={item.frequency}
-                        onChange={(e) => handleItemChange(item.id, "frequency", e.target.value)}
+                        onChange={(e) =>
+                          handleItemChange(
+                            item.id,
+                            "frequency",
+                            e.target.value
+                          )
+                        }
                       >
-                        {frequencyOptions.map((option) => (
+                        {FREQUENCY_OPTIONS.map((option) => (
                           <option key={option} value={option}>
                             {option}
                           </option>
@@ -504,9 +713,11 @@ const NewPrescription = () => {
                     <td>
                       <select
                         value={item.period}
-                        onChange={(e) => handleItemChange(item.id, "period", e.target.value)}
+                        onChange={(e) =>
+                          handleItemChange(item.id, "period", e.target.value)
+                        }
                       >
-                        {periodOptions.map((option) => (
+                        {PERIOD_OPTIONS.map((option) => (
                           <option key={option} value={option}>
                             {option}
                           </option>
@@ -517,12 +728,21 @@ const NewPrescription = () => {
                       <textarea
                         rows={1}
                         value={item.doseComment}
-                        onChange={(e) => handleItemChange(item.id, "doseComment", e.target.value)}
+                        onChange={(e) =>
+                          handleItemChange(
+                            item.id,
+                            "doseComment",
+                            e.target.value
+                          )
+                        }
                         placeholder="Add instructions..."
                       />
                     </td>
                     <td>
-                      <button className="danger-link" onClick={() => handleDeleteItem(item.id)}>
+                      <button
+                        className="danger-link"
+                        onClick={() => handleDeleteItem(item.id)}
+                      >
                         Delete
                       </button>
                     </td>
@@ -536,6 +756,7 @@ const NewPrescription = () => {
           </table>
         </div>
 
+        {/* Mode Tabs */}
         <div className="select-mode-tabs">
           {[
             { key: "byName", label: "By name" },
@@ -544,7 +765,9 @@ const NewPrescription = () => {
           ].map((mode) => (
             <button
               key={mode.key}
-              className={`select-mode-btn ${selectMode === mode.key ? "active" : ""}`}
+              className={`select-mode-btn ${
+                selectMode === mode.key ? "active" : ""
+              }`}
               onClick={() => setSelectMode(mode.key)}
             >
               {mode.label}
@@ -552,28 +775,59 @@ const NewPrescription = () => {
           ))}
         </div>
 
+        {/* Selector */}
         {renderSelectionPanel()}
+
+        {/* Actions */}
         <div className="action-bar">
-          <button className="action-btn secondary" onClick={handleViewPrescriptions} type="button">
+          <button
+            className="action-btn secondary"
+            onClick={handleViewPrescriptions}
+            type="button"
+          >
             View
           </button>
-          <button className="action-btn primary" onClick={handleSavePrescription} type="button">
+          <button
+            className="action-btn primary"
+            onClick={handleSavePrescription}
+            type="button"
+          >
             Save
           </button>
         </div>
+
+        {/* Preview Modal */}
         {showPreview && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
             <div className="modal-content">
               <div className="modal-header">
                 <h3>Prescription Preview</h3>
-                <button className="modal-close-btn" onClick={handleClosePreview} aria-label="Close preview">×</button>
+                <button
+                  className="modal-close-btn"
+                  onClick={handleClosePreview}
+                  aria-label="Close preview"
+                >
+                  ×
+                </button>
               </div>
               <div className="modal-body">
                 <div className="preview-meta">
-                  <div><strong>Complaint:</strong> {prescriptionMeta.complaint}</div>
-                  <div><strong>Doctor:</strong> {prescriptionMeta.doctor}</div>
-                  <div><strong>Prescribe Date:</strong> {prescriptionMeta.prescribeDate}</div>
-                  <div><strong>Status:</strong> {prescriptionMeta.status}</div>
+                  <div>
+                    <strong>Patient:</strong> {patientName} ({patientPhn})
+                  </div>
+                  <div>
+                    <strong>Complaint:</strong> {prescriptionMeta.complaint}
+                  </div>
+                  <div>
+                    <strong>Doctor:</strong> {prescriptionMeta.doctor}
+                  </div>
+                  <div>
+                    <strong>Prescribe Date:</strong>{" "}
+                    {prescriptionMeta.prescribeDate}
+                  </div>
+                  <div>
+                    <strong>Status:</strong> {prescriptionMeta.status}
+                  </div>
                 </div>
 
                 <div className="modal-table-wrapper">
@@ -590,7 +844,9 @@ const NewPrescription = () => {
                     <tbody>
                       {prescriptionItems.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="empty-row">No medicines added yet.</td>
+                          <td colSpan={5} className="empty-row">
+                            No medicines added yet.
+                          </td>
                         </tr>
                       ) : (
                         prescriptionItems.map((it) => (
@@ -599,7 +855,7 @@ const NewPrescription = () => {
                             <td>{it.dose}</td>
                             <td>{it.frequency}</td>
                             <td>{it.period}</td>
-                            <td>{it.doseComment || '-'}</td>
+                            <td>{it.doseComment || "-"}</td>
                           </tr>
                         ))
                       )}
@@ -611,12 +867,19 @@ const NewPrescription = () => {
                   <div className="qr-container">
                     <h4>Generated QR Code</h4>
                     <img src={qrUrl} alt="Prescription QR" className="qr-image" />
-                    <p className="selection-helper">Scan this QR to view prescription details.</p>
+                    <p className="selection-helper">
+                      Scan this QR to view prescription details.
+                    </p>
                   </div>
                 )}
               </div>
-              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                <button className="action-btn primary" onClick={generateQRCode}>Generate QR code</button>
+              <div
+                className="modal-footer"
+                style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
+              >
+                <button className="action-btn primary" onClick={generateQRCode}>
+                  Generate QR code
+                </button>
               </div>
             </div>
           </div>

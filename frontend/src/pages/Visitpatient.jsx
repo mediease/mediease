@@ -9,6 +9,7 @@ import PatientSummaryModal from "../components/PatientSummaryModal";
 import httpClient from "../services/httpClient";
 import "./css/style.css";
 
+// ------------------ Helper Extractors ------------------
 const resolvePhn = (p) => {
   if (p?.metadata?.patientPhn) return p.metadata.patientPhn;
   const ids = p?.resource?.identifier || [];
@@ -30,6 +31,7 @@ const resolveName = (p) => {
   return [name?.given?.[0], name?.family].filter(Boolean).join(" ") || "-";
 };
 
+// ------------------ Component ------------------
 const Visitpatient = () => {
   const { id } = useParams(); // PHN
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ const Visitpatient = () => {
   const [loading, setLoading] = useState(true);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
 
-  // ---------- LOAD PATIENT ----------
+  // ------------------ Load Patient ------------------
   useEffect(() => {
     const load = async () => {
       try {
@@ -55,74 +57,86 @@ const Visitpatient = () => {
     load();
   }, [id]);
 
-  // ---------- TAB NAVIGATION ----------
-  const handleTabChange = (option) => {
-    setSelectedFilter(option);
-    navigate(`/doctor/patient/${id}/${option.toLowerCase().replace(" ", "")}`);
-  };
-
-  // ---------- CLOSE VISIT BUTTON ----------
+  // ------------------ Close Visit Handler ------------------
   const handleCloseVisit = async () => {
     try {
-      // 1. Get doctor license
-      let doctorLicense = null;
-      const raw = localStorage.getItem("doctor");
-      if (raw) doctorLicense = JSON.parse(raw).medicalLicenseId;
+      // 1. Logged-in doctor license
+      const doctorRaw = localStorage.getItem("doctor");
+      const doctor = doctorRaw ? JSON.parse(doctorRaw) : {};
+      const doctorLicense = doctor?.medicalLicenseId;
 
-      // 2. Load all encounters for this patient
+      if (!doctorLicense) {
+        alert("Doctor license missing.");
+        return;
+      }
+
+      // 2. Fetch all encounters of this patient
       const encRes = await httpClient.get("/fhir/Encounter", {
         params: { patient: id }
       });
-      const encounters = encRes.data.data || [];
 
-      // 3. Find the active encounter
+      const encounters = encRes?.data?.data || [];
+
+      // 3. Find active encounter (status=in-progress + doctor matches)
       const activeEncounter = encounters.find(enc =>
         enc.metadata?.status === "in-progress" &&
         enc.metadata?.doctorLicense === doctorLicense
       );
 
       if (!activeEncounter) {
-        alert("No active visit found.");
+        alert("No active encounter found.");
         return;
       }
 
       const encounterId = activeEncounter.id;
 
-      // 4. Send PUT to close
+      // 4. PUT update to backend to close encounter
       await httpClient.put(`/fhir/Encounter/${encounterId}`, {
-        metadata: {
-          status: "finished",
-          endTime: new Date().toISOString()
-        }
+        status: "finished",
+        endTime: new Date().toISOString()
       });
 
-      alert("Visit successfully closed.");
+      alert("Visit closed successfully.");
       navigate("/doctor/patients");
 
     } catch (error) {
-      console.error("Error closing visit:", error);
+      console.error("Close visit failed:", error);
       alert("Failed to close visit.");
     }
   };
 
-  // ---------- OTHER BUTTONS ----------
-  const clickVisit = () => navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
-  const handleAddAllergy = () => navigate(`/doctor/patient/${id}/allergiesinfo`);
-  const handleOrderNewReport = () => navigate(`/doctor/visitpatient/${id}/order-report`);
+  // ------------------ Navigation ------------------
+  const handleTabChange = (option) => {
+    setSelectedFilter(option);
+    navigate(`/doctor/patient/${id}/${option.toLowerCase().replace(" ", "")}`);
+  };
+
+  const clickVisit = () =>
+    navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
+
+  const handleAddAllergy = () =>
+    navigate(`/doctor/patient/${id}/allergiesinfo`);
+
+  const handleOrderNewReport = () =>
+    navigate(`/doctor/visitpatient/${id}/order-report`);
+
   const handleRequestSummary = () => setIsSummaryModalOpen(true);
   const handleCloseSummary = () => setIsSummaryModalOpen(false);
 
+  // ------------------ UI LOADING ------------------
   if (loading) return <p>Loading...</p>;
 
-  const name = resolveName(patient);
+  // ------------------ Extract Patient Details ------------------
+  const fullName = resolveName(patient);
   const phn = resolvePhn(patient);
   const nic = resolveNic(patient);
   const gender = patient?.resource?.gender || "-";
   const dob = patient?.resource?.birthDate || "-";
 
+  // ------------------ Render ------------------
   return (
     <div className="patientDetailsMain">
-      <h2 className="patientDetailsHeder">Patients - {name}</h2>
+      <h2 className="patientDetailsHeder">Patients - {fullName}</h2>
 
       <SegmentedControl
         options={filterOptions}
@@ -134,7 +148,7 @@ const Visitpatient = () => {
         <div className="table-half">
           <PatientOverview
             dpUrl=""
-            fullName={name}
+            fullName={fullName}
             phn={phn}
             nic={nic}
             gender={gender}
@@ -147,7 +161,6 @@ const Visitpatient = () => {
         </div>
 
         <div className="table-half">
-
           <HealthInfoCard
             height={170}
             weight={70}
