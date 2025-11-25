@@ -22,6 +22,7 @@ import LoginPage from './pages/LoginPage';
 import AdminDocAppointments from './pages/AdminDocAppointments';
 import DocAllAppointment from './pages/DocAllAppointment';
 import AdminAllAppointments from './pages/AdminAllAppointments';
+import AdminUsers from './pages/AdminUsers';
 import PatientNew from './pages/PatientNew';
 import AppointmentView from './pages/AppointmentView';
 import UserRegister from './pages/UserRegister';
@@ -88,10 +89,12 @@ function AppRoutes() {
                 <Route path="/doctor/patient/:id/historyinfo" element={<ProtectedRoute allowedRoles={['doctor']}><HistoryInfo /></ProtectedRoute>} />
                 <Route path="/doctor/reports/:id" element={<ProtectedRoute allowedRoles={['doctor']}><SingelReport /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminPanel /></ProtectedRoute>} />
+                <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
                 <Route path="/admin/docappointments" element={<ProtectedRoute allowedRoles={['admin']}><AdminDocAppointments /></ProtectedRoute>} />
                 <Route path="/admin/docappointments/:id" element={<ProtectedRoute allowedRoles={['admin']}><DocAllAppointment /></ProtectedRoute>} />
                 <Route path="/admin/allappointments" element={<ProtectedRoute allowedRoles={['admin']}><AdminAllAppointments /></ProtectedRoute>} />
                 <Route path="/admin/userregister" element={<ProtectedRoute allowedRoles={['admin']}><UserRegister /></ProtectedRoute>} />
+                <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><Settings /></ProtectedRoute>} />
               </Routes>
             </MainLayout>
           }
