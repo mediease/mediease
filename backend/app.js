@@ -8,7 +8,10 @@ import fhirAppointmentRoutes from './routes/fhirAppointment.routes.js';
 import fhirEncounterRoutes from './routes/fhirEncounter.routes.js';
 import fhirMedicationRoutes from './routes/fhirMedication.routes.js';
 import fhirPrescriptionRoutes from './routes/fhirPrescription.routes.js';
+import allergyRoutes from './routes/allergy.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 import labRoutes from './routes/lab.routes.js';
+import summarizeRoute from './routes/summarize.js';
 
 const app = express();
 
@@ -25,13 +28,20 @@ app.use('/fhir', fhirAppointmentRoutes);
 app.use('/fhir', fhirEncounterRoutes);
 app.use('/fhir', fhirMedicationRoutes);
 app.use('/fhir', fhirPrescriptionRoutes);
+app.use('/fhir', allergyRoutes);
+app.use('/ai', aiRoutes);
 app.use('/api/lab', labRoutes);
+app.use('/api', summarizeRoute);
 app.use('/admin', fhirAppointmentRoutes); // admin appointment routes
 app.use('/admin', authRoutes); // admin approval routes
 app.use('/clinic', fhirEncounterRoutes); // clinic encounter routes
 app.use('/doctor', fhirAppointmentRoutes); // doctor appointment routes
 
 // Health check
+app.get('/ping', (req, res) => {
+  res.json({ success: true, message: 'PONG' });
+});
+
 app.get('/health', (req, res) => {
   res.json({ success: true, message: 'FHIR EMR Server is running', timestamp: new Date() });
 });

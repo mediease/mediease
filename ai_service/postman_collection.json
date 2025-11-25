@@ -1,0 +1,562 @@
+{
+	"info": {
+		"_postman_id": "ai-prescription-validation-service",
+		"name": "AI Prescription Validation Service",
+		"description": "Postman collection for testing the AI Prescription Validation Microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has status field\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData.status).to.eql('ok');",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/ai/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"health"
+					]
+				},
+				"description": "Health check endpoint to verify the service is running"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - NSAID with Gastritis (Should Warn)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is successful\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Has warnings\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.warnings).to.be.an('array');",
+							"    pm.expect(jsonData.warnings.length).to.be.above(0);",
+							"});",
+							"",
+							"pm.test(\"Prescription is not safe\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.safe).to.be.false;",
+							"});",
+							"",
+							"pm.test(\"Warning contains expected fields\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.warnings.length > 0) {",
+							"        var warning = jsonData.warnings[0];",
+							"        pm.expect(warning).to.have.property('medicineName');",
+							"        pm.expect(warning).to.have.property('drugClass');",
+							"        pm.expect(warning).to.have.property('relatedCondition');",
+							"        pm.expect(warning).to.have.property('severity');",
+							"        pm.expect(warning).to.have.property('message');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH12345\",\n  \"patientConditions\": [\"Gastritis\"],\n  \"currentComplaint\": \"Fever and body aches\",\n  \"medicines\": [\n    {\n      \"name\": \"Ibuprofen 200mg Tablet\",\n      \"rxNormId\": \"197806\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"TDS\",\n      \"period\": \"5 days\",\n      \"instructions\": \"After meals\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: NSAID (Ibuprofen) prescribed to patient with Gastritis - should generate high severity warning"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Multiple Conditions (Asthma + Gastritis)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is successful\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Has multiple warnings for different conditions\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.warnings.length).to.be.above(1);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH67890\",\n  \"patientConditions\": [\"Gastritis\", \"Asthma\"],\n  \"currentComplaint\": \"Fever for 2 days\",\n  \"medicines\": [\n    {\n      \"name\": \"Ibuprofen 200mg Tablet\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"TDS\",\n      \"period\": \"5 days\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: NSAID prescribed to patient with both Gastritis and Asthma - should generate warnings for both conditions"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Safe Prescription (No Warnings)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is successful\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"No warnings\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.warnings).to.be.an('array');",
+							"    pm.expect(jsonData.warnings.length).to.eql(0);",
+							"});",
+							"",
+							"pm.test(\"Prescription is safe\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.safe).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH11111\",\n  \"patientConditions\": [\"Hypertension\"],\n  \"currentComplaint\": \"Common cold\",\n  \"medicines\": [\n    {\n      \"name\": \"Amoxicillin 500mg Capsule\",\n      \"dose\": \"1 capsule\",\n      \"frequency\": \"TDS\",\n      \"period\": \"7 days\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: Antibiotic (Amoxicillin) prescribed to patient with Hypertension - should be safe (no warnings)"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Multiple Medicines",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is successful\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH22222\",\n  \"patientConditions\": [\"Gastritis\", \"Diabetes\"],\n  \"currentComplaint\": \"Multiple symptoms\",\n  \"medicines\": [\n    {\n      \"name\": \"Ibuprofen 200mg Tablet\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"TDS\",\n      \"period\": \"5 days\"\n    },\n    {\n      \"name\": \"Prednisolone 5mg Tablet\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"OD\",\n      \"period\": \"7 days\"\n    },\n    {\n      \"name\": \"Amoxicillin 500mg Capsule\",\n      \"dose\": \"1 capsule\",\n      \"frequency\": \"TDS\",\n      \"period\": \"7 days\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: Multiple medicines (NSAID, Steroid, Antibiotic) with multiple conditions - should detect multiple risks"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Steroid with Diabetes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Has warnings for steroid\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var hasSteroidWarning = jsonData.warnings.some(function(w) {",
+							"        return w.drugClass === 'Steroid';",
+							"    });",
+							"    pm.expect(hasSteroidWarning).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH33333\",\n  \"patientConditions\": [\"Diabetes\"],\n  \"currentComplaint\": \"Inflammation\",\n  \"medicines\": [\n    {\n      \"name\": \"Prednisolone 5mg Tablet\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"OD\",\n      \"period\": \"10 days\",\n      \"instructions\": \"Take with food\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: Steroid (Prednisolone) prescribed to patient with Diabetes - should generate warning"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Error: Missing Conditions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response indicates failure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.false;",
+							"});",
+							"",
+							"pm.test(\"Has error message\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('error');",
+							"    pm.expect(jsonData.error).to.include('patientConditions');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH44444\",\n  \"patientConditions\": [],\n  \"medicines\": [\n    {\n      \"name\": \"Ibuprofen 200mg Tablet\",\n      \"dose\": \"1 tablet\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: Empty patientConditions array - should return error"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Error: Missing Medicines",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response indicates failure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.false;",
+							"});",
+							"",
+							"pm.test(\"Has error message about medicines\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('error');",
+							"    pm.expect(jsonData.error).to.include('medicines');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH55555\",\n  \"patientConditions\": [\"Gastritis\"],\n  \"medicines\": []\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: Empty medicines array - should return error"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Unknown Drug (Low Similarity)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is successful\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"May or may not have warnings (depends on classification)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.warnings).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH66666\",\n  \"patientConditions\": [\"Gastritis\"],\n  \"currentComplaint\": \"Unknown condition\",\n  \"medicines\": [\n    {\n      \"name\": \"XYZ123 Unknown Drug 100mg\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"BD\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: Unknown drug that may not be classified - tests edge case handling"
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Prescription - Paracetamol (Safe Analgesic)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is successful\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Paracetamol is safe for Gastritis\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    // Paracetamol should not trigger NSAID warnings",
+							"    var hasNSAIDWarning = jsonData.warnings.some(function(w) {",
+							"        return w.drugClass === 'NSAID' && w.relatedCondition === 'Gastritis';",
+							"    });",
+							"    pm.expect(hasNSAIDWarning).to.be.false;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"patientPhn\": \"PH77777\",\n  \"patientConditions\": [\"Gastritis\"],\n  \"currentComplaint\": \"Fever\",\n  \"medicines\": [\n    {\n      \"name\": \"Paracetamol 500mg Tablet\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"QID\",\n      \"period\": \"3 days\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/ai/validate-prescription",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ai",
+						"validate-prescription"
+					]
+				},
+				"description": "Test case: Paracetamol prescribed to patient with Gastritis - should be safe (Paracetamol is not an NSAID)"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
+

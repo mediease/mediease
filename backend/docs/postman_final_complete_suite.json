@@ -32,6 +32,8 @@
     { "key": "labReportId", "value": "", "type": "string" },
     { "key": "labReportId2", "value": "", "type": "string" },
     { "key": "diagnosticReportId", "value": "", "type": "string" },
+    { "key": "allergyId", "value": "", "type": "string" },
+    { "key": "allergyId2", "value": "", "type": "string" },
     { "key": "adminToken", "value": "", "type": "string" },
     { "key": "doctorToken", "value": "", "type": "string" },
     { "key": "doctor2Token", "value": "", "type": "string" },
@@ -273,11 +275,52 @@
       ]
     },
     {
-      "name": "7. System Health & Endpoints",
+      "name": "7. Allergy Management (FHIR)",
+      "description": "FHIR AllergyIntolerance resource - food and medication allergies",
+      "item": [
+        {
+          "name": "7.1 Create Food Allergy",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Allergy created', () => json.success === true)","pm.test('✓ AllergyID generated', () => json.data?.allergyId && /^ALG\\d{5}$/.test(json.data.allergyId))","pm.test('✓ FHIR resource included', () => json.data?.fhirResource?.resourceType === 'AllergyIntolerance')","pm.collectionVariables.set('allergyId', json.data?.allergyId)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"category\": \"food\",\"criticality\": \"high\",\"substance\": \"Peanut\",\"reaction\": \"Hives and facial swelling\",\"recorder\": \"{{medicalLicenseId}}\",\"note\": \"Patient confirmed severe reaction on previous exposure\"}"},"url": {"raw": "{{baseUrl}}/fhir/AllergyIntolerance","host": ["{{baseUrl}}"],"path": ["fhir","AllergyIntolerance"]}}
+        },
+        {
+          "name": "7.2 Create Medication Allergy",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Allergy created', () => json.success === true)","pm.test('✓ AllergyID generated', () => json.data?.allergyId && /^ALG\\d{5}$/.test(json.data.allergyId))","pm.collectionVariables.set('allergyId2', json.data?.allergyId)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"category\": \"medication\",\"criticality\": \"high\",\"substance\": \"Penicillin\",\"reaction\": \"Anaphylaxis\",\"recorder\": \"{{medicalLicenseId}}\",\"note\": \"Documented in patient chart - use alternative antibiotics\"}"},"url": {"raw": "{{baseUrl}}/fhir/AllergyIntolerance","host": ["{{baseUrl}}"],"path": ["fhir","AllergyIntolerance"]}}
+        },
+        {
+          "name": "7.3 Get All Patient Allergies (FHIR Bundle)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ FHIR Bundle returned', () => json.data?.resourceType === 'Bundle')","pm.test('✓ Multiple allergies in bundle', () => json.data?.total >= 2)","pm.test('✓ Entries present', () => Array.isArray(json.data?.entry) && json.data.entry.length >= 2)"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/AllergyIntolerance/patient/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","AllergyIntolerance","patient","{{patientPhn}}"]}}
+        },
+        {
+          "name": "7.4 Get Allergies Summary",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Summary list returned', () => Array.isArray(json.data))","pm.test('✓ Count >= 2', () => json.count >= 2)"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/AllergyIntolerance/summary/patient/{{patientPhn}}","host": ["{{baseUrl}}"],"path": ["fhir","AllergyIntolerance","summary","patient","{{patientPhn}}"]}}
+        },
+        {
+          "name": "7.5 Get Single Allergy by ID",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ FHIR resource returned', () => json.data?.resourceType === 'AllergyIntolerance')","pm.test('✓ Has allergy ID', () => json.data?.id === '{{allergyId}}')"]}}],
+          "request": {"method": "GET","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/AllergyIntolerance/{{allergyId}}","host": ["{{baseUrl}}"],"path": ["fhir","AllergyIntolerance","{{allergyId}}"]}}
+        },
+        {
+          "name": "7.6 Delete Allergy",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Deletion successful', () => json.success === true)","pm.test('✓ Deleted allergyId present', () => json.data?.allergyId === '{{allergyId2}}')"]}}],
+          "request": {"method": "DELETE","header": [{"key": "Authorization","value": "Bearer {{doctorToken}}"}],"url": {"raw": "{{baseUrl}}/fhir/AllergyIntolerance/{{allergyId2}}","host": ["{{baseUrl}}"],"path": ["fhir","AllergyIntolerance","{{allergyId2}}"]}}
+        },
+        {
+          "name": "7.7 Create Allergy by Nurse",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 201 Created', () => pm.response.code === 201)","const json = pm.response.json()","pm.test('✓ Allergy created by nurse', () => json.success === true)"]}}],
+          "request": {"method": "POST","header": [{"key": "Authorization","value": "Bearer {{nurseToken}}"},{"key": "Content-Type","value": "application/json"}],"body": {"mode": "raw","raw": "{\"patientPhn\": \"{{patientPhn}}\",\"category\": \"food\",\"criticality\": \"low\",\"substance\": \"Shellfish\",\"reaction\": \"Mild itching\",\"recorder\": \"{{nurseId}}\"}"},"url": {"raw": "{{baseUrl}}/fhir/AllergyIntolerance","host": ["{{baseUrl}}"],"path": ["fhir","AllergyIntolerance"]}}
+        }
+      ]
+    },
+    {
+      "name": "8. System Health & Endpoints",
       "description": "System status and general endpoints",
       "item": [
         {
-          "name": "7.1 Health Check",
+          "name": "8.1 Health Check",
           "event": [{"listen": "test", "script": {"exec": ["pm.test('✓ Status 200 OK', () => pm.response.code === 200)","const json = pm.response.json()","pm.test('✓ Server running', () => json.success === true)","pm.test('✓ Has message', () => json.message)"]}}],
           "request": {"method": "GET","header": [],"url": {"raw": "{{baseUrl}}/health","host": ["{{baseUrl}}"],"path": ["health"]}}
         }
