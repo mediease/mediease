@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import SectionHeader from "../components/SectionHeader";
-import SegmentedTable from "../components/SegmentedTable"; // segmentation UI retained
+import SegmentedTable from "../components/SegmentedTable";
 import SimpleButton from "../components/buttons";
 import httpClient from "../services/httpClient";
 import "./css/style.css";
 
-// Helper resolution functions preserved from original implementation
+// ---------- Helper Functions ----------
 const resolvePhn = (p) => {
   if (p?.metadata?.patientPhn) return p.metadata.patientPhn;
   if (p?.phn) return p.phn;
@@ -52,10 +52,10 @@ const Patients = () => {
   const navigate = useNavigate();
   const mountedRef = useRef(true);
   const [loading, setLoading] = useState(true);
-  const [allPatients, setAllPatients] = useState([]); // full list from /fhir/Patient
-  const [visitedPatients, setVisitedPatients] = useState([]); // subset with encounters matching doctor
-  const [displayData, setDisplayData] = useState([]); // data shown in table
-  const [tableState, setTableState] = useState("All"); // "All" or "Clinic Visit"
+  const [allPatients, setAllPatients] = useState([]);
+  const [visitedPatients, setVisitedPatients] = useState([]);
+  const [displayData, setDisplayData] = useState([]);
+  const [tableState, setTableState] = useState("All");
 
   // Logged-in doctor license
   let doctorLicense = null;
@@ -63,14 +63,40 @@ const Patients = () => {
     const doctorRaw = localStorage.getItem("doctor");
     const doctorObj = doctorRaw ? JSON.parse(doctorRaw) : null;
     doctorLicense = doctorObj?.medicalLicenseId || null;
-  } catch (e) {
-    console.warn("Failed to parse doctor from localStorage", e);
-  }
+  } catch {}
 
   const handleAddNewPatient = () => navigate("/doctor/patients/new");
-  const handleRowClick = (row) => navigate(`/doctor/patient/${row.phn}`);
 
-  // Fetch all patients then derive visited subset
+  // ---------- CLICK ON PATIENT: CHECK ACTIVE VISIT ----------
+  const handleRowClick = async (row) => {
+    const phn = row.phn;
+    if (!phn) return;
+
+    try {
+      const encRes = await httpClient.get("/fhir/Encounter", {
+        params: { patient: phn }
+      });
+      const encounters = encRes?.data?.data || [];
+
+      const hasActiveVisit = encounters.some((enc) => {
+        const sameDoctor = enc.metadata?.doctorLicense === doctorLicense;
+        const status = enc.metadata?.status || enc.resource?.status;
+        return sameDoctor && status === "in-progress";
+      });
+
+      if (hasActiveVisit) {
+        navigate(`/doctor/visitpatient/${phn}`);
+      } else {
+        navigate(`/doctor/patient/${phn}`);
+      }
+
+    } catch (err) {
+      console.error("Error checking active visit:", err);
+      navigate(`/doctor/patient/${phn}`);
+    }
+  };
+
+  // ---------- LOAD PATIENTS ----------
   useEffect(() => {
     mountedRef.current = true;
     const load = async () => {
@@ -78,7 +104,8 @@ const Patients = () => {
       try {
         const patientRes = await httpClient.get("/fhir/Patient/");
         const rawPatients = patientRes?.data?.data || [];
-        const shapedAll = rawPatients.map(p => {
+
+        const shapedAll = rawPatients.map((p) => {
           const phn = resolvePhn(p) || "-";
           return {
             phn,
@@ -89,46 +116,59 @@ const Patients = () => {
             _raw: p,
           };
         });
+
         if (mountedRef.current) setAllPatients(shapedAll);
 
-        // Concurrent encounter checks to build visitedPatients
+        // ---------- ENCOUNTER MATCHING FOR VISITED LIST ----------
         if (doctorLicense) {
-          const visitPromises = rawPatients.map(async p => {
+          const visitPromises = rawPatients.map(async (p) => {
             const phn = resolvePhn(p);
             if (!phn) return null;
+
             try {
-              const encRes = await httpClient.get("/fhir/Encounter", { params: { patient: phn } });
+              const encRes = await httpClient.get("/fhir/Encounter", {
+                params: { patient: phn }
+              });
+
               const encounters = encRes?.data?.data || [];
-              const visited = encounters.some(enc => enc.metadata?.doctorLicense === doctorLicense);
+              const visited = encounters.some(
+                (enc) => enc.metadata?.doctorLicense === doctorLicense
+              );
+
               if (!visited) return null;
+
               const latestDate = findLatestEncounterDate(encounters);
+
               return {
                 phn,
                 name: resolveName(p),
                 gender: p.metadata?.gender || p.resource?.gender || "-",
                 nic: resolveNic(p),
-                nearestVisitDate: latestDate ? latestDate.toLocaleDateString() : "-",
+                nearestVisitDate: latestDate
+                  ? latestDate.toLocaleDateString()
+                  : "-",
               };
-            } catch (err) {
-              console.warn(`Encounter fetch failed for patient ${phn}:`, err);
+            } catch {
               return null;
             }
           });
+
           const visitedResults = await Promise.all(visitPromises);
           const filteredVisited = visitedResults.filter(Boolean);
+
           if (mountedRef.current) {
             setVisitedPatients(filteredVisited);
-            // Merge nearestVisitDate into allPatients for those visited
-            setAllPatients(prev => prev.map(ap => {
-              const match = filteredVisited.find(v => v.phn === ap.phn);
-              return match ? { ...ap, nearestVisitDate: match.nearestVisitDate } : ap;
-            }));
+            setAllPatients((prev) =>
+              prev.map((ap) => {
+                const match = filteredVisited.find((v) => v.phn === ap.phn);
+                return match
+                  ? { ...ap, nearestVisitDate: match.nearestVisitDate }
+                  : ap;
+              })
+            );
           }
-        } else {
-          if (mountedRef.current) setVisitedPatients([]);
         }
       } catch (err) {
-        console.error("Error fetching patients:", err);
         if (mountedRef.current) {
           setAllPatients([]);
           setVisitedPatients([]);
@@ -137,15 +177,18 @@ const Patients = () => {
         if (mountedRef.current) setLoading(false);
       }
     };
+
     load();
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, [doctorLicense]);
 
-  // Update display data when tableState changes or lists update
+  // ---------- SET TABLE ----------
   useEffect(() => {
     if (tableState === "All") {
-      setDisplayData(allPatients.map(p => ({ phn: p.phn, name: p.name, gender: p.gender, nic: p.nic, nearestVisitDate: p.nearestVisitDate })));
-    } else if (tableState === "Clinic Visit") {
+      setDisplayData(allPatients);
+    } else {
       setDisplayData(visitedPatients);
     }
   }, [tableState, allPatients, visitedPatients]);
