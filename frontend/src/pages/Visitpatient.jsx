@@ -1,169 +1,183 @@
 import { useParams, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PatientOverview from "../components/PatientOverview";
 import SegmentedControl from "../components/SegmentedControl";
 import HealthInfoCard from "../components/HealthInfoCard";
-import SimpleButton from '../components/buttons';
+import SimpleButton from "../components/buttons";
 import RedButton from "../components/Redbutton";
 import PatientSummaryModal from "../components/PatientSummaryModal";
-import './css/style.css'
+import httpClient from "../services/httpClient";
+import "./css/style.css";
+
+const resolvePhn = (p) => {
+  if (p?.metadata?.patientPhn) return p.metadata.patientPhn;
+  const ids = p?.resource?.identifier || [];
+  const obj = ids.find(i => (i.system || "").includes("phn"));
+  return obj?.value || "-";
+};
+
+const resolveNic = (p) => {
+  const ids = p?.resource?.identifier || [];
+  const obj = ids.find(i => (i.system || "").includes("nic"));
+  return obj?.value || "-";
+};
+
+const resolveName = (p) => {
+  if (p?.metadata?.firstName || p?.metadata?.lastName)
+    return `${p.metadata.firstName || ""} ${p.metadata.lastName || ""}`.trim();
+
+  const name = p?.resource?.name?.[0];
+  return [name?.given?.[0], name?.family].filter(Boolean).join(" ") || "-";
+};
 
 const Visitpatient = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // PHN
   const navigate = useNavigate();
-  const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
 
+  const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
   const [selectedFilter, setSelectedFilter] = useState("Basic");
+
+  const [patient, setPatient] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
 
-  // Handle tab change with navigation
+  // ---------- LOAD PATIENT ----------
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await httpClient.get(`/fhir/Patient/${id}`);
+        setPatient(res.data.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [id]);
+
+  // ---------- TAB NAVIGATION ----------
   const handleTabChange = (option) => {
     setSelectedFilter(option);
-    
-    // Navigate to the appropriate route based on selected tab
-    switch(option) {
-      case "Basic":
-        navigate(`/doctor/patient/${id}`);
-        break;
-      case "Report":
-        navigate(`/doctor/patient/${id}/reportinfo`);
-        break;
-      case "Allergies":
-        navigate(`/doctor/patient/${id}/allergies`);
-        break;
-      case "Medications":
-        navigate(`/doctor/patient/${id}/medications`);
-        break;
-      case "Visit History":
-        navigate(`/doctor/patient/${id}/historyinfo`);
-        break;
-      default:
-        navigate(`/doctor/patient/${id}`);
+    navigate(`/doctor/patient/${id}/${option.toLowerCase().replace(" ", "")}`);
+  };
+
+  // ---------- CLOSE VISIT BUTTON ----------
+  const handleCloseVisit = async () => {
+    try {
+      // 1. Get doctor license
+      let doctorLicense = null;
+      const raw = localStorage.getItem("doctor");
+      if (raw) doctorLicense = JSON.parse(raw).medicalLicenseId;
+
+      // 2. Load all encounters for this patient
+      const encRes = await httpClient.get("/fhir/Encounter", {
+        params: { patient: id }
+      });
+      const encounters = encRes.data.data || [];
+
+      // 3. Find the active encounter
+      const activeEncounter = encounters.find(enc =>
+        enc.metadata?.status === "in-progress" &&
+        enc.metadata?.doctorLicense === doctorLicense
+      );
+
+      if (!activeEncounter) {
+        alert("No active visit found.");
+        return;
+      }
+
+      const encounterId = activeEncounter.id;
+
+      // 4. Send PUT to close
+      await httpClient.put(`/fhir/Encounter/${encounterId}`, {
+        metadata: {
+          status: "finished",
+          endTime: new Date().toISOString()
+        }
+      });
+
+      alert("Visit successfully closed.");
+      navigate("/doctor/patients");
+
+    } catch (error) {
+      console.error("Error closing visit:", error);
+      alert("Failed to close visit.");
     }
   };
 
-  const clickVisit = () => {
-    navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
-  };
+  // ---------- OTHER BUTTONS ----------
+  const clickVisit = () => navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
+  const handleAddAllergy = () => navigate(`/doctor/patient/${id}/allergiesinfo`);
+  const handleOrderNewReport = () => navigate(`/doctor/visitpatient/${id}/order-report`);
+  const handleRequestSummary = () => setIsSummaryModalOpen(true);
+  const handleCloseSummary = () => setIsSummaryModalOpen(false);
 
-  const handleAddAllergy = () => {
-    navigate(`/doctor/patient/${id}/allergiesinfo`);
-  };
+  if (loading) return <p>Loading...</p>;
 
-  const handleOrderNewReport = () => {
-    navigate(`/doctor/visitpatient/${id}/order-report`);
-  };
-
-  const handleRequestSummary = () => {
-    setIsSummaryModalOpen(true);
-  };
-
-  const handleCloseVisit = () => {
-    navigate('/doctor/patients');
-  };
-
-  const handleCloseSummary = () => {
-    setIsSummaryModalOpen(false);
-  };
-
-  // Patient summary data - in a real app, this would be fetched from an API
-  const patientSummaryData = {
-    demographics: {
-      name: 'Bandarage Naveen Bimsara',
-      age: 24,
-      dob: '2000-06-12',
-      mrn: id || '1001',
-      bloodType: 'A+'
-    },
-    diagnoses: [
-      { name: 'Hypertension', snomed: '3834100' },
-      { name: 'Hyperlipidemia', snomed: '205890000' }
-    ],
-    medications: [
-      { name: 'Amlodipine', dosage: '5mg', condition: 'Hypertension' },
-      { name: 'Atorvastatin', dosage: '20mg', condition: 'Hyperlipidemia' }
-    ],
-    allergies: [
-      { name: 'NSAIDS', severity: 'Moderate', reaction: 'GI upset' }
-    ],
-    labFindings: [
-      { name: 'Blood Pressure', value: '110/70 mmHg' }
-    ],
-    assessment: 'This is a 24-year-old patient with 2 active medical conditions requiring ongoing management. Current medication regimen includes 2 medications. Notable allergies documented. Recent vital signs and laboratory parameters are available.',
-    recommendation: 'Continue current management with regular monitoring and follow-up appointments.'
-  };
+  const name = resolveName(patient);
+  const phn = resolvePhn(patient);
+  const nic = resolveNic(patient);
+  const gender = patient?.resource?.gender || "-";
+  const dob = patient?.resource?.birthDate || "-";
 
   return (
     <div className="patientDetailsMain">
-      <h2 className="patientDetailsHeder">Patients - Naveen Bimsara</h2>
-      <SegmentedControl 
+      <h2 className="patientDetailsHeder">Patients - {name}</h2>
+
+      <SegmentedControl
         options={filterOptions}
         selected={selectedFilter}
         onChange={handleTabChange}
       />
-      
+
       <div className="table-row">
         <div className="table-half">
-            <PatientOverview
-            dpUrl="" 
-            fullName="Bandarage Naveen Bimsara"
-            phn={id}
-            nic="200016489950"
-            gender="Male"
-            dob="June 12, 2000"
-            contactNo="074 1234 589"
-            address="NO:10/A, 2nd Lane, Meepe, Padukka"
-            guardianName="M.R.M. Nayomi"
-            guardianNIC="8945678125V"
-            />
+          <PatientOverview
+            dpUrl=""
+            fullName={name}
+            phn={phn}
+            nic={nic}
+            gender={gender}
+            dob={dob}
+            contactNo="-"
+            address="-"
+            guardianName="-"
+            guardianNIC="-"
+          />
         </div>
+
         <div className="table-half">
-          <div>
+
           <HealthInfoCard
-            height={168}
-            weight={65}
-            bmi={23.03}
-            bloodPressure="110/70"
-            sugarLevel={120}
-            />
+            height={170}
+            weight={70}
+            bmi={23}
+            bloodPressure="120/80"
+            sugarLevel={110}
+          />
+
+          <div className="buttonContainer">
+            <div className="inlineButton">
+              <SimpleButton label="Order New Report" onClick={handleOrderNewReport} />
+              <SimpleButton label="Add Allergies" onClick={handleAddAllergy} />
+            </div>
+
+            <div className="inlineButton">
+              <SimpleButton label="Request Summary" onClick={handleRequestSummary} />
+              <SimpleButton label="New Prescription" onClick={clickVisit} />
+            </div>
+
+            <div className="inlineButton">
+              <RedButton label="Close the Visit" onClick={handleCloseVisit} />
+            </div>
           </div>
-          <div className='buttonContainer'>
-            <div className="inlineButton">
-                <SimpleButton 
-                label="Order New Report" 
-                onClick={handleOrderNewReport}
-                />
-                <div className="inlineButton"></div>
-                <SimpleButton 
-                label="Add Allergies" 
-                onClick={handleAddAllergy}
-                />
-            </div>
-            <div className="inlineButton">
-                <SimpleButton 
-                label="Request Summary" 
-                onClick={handleRequestSummary}
-                />
-                <div className="inlineButton"></div>
-                <SimpleButton 
-                label="New Prescription" 
-                onClick={clickVisit}
-                />
-            </div>
-            <div className="inlineButton">
-                <RedButton
-                label="Close the Visit" 
-                onClick={handleCloseVisit}
-                />
-            </div>
-            </div>
         </div>
       </div>
-      
-      <PatientSummaryModal 
+
+      <PatientSummaryModal
         isOpen={isSummaryModalOpen}
         onClose={handleCloseSummary}
-        patientData={patientSummaryData}
+        patientData={{}}
       />
     </div>
   );
