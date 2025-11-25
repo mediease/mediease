@@ -1,0 +1,460 @@
+.admin-users-container {
+  padding: 0;
+  width: 100%;
+}
+
+.admin-users-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 24px;
+}
+
+/* Tabs */
+.admin-users-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.admin-users-tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  position: relative;
+  top: 2px;
+}
+
+.admin-users-tab:hover {
+  color: #0284c7;
+}
+
+.admin-users-tab.active {
+  color: #0284c7;
+  border-bottom-color: #0284c7;
+  font-weight: 600;
+}
+
+/* Actions Bar */
+.admin-users-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.admin-users-search {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 16px;
+}
+
+.admin-users-search-input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.admin-users-search-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.admin-users-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #0284c7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-users-add-btn:hover {
+  background-color: #0369a1;
+}
+
+.add-icon {
+  font-size: 14px;
+}
+
+/* Table Wrapper */
+.admin-users-table-wrapper {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-users-table thead {
+  background-color: #f9fafb;
+}
+
+.admin-users-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 13px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-users-table td {
+  padding: 14px 16px;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.admin-users-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.admin-users-table tbody tr.even-row {
+  background-color: #d7f4fc7d;
+}
+
+.admin-users-table tbody tr.even-row:hover {
+  background-color: #c0e8f5;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Delete Button */
+.admin-users-delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.admin-users-delete-btn:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.admin-users-delete-btn:active {
+  transform: scale(0.95);
+}
+
+/* Modal Styles */
+.admin-users-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.admin-users-modal {
+  background-color: #ffffff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.admin-users-modal-header {
+  background-color: #0284c7;
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+}
+
+.admin-users-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.admin-users-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.admin-users-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.admin-users-modal-form {
+  padding: 24px;
+}
+
+.admin-users-form-group {
+  margin-bottom: 20px;
+}
+
+.admin-users-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.admin-users-form-input,
+.admin-users-form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.admin-users-form-input:focus,
+.admin-users-form-select:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.admin-users-form-select {
+  cursor: pointer;
+  background-color: white;
+}
+
+.admin-users-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.admin-users-modal-cancel {
+  padding: 10px 20px;
+  background-color: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-users-modal-cancel:hover {
+  background-color: #e5e7eb;
+}
+
+.admin-users-modal-save {
+  padding: 10px 20px;
+  background-color: #0284c7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-users-modal-save:hover {
+  background-color: #0369a1;
+}
+
+/* Delete Confirmation Modal */
+.admin-users-delete-modal {
+  background-color: #ffffff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+.admin-users-delete-modal-header {
+  background-color: #ef4444;
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+}
+
+.admin-users-delete-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.admin-users-delete-modal-content {
+  padding: 24px;
+}
+
+.admin-users-delete-message {
+  font-size: 16px;
+  color: #374151;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.admin-users-delete-message strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.admin-users-delete-warning {
+  font-size: 14px;
+  color: #ef4444;
+  margin: 0;
+  font-weight: 500;
+}
+
+.admin-users-delete-confirm-btn {
+  padding: 10px 20px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-users-delete-confirm-btn:hover {
+  background-color: #dc2626;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-users-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-users-search {
+    max-width: 100%;
+  }
+
+  .admin-users-table {
+    font-size: 12px;
+  }
+
+  .admin-users-table th,
+  .admin-users-table td {
+    padding: 8px 12px;
+  }
+
+  .admin-users-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .admin-users-modal-form {
+    padding: 20px;
+  }
+}
+
