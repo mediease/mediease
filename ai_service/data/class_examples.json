@@ -1,0 +1,118 @@
+{
+  "NSAID": [
+    "ibuprofen tablet",
+    "aspirin tablet",
+    "diclofenac",
+    "naproxen",
+    "indomethacin",
+    "ketoprofen",
+    "meloxicam",
+    "celecoxib",
+    "etoricoxib",
+    "piroxicam"
+  ],
+  "Steroid": [
+    "prednisolone",
+    "dexamethasone",
+    "hydrocortisone",
+    "methylprednisolone",
+    "betamethasone",
+    "triamcinolone",
+    "cortisone",
+    "fluticasone",
+    "budesonide",
+    "beclomethasone"
+  ],
+  "Antibiotic": [
+    "amoxicillin",
+    "cephalexin",
+    "azithromycin",
+    "ciprofloxacin",
+    "doxycycline",
+    "clindamycin",
+    "metronidazole",
+    "penicillin",
+    "erythromycin",
+    "trimethoprim"
+  ],
+  "High-dose Antibiotic": [
+    "high dose amoxicillin",
+    "high dose vancomycin",
+    "high dose gentamicin",
+    "high dose ciprofloxacin",
+    "high dose meropenem",
+    "high dose ceftriaxone"
+  ],
+  "Beta-blocker": [
+    "propranolol",
+    "atenolol",
+    "metoprolol",
+    "bisoprolol",
+    "carvedilol",
+    "labetalol",
+    "nebivolol",
+    "timolol"
+  ],
+  "Paracetamol": [
+    "acetaminophen",
+    "paracetamol",
+    "tylenol",
+    "panadol"
+  ],
+  "Analgesic": [
+    "morphine",
+    "codeine",
+    "tramadol",
+    "oxycodone",
+    "fentanyl",
+    "pethidine",
+    "buprenorphine"
+  ],
+  "Anticoagulant": [
+    "warfarin",
+    "heparin",
+    "enoxaparin",
+    "rivaroxaban",
+    "apixaban",
+    "dabigatran",
+    "edoxaban"
+  ],
+  "Antiplatelet": [
+    "aspirin",
+    "clopidogrel",
+    "ticagrelor",
+    "prasugrel",
+    "dipyridamole"
+  ],
+  "Decongestant": [
+    "pseudoephedrine",
+    "phenylephrine",
+    "oxymetazoline",
+    "xylometazoline"
+  ],
+  "Antifungal": [
+    "fluconazole",
+    "ketoconazole",
+    "itraconazole",
+    "amphotericin",
+    "voriconazole",
+    "terbinafine"
+  ],
+  "Teratogenic": [
+    "isotretinoin",
+    "warfarin",
+    "methotrexate",
+    "thalidomide",
+    "valproate",
+    "phenytoin"
+  ],
+  "Calcium Channel Blocker": [
+    "amlodipine",
+    "nifedipine",
+    "verapamil",
+    "diltiazem",
+    "felodipine",
+    "nicardipine"
+  ]
+}
+

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+.env.*
+.venv/
+
+# Byte-compiled / optimized / DLL files
+*.so
+*.dylib
+*.dll
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# VS Code
+.vscode/
+
+# Data and models (if you store models outside Git LFS or releases)
+# models/
+
+# Other
+*.log

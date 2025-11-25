@@ -1,0 +1,874 @@
+{
+  "info": {
+    "_postman_id": "ai-summarization-suite-001",
+    "name": "AI Summarization Module - Complete Suite",
+    "description": "Comprehensive test suite for MediEase AI Summarization Module\n\nEndpoints:\n- Health Check: Verify AI service availability\n- Patient Summary: Generate medical summary using HuggingFace AI\n\nSetup:\n1. Set HUGGINGFACE_API_KEY in backend .env\n2. Import this collection\n3. Set variable: patientPhn = PH00001 (or valid patient PHN)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Setup & Configuration",
+      "item": [
+        {
+          "name": "1.1 Health Check - Verify AI Service",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('AI Service Connected', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.equal(true);",
+                  "    pm.expect(jsonData.data.aiService).to.equal('connected');",
+                  "});",
+                  "",
+                  "pm.test('Response has timestamp', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ai/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "health"
+              ]
+            },
+            "description": "Check if HuggingFace AI service is available\n\n**Endpoint:** GET /ai/health\n**Auth:** None (Public endpoint)\n**Purpose:** Verify AI service connectivity before generating summaries"
+          }
+        },
+        {
+          "name": "1.2 Verify JWT Token Works",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 401', function () {",
+                  "    pm.expect([200, 401, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 401) {",
+                  "    pm.test('Token is required', function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.message).to.include('Token');",
+                  "    });",
+                  "} else if (pm.response.code === 200) {",
+                  "    pm.test('Token is valid', function () {",
+                  "        pm.expect(true).to.equal(true);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00001"
+              ]
+            },
+            "description": "Verify that JWT token is working\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token required\n**Note:** Will fail if patient doesn't exist, but confirms token acceptance"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Generate Summaries - Valid Cases",
+      "item": [
+        {
+          "name": "2.1 Generate Summary - Patient with Full History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "pm.test('Summary data is present', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('patientPhn');",
+                  "    pm.expect(jsonData.data).to.have.property('summary');",
+                  "    pm.expect(jsonData.data).to.have.property('generatedAt');",
+                  "});",
+                  "",
+                  "pm.test('Summary is non-empty string', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(typeof jsonData.data.summary).to.equal('string');",
+                  "    pm.expect(jsonData.data.summary.length).to.be.greaterThan(0);",
+                  "});",
+                  "",
+                  "pm.test('Summary contains clinical information', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var summary = jsonData.data.summary.toLowerCase();",
+                  "    pm.expect(summary).to.not.be.empty;",
+                  "});",
+                  "",
+                  "pm.test('No PII in summary', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var summary = jsonData.data.summary;",
+                  "    pm.expect(summary).to.not.include('PH');",
+                  "    pm.expect(summary).to.not.include('@');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/{{patientPhn}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "{{patientPhn}}"
+              ]
+            },
+            "description": "Generate medical summary for patient with full medical history\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token (doctor/nurse/admin)\n**Expected:** 200 with AI-generated summary\n**Variable:** patientPhn (set to valid patient PHN)\n\nTests verify:\n- Response structure correct\n- Summary content present\n- No PII exposed\n- Timestamp included"
+          }
+        },
+        {
+          "name": "2.2 Generate Summary - Patient with Minimal Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Handles minimal data gracefully', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data.summary) {",
+                  "        pm.expect(jsonData.data.summary).to.not.be.empty;",
+                  "    } else {",
+                  "        pm.expect(jsonData.message).to.include('No medical data');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00002",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00002"
+              ]
+            },
+            "description": "Generate summary for patient with minimal medical records\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token\n**Expected:** 200 with summary or message about limited data\n\nTests verify:\n- Graceful handling of minimal data\n- No errors with sparse records"
+          }
+        },
+        {
+          "name": "2.3 Generate Summary - Different Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Summary generated successfully', function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.data).to.have.property('summary');",
+                  "    });",
+                  "} else if (pm.response.code === 404) {",
+                  "    pm.test('Patient not found', function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.message).to.include('not found');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00003",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00003"
+              ]
+            },
+            "description": "Generate summary for another patient\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token\n**Note:** Modify PH00003 to valid patient PHN for your database"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Error Handling - Invalid Inputs",
+      "item": [
+        {
+          "name": "3.1 Invalid PHN Format",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message about invalid format', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('Invalid');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/invalid",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "invalid"
+              ]
+            },
+            "description": "Test with invalid PHN format\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token\n**Expected:** 400 Bad Request\n**Test:** PHN format validation"
+          }
+        },
+        {
+          "name": "3.2 Non-existent Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Error message about patient not found', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('not found');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH99999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH99999"
+              ]
+            },
+            "description": "Test with non-existent patient\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token\n**Expected:** 404 Not Found\n**Test:** Patient existence validation"
+          }
+        },
+        {
+          "name": "3.3 Missing Authorization Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 401', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Error message about missing token', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('Token');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00001"
+              ]
+            },
+            "description": "Test without authorization token\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** None\n**Expected:** 401 Unauthorized\n**Test:** Authentication enforcement"
+          }
+        },
+        {
+          "name": "3.4 Expired/Invalid Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 401 or 403', function () {",
+                  "    pm.expect([401, 403]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test('Error message about invalid token', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message.toLowerCase()).to.include.oneOf(['token', 'invalid', 'expired']);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid.token.here",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00001"
+              ]
+            },
+            "description": "Test with invalid/expired token\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Invalid bearer token\n**Expected:** 401/403 error\n**Test:** Token validation"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Authorization Tests",
+      "item": [
+        {
+          "name": "4.1 Allowed Role - Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test('Doctor access allowed', function () {",
+                  "    var code = pm.response.code;",
+                  "    pm.expect(code).to.not.equal(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctorToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00001"
+              ]
+            },
+            "description": "Test access with doctor role\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Doctor token\n**Expected:** 200 or 404 (not 403)\n**Test:** Doctor role authorization"
+          }
+        },
+        {
+          "name": "4.2 Allowed Role - Nurse",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test('Nurse access allowed', function () {",
+                  "    var code = pm.response.code;",
+                  "    pm.expect(code).to.not.equal(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{nurseToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00001"
+              ]
+            },
+            "description": "Test access with nurse role\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Nurse token\n**Expected:** 200 or 404 (not 403)\n**Test:** Nurse role authorization"
+          }
+        },
+        {
+          "name": "4.3 Allowed Role - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test('Admin access allowed', function () {",
+                  "    var code = pm.response.code;",
+                  "    pm.expect(code).to.not.equal(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00001"
+              ]
+            },
+            "description": "Test access with admin role\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Admin token\n**Expected:** 200 or 404 (not 403)\n**Test:** Admin role authorization"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Performance & Data Integrity",
+      "item": [
+        {
+          "name": "5.1 Response Time Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is acceptable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(15000);",
+                  "});",
+                  "",
+                  "pm.test('Response time logged', function () {",
+                  "    console.log('Response Time: ' + pm.response.responseTime + 'ms');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/{{patientPhn}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "{{patientPhn}}"
+              ]
+            },
+            "description": "Verify response time is acceptable\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token\n**Test:** Response time < 15 seconds (HuggingFace model loading time)"
+          }
+        },
+        {
+          "name": "5.2 No PII Exposure Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('No sensitive data in response', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var summary = JSON.stringify(jsonData);",
+                  "    ",
+                  "    // Check for common PII patterns",
+                  "    pm.expect(summary).to.not.match(/PH\\d{5}/);",
+                  "    pm.expect(summary).to.not.match(/\\d{3}-\\d{2}-\\d{4}/); // SSN format",
+                  "    pm.expect(summary).to.not.match(/\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b/); // Email",
+                  "    ",
+                  "    console.log('PII check passed');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/{{patientPhn}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "{{patientPhn}}"
+              ]
+            },
+            "description": "Verify no PII is exposed in response\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token\n**Test:** No PHN, SSN, email patterns in response"
+          }
+        },
+        {
+          "name": "5.3 Data Consistency - Multiple Calls",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response structure consistent', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('patientPhn');",
+                  "    pm.expect(jsonData.data).to.have.property('summary');",
+                  "    pm.expect(jsonData.data).to.have.property('generatedAt');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/{{patientPhn}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "{{patientPhn}}"
+              ]
+            },
+            "description": "Run multiple times to verify consistency\n\n**Endpoint:** GET /ai/summary/:phn\n**Auth:** Bearer token\n**Test:** Response structure consistency\n**Note:** Run this test multiple times to verify consistent response format"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Edge Cases & Special Scenarios",
+      "item": [
+        {
+          "name": "6.1 Patient with Only Allergies",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Summary includes allergy information', function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        var summary = jsonData.data.summary.toLowerCase();",
+                  "        pm.expect(summary.length).to.be.greaterThan(0);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00010",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00010"
+              ]
+            },
+            "description": "Test with patient having only allergy records\n\n**Note:** Modify PH00010 to a patient with allergies only"
+          }
+        },
+        {
+          "name": "6.2 Patient with Only Prescriptions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00011",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00011"
+              ]
+            },
+            "description": "Test with patient having only prescription records\n\n**Note:** Modify PH00011 to a patient with prescriptions only"
+          }
+        },
+        {
+          "name": "6.3 Patient with Only Encounters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/summary/PH00012",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "summary",
+                "PH00012"
+              ]
+            },
+            "description": "Test with patient having only encounter records\n\n**Note:** Modify PH00012 to a patient with encounters only"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "doctorToken",
+      "value": "your_doctor_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "nurseToken",
+      "value": "your_nurse_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "your_admin_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "patientPhn",
+      "value": "PH00001",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "Gastritis": {
+    "risky_classes": ["NSAID", "Steroid"],
+    "message": "These drugs may worsen gastric irritation and increase the risk of gastric ulcers."
+  },
+  "Asthma": {
+    "risky_classes": ["NSAID", "Beta-blocker"],
+    "message": "These drugs may trigger bronchospasm and worsen asthma symptoms."
+  },
+  "Diabetes": {
+    "risky_classes": ["Steroid"],
+    "message": "These drugs can increase blood glucose levels and may require dose adjustments for diabetes medications."
+  },
+  "Kidney Disease": {
+    "risky_classes": ["NSAID", "High-dose Antibiotic"],
+    "message": "These drugs can worsen kidney function and may require dose adjustments."
+  },
+  "Hypertension": {
+    "risky_classes": ["NSAID", "Decongestant"],
+    "message": "These drugs can increase blood pressure and may interfere with antihypertensive medications."
+  },
+  "Peptic Ulcer": {
+    "risky_classes": ["NSAID", "Steroid", "Anticoagulant"],
+    "message": "These drugs can increase the risk of bleeding and ulcer complications."
+  },
+  "Liver Disease": {
+    "risky_classes": ["Paracetamol", "High-dose Antibiotic", "Antifungal"],
+    "message": "These drugs can cause liver toxicity, especially in patients with existing liver disease."
+  },
+  "Pregnancy": {
+    "risky_classes": ["Teratogenic", "NSAID", "Anticoagulant"],
+    "message": "These drugs may pose risks during pregnancy and require careful consideration."
+  },
+  "Bleeding Disorder": {
+    "risky_classes": ["Anticoagulant", "NSAID", "Antiplatelet"],
+    "message": "These drugs can increase the risk of bleeding complications."
+  },
+  "Heart Failure": {
+    "risky_classes": ["NSAID", "Beta-blocker", "Calcium Channel Blocker"],
+    "message": "These drugs may worsen heart failure symptoms and require careful monitoring."
+  }
+}
+

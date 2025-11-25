@@ -125,3 +125,37 @@ export const isValidMedicalLicense = (licenseId) => {
 export const isValidLABID = (labId) => {
   return /^LAB\d{5}$/.test(labId);
 };
+
+/**
+ * Generate unique ALGID (Allergy ID) - Format: ALG + 5 digits
+ * @returns {Promise<string>} Generated ALGID (e.g., ALG00001)
+ */
+export const createALGID = async () => {
+  try {
+    // Dynamically import to avoid circular dependency
+    const AllergyModel = (await import('../models/allergy.model.js')).default;
+    const lastAllergy = await AllergyModel.findOne().sort({ allergyId: -1 }).select('allergyId');
+    
+    if (!lastAllergy || !lastAllergy.allergyId) {
+      return 'ALG00001';
+    }
+    
+    const lastNumber = parseInt(lastAllergy.allergyId.substring(3));
+    const nextNumber = lastNumber + 1;
+    return `ALG${String(nextNumber).padStart(5, '0')}`;
+  } catch (error) {
+    console.error('Error generating ALGID:', error.message);
+    // Fallback: generate based on timestamp to ensure uniqueness
+    const timestamp = Date.now().toString().slice(-5);
+    return `ALG${timestamp}`;
+  }
+};
+
+/**
+ * Validate ALGID format
+ * @param {string} allergyId - Allergy ID to validate
+ * @returns {boolean} True if valid format
+ */
+export const isValidALGID = (allergyId) => {
+  return /^ALG\d{5}$/.test(allergyId);
+};
