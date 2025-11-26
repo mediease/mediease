@@ -3,6 +3,7 @@ import Prescription from '../models/prescription.model.js';
 import FHIRPatient from '../models/fhirPatient.model.js';
 import User from '../models/user.model.js';
 import { validateEncounterBeforePrescription, attachPrescriptionToEncounter } from '../services/prescriptionEncounter.service.js';
+import { runAiValidation } from '../services/aiPrescriptionValidation.service.js';
 
 // Map UI status to FHIR-compliant status values
 const mapStatusToFHIR = (status) => {
@@ -129,7 +130,15 @@ export const createPrescription = asyncHandler(async (req, res) => {
     valueString: encounterCheck.encounter.encId
   });
 
-  return res.status(201).json({ success: true, message: 'Prescription created', data: resource });
+  // Run AI validation for the newly created prescription only
+  const aiResult = await runAiValidation(patientPhn, encounterCheck.encounter._id, prescDoc._id);
+
+  return res.status(201).json({
+    success: true,
+    message: 'Prescription created',
+    data: resource,
+    aiValidation: aiResult
+  });
 });
 
 /**
