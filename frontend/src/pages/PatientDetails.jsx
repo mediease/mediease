@@ -10,7 +10,6 @@ import httpClient from '../services/httpClient';
 const PatientDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
 
   const [selectedFilter, setSelectedFilter] = useState("Basic");
   const [loading, setLoading] = useState(true);
@@ -204,11 +203,7 @@ const PatientDetails = () => {
         Patients - {patientData?.fullName || "Loading..."}
       </h2>
 
-      <SegmentedControl
-        options={filterOptions}
-        selected={selectedFilter}
-        onChange={handleTabChange}
-      />
+      
 
       {loading && <p>Loading patient details...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}

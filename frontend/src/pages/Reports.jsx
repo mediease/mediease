@@ -1,63 +1,104 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import SectionHeader from '../components/SectionHeader';
-import SegmentedTable from '../components/SegmentedTable';
+import SectionHeader from "../components/SectionHeader";
+import SegmentedTable from "../components/SegmentedTable";
+import httpClient from "../services/httpClient";
+import "./css/style.css";
 
-const HomePage = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
+const Reports = () => {
   const navigate = useNavigate();
+  const mountedRef = useRef(true);
+
+  const [loading, setLoading] = useState(true);
+  const [displayData, setDisplayData] = useState([]);
+  const [tableState, setTableState] = useState("All");
+
+  // Test type display names
+  const TEST_LABELS = {
+    ecg: "ECG",
+    blood_sugar: "Blood Sugar",
+    cbc: "Complete Blood Count",
+    xray: "X-Ray",
+    lipid_profile: "Lipid Profile",
+    urine: "Urine Test",
+    lft: "Liver Function Test",
+    kft: "Kidney Function Test",
+  };
+
+  // ------------------ FETCH REPORTS ------------------
+  useEffect(() => {
+    mountedRef.current = true;
+
+    const loadReports = async () => {
+      setLoading(true);
+      try {
+        const res = await httpClient.get("/api/lab/doctor/reports");
+
+        const { requests = [], reports = [] } = res.data.data;
+
+        // Shape aggregated rows
+        const shaped = requests.map((req) => {
+          const report = reports.find((r) => r.labRequestId === req._id);
+
+          return {
+            labId: req.labId,
+            phn: req.patientPhn,
+            type: TEST_LABELS[req.testType] || req.testType,
+            status: req.status === "pending" ? "Pending" : "Completed",
+            date: req.completedAt
+              ? new Date(req.completedAt).toLocaleDateString()
+              : "-",
+            reviewedBy: report?.reviewedBy || "Not Reviewed",
+            rawRequest: req,
+            rawReport: report
+          };
+        });
+
+        if (mountedRef.current) {
+          setDisplayData(shaped);
+        }
+      } catch (err) {
+        console.error("Report Load Error:", err);
+        if (mountedRef.current) setDisplayData([]);
+      } finally {
+        if (mountedRef.current) setLoading(false);
+      }
+    };
+
+    loadReports();
+    return () => (mountedRef.current = false);
+  }, []);
+
+  // ------------------ ON ROW CLICK ------------------
   const handleRowClick = (row) => {
-    navigate(`/doctor/reports/${row.id}`);
+    navigate(`/doctor/reports/${row.labId}`);
   };
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
-  selectedDate ? selectedDate.toDateString() : 'None'
 
+  // ------------------ TABLE COLUMNS (NO ACTION COLUMN) ------------------
   const columns = [
-    { label: "ID", key: "id" },
+    { label: "Lab ID", key: "labId" },
     { label: "PHN", key: "phn" },
-    { label: "Type", key: "type" },
-    { label: "Patient Name", key: "patient name" },
+    { label: "Test Type", key: "type" },
     { label: "Status", key: "status" },
-    { label: "Date", key: "date" },
-    { label: "Action", key: "action" }
-  ];
-  
-
-  const Data = [
-    { id: "0102", phn: "1001", type: "Consultation", "patient name": "Niluka", status: "In Progress", date: "20/12/2024" },
-    { id: "0103", phn: "1102", type: "Lab Test", "patient name": "Roshini", status: "Completed", date: "24/12/2024" },
-    { id: "0102", phn: "1256", type: "Emergency Visit", "patient name": "Lahiru", status: "In Progress", date: "21/12/2024" },
-    { id: "0098", phn: "890", type: "Follow-up", "patient name": "Pathum", status: "Completed", date: "26/12/2024" },
-    { id: "0085", phn: "451", type: "Vaccination", "patient name": "Naduni", status: "In Progress", date: "28/12/2024" },
-    { id: "0005", phn: "753", type: "Lab Test", "patient name": "Deshan", status: "Completed", date: "30/12/2024" }
+    { label: "Completed Date", key: "date" },
+    { label: "Reviewed By (Doctor ID)", key: "reviewedBy" }
   ];
 
   return (
     <div>
-      <SectionHeader title="Reports" onDateChange={handleDateChange} />
+      <SectionHeader title="Reports Ordered by You" />
+
       <SegmentedTable
-      columns={columns}
-      data={Data}
-      filterOptions={["All", "Clinic Visit", "Wards"]}
-      handleRowClick = {handleRowClick}
-      tableState={"All"}
-      renderCell={(col, value) => {
-        if (col === "Action") {
-          return (
-            <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-              <span role="img" aria-label="view">👁️</span>
-              <span role="img" aria-label="download">⬇️</span>
-              <span role="img" aria-label="print">🖨️</span>
-            </div>
-          );
-        }
-        return value;
-      }}
-    />
+        columns={columns}
+        data={displayData}
+        filterOptions={["All"]}
+        tableState={tableState}
+        setTableState={setTableState}
+        loading={loading}
+        handleRowClick={handleRowClick}
+      />
     </div>
   );
 };
 
-export default HomePage;
+export default Reports;

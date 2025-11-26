@@ -1,0 +1,213 @@
+{
+  "info": {
+    "name": "MediEase - Lab Reports Test Suite",
+    "_postman_id": "mediease-lab-reports-collection",
+    "description": "Postman collection to test all lab request/report flows across different test types.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "{{YOUR_JWT_TOKEN}}" },
+    { "key": "patientPhn", "value": "PH00001" },
+    { "key": "encounterId", "value": "ENC12345" },
+    { "key": "doctorLicense", "value": "LIC123" },
+    { "key": "labRequestId", "value": "" },
+    { "key": "labId", "value": "" },
+    { "key": "diagnosticReportId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Create Lab Request - all test types",
+      "item": [
+        {
+          "name": "Create request - ecg (requires PDF)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"ecg\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status is 201 or 400 (if validation)\", function () {\n  pm.expect(pm.response.code).to.be.oneOf([201,400]);\n});",
+                  "if (pm.response.code === 201) {\n  var json = pm.response.json();\n  if (json.data && json.data._id) {\n    pm.environment.set('labRequestId', json.data._id);\n    pm.environment.set('labId', json.data.labId || '');\n  }\n}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create request - blood_sugar (no file, requires glucoseLevel)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"blood_sugar\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status is 201 or 400 (missing param)\", function () {\n  pm.expect(pm.response.code).to.be.oneOf([201,400]);\n});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create request - cbc",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"cbc\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] }
+          },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status is 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Create request - xray",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" } ], "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"xray\"\n}" }, "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status is 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Create request - lipid_profile",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" } ], "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"lipid_profile\"\n}" }, "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status is 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Create request - urine_test",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" } ], "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"urine_test\"\n}" }, "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status is 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Create request - lft",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" } ], "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"lft\"\n}" }, "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status is 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Create request - kft",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" } ], "body": { "mode": "raw", "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"testType\": \"kft\"\n}" }, "url": { "raw": "{{baseUrl}}/api/lab/request", "host": ["{{baseUrl}}"], "path": ["api","lab","request"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status is 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        }
+      ]
+    },
+    {
+      "name": "Pending & Retrieval",
+      "item": [
+        {
+          "name": "Get pending lab requests",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "url": { "raw": "{{baseUrl}}/api/lab/pending", "host": ["{{baseUrl}}"], "path": ["api","lab","pending"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 200\", function () { pm.response.to.have.status(200); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Get reports for encounter",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "url": { "raw": "{{baseUrl}}/api/lab/reports?encounterId={{encounterId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","reports"], "query": [ { "key": "encounterId", "value": "{{encounterId}}" } ] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 200\", function () { pm.response.to.have.status(200); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Get reports for patient",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "url": { "raw": "{{baseUrl}}/api/lab/patient/{{patientPhn}}", "host": ["{{baseUrl}}"], "path": ["api","lab","patient","{{patientPhn}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 200 or 404\", function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Get doctor requested reports",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "url": { "raw": "{{baseUrl}}/api/lab/doctor/reports", "host": ["{{baseUrl}}"], "path": ["api","lab","doctor","reports"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 200\", function () { pm.response.to.have.status(200); });" ], "type": "text/javascript" } } ]
+        }
+      ]
+    },
+    {
+      "name": "Upload Reports - per test type",
+      "item": [
+        {
+          "name": "Upload report - ecg (PDF required)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "__UPLOAD_PDF_PATH__" },
+                { "key": "resultText", "value": "ECG normal" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });", "if (pm.response.code === 201) { var j = pm.response.json(); if (j.data && j.data.diagnosticReport) { pm.environment.set('diagnosticReportId', j.data.diagnosticReport.id || ''); } }" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Upload report - blood_sugar (no file, requires glucoseLevel)",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "body": { "mode": "formdata", "formdata": [ { "key": "glucoseLevel", "value": "6.8" }, { "key": "resultText", "value": "Glucose 6.8 mmol/L" } ] }, "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400 (validation)\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Upload report - cbc (parameters required)",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "body": { "mode": "formdata", "formdata": [ { "key": "hemoglobin", "value": "13.2" }, { "key": "rbc", "value": "4.5" }, { "key": "hematocrit", "value": "40" }, { "key": "mcv", "value": "90" }, { "key": "mch", "value": "29" }, { "key": "mchc", "value": "33" }, { "key": "wbc", "value": "6.2" }, { "key": "differential", "value": "normal" }, { "key": "plateletCount", "value": "250" }, { "key": "resultText", "value": "CBC within normal limits" } ] }, "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Upload report - xray (file required)",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "body": { "mode": "formdata", "formdata": [ { "key": "file", "type": "file", "src": "__UPLOAD_IMG_PATH__" }, { "key": "resultText", "value": "Small consolidation in left lower lobe" } ] }, "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Upload report - lipid_profile",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "body": { "mode": "formdata", "formdata": [ { "key": "totalCholesterol", "value": "5.2" }, { "key": "ldl", "value": "3.0" }, { "key": "hdl", "value": "1.2" }, { "key": "triglycerides", "value": "1.1" }, { "key": "vldl", "value": "0.3" }, { "key": "resultText", "value": "Lipid profile borderline" } ] }, "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Upload report - urine_test",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "body": { "mode": "formdata", "formdata": [ { "key": "ph", "value": "6.0" }, { "key": "specificGravity", "value": "1.015" }, { "key": "rbc", "value": "0-2" }, { "key": "wbc", "value": "0-2" }, { "key": "resultText", "value": "Urinalysis normal" } ] }, "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Upload report - lft",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "body": { "mode": "formdata", "formdata": [ { "key": "alt", "value": "35" }, { "key": "ast", "value": "28" }, { "key": "alp", "value": "70" }, { "key": "ggt", "value": "40" }, { "key": "totalBilirubin", "value": "12" }, { "key": "albumin", "value": "4.2" }, { "key": "resultText", "value": "LFT mild elevation" } ] }, "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Upload report - kft",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" } ], "body": { "mode": "formdata", "formdata": [ { "key": "creatinine", "value": "80" }, { "key": "urea", "value": "5" }, { "key": "egfr", "value": "90" }, { "key": "resultText", "value": "KFT normal" } ] }, "url": { "raw": "{{baseUrl}}/api/lab/upload/{{labRequestId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","upload","{{labRequestId}}"] } },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 201 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([201,400]); });" ], "type": "text/javascript" } } ]
+        }
+      ]
+    },
+    {
+      "name": "Review report",
+      "item": [
+        {
+          "name": "Review diagnostic report",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"reviewNotes\": \"Looks good\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/lab/review/{{diagnosticReportId}}", "host": ["{{baseUrl}}"], "path": ["api","lab","review","{{diagnosticReportId}}"] }
+          },
+          "event": [ { "listen": "test", "script": { "exec": [ "pm.test(\"status 200 or 400\", function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });" ], "type": "text/javascript" } } ]
+        }
+      ]
+    }
+  ]
+}

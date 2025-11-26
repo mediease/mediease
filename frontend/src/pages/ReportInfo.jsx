@@ -1,83 +1,128 @@
 import { useParams, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SegmentedControl from "../components/SegmentedControl";
-import './css/style.css'
 import TableN1 from "../components/tableN1";
-import SimpleButton from "../components/buttons";
-const ReportInfo = () =>{
-     const { id } = useParams();
-      const navigate = useNavigate();
-      const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
-      
-      const [selectedFilter, setSelectedFilter] = useState("Report");
-      const columns = [
-        { label: 'ID', key: 'id' },
-        { label: 'Name', key: 'name' },
-        { label: 'Provide Doctor', key: 'providedoctor' },
-        { label: 'Last Update', key: 'lastupdate' },
-        { label: 'Last Updated By', key: 'lastupdatedby' },
-      ];
-      const data = [
-        { id: '0102', name: 'Prolactin', providedoctor: 'Niluka', lastupdate: '20/12/2024', lastupdatedby: 'Nilani' },
-        { id: '0103', name: 'Bilirubin', providedoctor: 'Roshini', lastupdate: '24/12/2024', lastupdatedby: 'Pathmawad' },
-        { id: '0102', name: 'DHEA-sulphate', providedoctor: 'Lahiru', lastupdate: '21/12/2024', lastupdatedby: 'Ruwindi' },
-        { id: '0098', name: 'FUC', providedoctor: 'Pathum', lastupdate: '26/12/2024', lastupdatedby: 'Ruwindi' },
-        { id: '0085', name: 'Alcohol', providedoctor: 'Naduni', lastupdate: '28/12/2024', lastupdatedby: 'Padmawad' },
-        { id: '0005', name: 'FBC', providedoctor: 'Deshan', lastupdate: '30/12/2024', lastupdatedby: 'Ruwindi' },
-        { id: '0102', name: 'Prolactin', providedoctor: 'Niluka', lastupdate: '20/12/2024', lastupdatedby: 'Nilani' },
-        { id: '0103', name: 'Bilirubin', providedoctor: 'Roshini', lastupdate: '24/12/2024', lastupdatedby: 'Pathmawad' },
-        { id: '0102', name: 'DHEA-sulphate', providedoctor: 'Lahiru', lastupdate: '21/12/2024', lastupdatedby: 'Ruwindi' },
-        { id: '0098', name: 'FUC', providedoctor: 'Pathum', lastupdate: '26/12/2024', lastupdatedby: 'Ruwindi' },
-        { id: '0085', name: 'Alcohol', providedoctor: 'Naduni', lastupdate: '28/12/2024', lastupdatedby: 'Padmawad' },
-        { id: '0005', name: 'FBC', providedoctor: 'Deshan', lastupdate: '30/12/2024', lastupdatedby: 'Ruwindi' },
-      ];
-      // Handle tab change with navigation
-      const handleTabChange = (option) => {
-        setSelectedFilter(option);
-        
-        // Navigate to the appropriate route based on selected tab
-        switch(option) {
-          case "Basic":
-            navigate(`/doctor/visitpatient/${id}`);
-            break;
-          case "Report":
-            navigate(`/doctor/patient/${id}/reportinfo`);
-            break;
-          case "Allergies":
-            navigate(`/doctor/patient/${id}/allergiesinfo`);
-            break;
-          case "Medications":
-            navigate(`/doctor/patient/${id}/medicationsinfo`);
-            break;
-          case "Visit History":
-            navigate(`/doctor/patient/${id}/historyinfo`);
-            break;
-          default:
-            navigate(`/doctor/patient/${id}`);
-        }
-      };
-      return(
-        <div  className="patientDetailsMain">
-            <h2 className="patientDetailsHeder">Patients - Naveen Bimsara</h2>
-            <SegmentedControl 
-            options={filterOptions}
-            selected={selectedFilter}
-            onChange={handleTabChange}
-            />
-            <TableN1
-            columns={columns}
-            data={data}
-            compact
-            showHeader={false}
-            showActions={true}
-            />
-            <div className="inlineButton">
-            
-            </div>
-            
+import httpClient from "../services/httpClient";
+import "./css/style.css";
 
-        </div>
-      )
-}
+const ReportInfo = () => {
+  const { id } = useParams(); // PHN
+  const navigate = useNavigate();
+
+  const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
+  const [selectedFilter, setSelectedFilter] = useState("Report");
+
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Map backend testTypes → readable names
+  const TEST_LABELS = {
+    ecg: "ECG",
+    blood_sugar: "Blood Sugar",
+    cbc: "Complete Blood Count",
+    xray: "X-Ray",
+    lipid_profile: "Lipid Profile",
+    urine: "Urine Test",
+    lft: "Liver Function Test",
+    kft: "Kidney Function Test"
+  };
+
+  // Columns for table
+  const columns = [
+    { label: "Lab ID", key: "labId" },
+    { label: "Test", key: "testName" },
+    { label: "Ordered By", key: "doctor" },
+    { label: "Requested On", key: "requested" },
+    { label: "Status", key: "status" },
+    { label: "Last Update", key: "lastUpdate" },
+    { label: "Reviewed By", key: "reviewedBy" },
+  ];
+
+  // ---------------------- Load Reports ----------------------
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await httpClient.get(`/api/lab/patient/${id}`);
+        const { requests = [], reports = [] } = res.data.data;
+
+        // map request + report data into table rows
+        const combined = requests.map(req => {
+          const report = reports.find(r => r.labId === req.labId);
+
+          return {
+            labId: req.labId,
+            testName: TEST_LABELS[req.testType] || req.testType,
+            doctor: req.doctorLicense,
+            requested: new Date(req.createdAt).toLocaleDateString(),
+            status: req.status === "pending" ? "Pending" : "Completed",
+            lastUpdate: report?.reviewedAt
+              ? new Date(report.reviewedAt).toLocaleDateString()
+              : req.completedAt
+              ? new Date(req.completedAt).toLocaleDateString()
+              : "-",
+            reviewedBy: report?.reviewedBy || "-",
+          };
+        });
+
+        setRows(combined);
+      } catch (err) {
+        console.error("Load report info failed:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [id]);
+
+  // ---------------------- Navigation ----------------------
+  const handleTabChange = (option) => {
+    setSelectedFilter(option);
+
+    switch (option) {
+      case "Basic":
+        navigate(`/doctor/visitpatient/${id}`);
+        break;
+      case "Report":
+        navigate(`/doctor/patient/${id}/reportinfo`);
+        break;
+      case "Allergies":
+        navigate(`/doctor/patient/${id}/allergiesinfo`);
+        break;
+      case "Medications":
+        navigate(`/doctor/patient/${id}/medicationsinfo`);
+        break;
+      case "Visit History":
+        navigate(`/doctor/patient/${id}/historyinfo`);
+        break;
+      default:
+        navigate(`/doctor/patient/${id}`);
+    }
+  };
+
+  return (
+    <div className="patientDetailsMain">
+      <h2 className="patientDetailsHeder">Patient Reports</h2>
+
+      <SegmentedControl
+        options={filterOptions}
+        selected={selectedFilter}
+        onChange={handleTabChange}
+      />
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <TableN1
+          columns={columns}
+          data={rows}
+          compact
+          showHeader={true}
+          showActions={false}
+        />
+      )}
+    </div>
+  );
+};
 
 export default ReportInfo;

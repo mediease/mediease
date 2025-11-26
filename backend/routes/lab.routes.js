@@ -3,11 +3,20 @@ import multer from 'multer';
 import path from 'path';
 import { protect } from '../middleware/authMiddleware.js';
 import { doctorOnly, labAssistantOnly } from '../middleware/roleMiddleware.js';
-import { createLabRequest, getPendingLabRequests, getLabReportsForEncounter, uploadLabReport, reviewLabReport } from '../controllers/lab.controller.js';
+
+import {
+  createLabRequest,
+  getPendingLabRequests,
+  getLabReportsForEncounter,
+  getLabReportsForPatient,
+  getDoctorRequestedReports,
+  uploadLabReport,
+  reviewLabReport,
+} from '../controllers/lab.controller.js';
 
 const router = express.Router();
 
-// Multer storage config
+// Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(process.cwd(), 'uploads', 'lab'));
@@ -19,33 +28,48 @@ const storage = multer.diskStorage({
   }
 });
 
-function fileFilter(req, file, cb) {
-  // Allow images and pdf
-  const allowed = ['image/png','image/jpeg','application/pdf'];
+const fileFilter = (req, file, cb) => {
+  const allowed = ['image/png', 'image/jpeg', 'application/pdf'];
   if (!allowed.includes(file.mimetype)) {
-    return cb(new Error('Invalid file type. Allowed: png, jpg, pdf'));
+    return cb(new Error('Invalid file type. Allowed: png, jpeg, pdf'));
   }
   cb(null, true);
-}
+};
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+});
 
-// Auth middleware for all lab routes
+// -------------------- ROUTES --------------------
+
 router.use(protect);
 
-// Create lab request (doctor)
+// Doctor creates request
 router.post('/request', doctorOnly, createLabRequest);
 
-// Pending lab requests (lab assistant)
+// Lab pending list
 router.get('/pending', labAssistantOnly, getPendingLabRequests);
 
-// Encounter reports (doctor)
+// Doctor: reports for encounter
 router.get('/reports', doctorOnly, getLabReportsForEncounter);
 
-// Review lab report (doctor)
-router.put('/review/:diagnosticReportId', doctorOnly, reviewLabReport);
+// Doctor: reports for patient
+router.get('/patient/:phn', doctorOnly, getLabReportsForPatient);
 
-// Upload lab report (lab assistant)
-router.post('/upload/:labRequestId', labAssistantOnly, upload.single('file'), uploadLabReport);
+// Doctor: all reports doctor requested
+router.get('/doctor/reports', doctorOnly, getDoctorRequestedReports);
+
+// Lab assistant uploads report
+router.post(
+  '/upload/:labRequestId',
+  labAssistantOnly,
+  upload.single('file'),
+  uploadLabReport
+);
+
+// Doctor reviews report
+router.put('/review/:diagnosticReportId', doctorOnly, reviewLabReport);
 
 export default router;
