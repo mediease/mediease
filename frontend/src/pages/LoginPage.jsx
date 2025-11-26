@@ -7,7 +7,8 @@ import './css/LoginPage.css';
 import logo from '../assets/logo2.png';
 
 function LoginPage() {
-  const [userType, setUserType] = useState('doctor');
+  const [userType, setUserType] = useState('doctor');   // doctor | admin | staff
+  const [staffRole, setStaffRole] = useState('nurse');  // nurse | lab_assistant (only used when userType === 'staff')
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,48 +20,82 @@ function LoginPage() {
     setError('');
     setLoading(true);
 
+    // Decide which role to send to backend
+    const roleToSend =
+      userType === 'staff'
+        ? staffRole                      // "nurse" or "lab_assistant"
+        : userType;                      // "doctor" or "admin"
+
     try {
       const response = await httpClient.post('/auth/login', {
         email,
         password,
-        role: userType,
+        role: roleToSend,
       });
+
       console.log('Login response raw:', response.data);
 
-      // Save token & role
-      const token = response.data?.token || response.data?.accessToken || response.data?.jwt || response.data?.data?.token;
+      const data = response.data?.data || {};
+      const user = data.user || data;
+
+      // ---- Save token ----
+      const token =
+        data.token ||
+        response.data?.token ||
+        response.data?.accessToken ||
+        response.data?.jwt;
+
       if (token) {
         localStorage.setItem('authToken', token);
       } else {
         console.warn('No token field found in login response');
       }
-      localStorage.setItem('userRole', userType);
 
-      // Extract doctor related info from various possible response shapes
-      const userPayload = response.data?.user || response.data?.data?.user || response.data?.data || response.data;
-      const meta = userPayload?.metadata || response.data?.metadata || response.data?.data?.metadata || {};
-      const medicalLicenseId = userPayload?.medicalLicenseId || meta?.medicalLicenseId || response.data?.medicalLicenseId || 'MED_UNKNOWN';
-      const firstName = userPayload?.firstName || meta?.firstName || 'Doctor';
-      const lastName = userPayload?.lastName || meta?.lastName || '';
-
-      if (medicalLicenseId) {
-        localStorage.setItem('medicalLicenseId', String(medicalLicenseId));
+      // Save actual backend role ("doctor", "admin", "nurse", "lab_assistant")
+      if (user.role) {
+        localStorage.setItem('userRole', user.role);
       } else {
-        console.warn('medicalLicenseId missing in login response');
+        localStorage.setItem('userRole', roleToSend);
       }
 
-      // Only store doctor object if logging in as doctor
-      if (userType === 'doctor') {
+      // ---- Store extra info for specific roles ----
+      if (roleToSend === 'doctor') {
+        const medicalLicenseId = user.medicalLicenseId || 'MED_UNKNOWN';
+        localStorage.setItem('medicalLicenseId', String(medicalLicenseId));
+
         const doctorObj = {
-          firstName: firstName || 'Doctor',
-          lastName: lastName || '',
-          medicalLicenseId: medicalLicenseId || 'MED_UNKNOWN',
+          firstName: user.firstName || 'Doctor',
+          lastName: user.lastName || '',
+          medicalLicenseId,
         };
         localStorage.setItem('doctor', JSON.stringify(doctorObj));
-        console.log('Stored doctor object:', doctorObj);
       }
 
-      // Navigate based on user type
+      if (roleToSend === 'nurse') {
+        const nurId = user.nurId || 'NUR_UNKNOWN';
+        localStorage.setItem('nurId', String(nurId));
+
+        const nurseObj = {
+          firstName: user.firstName || 'Nurse',
+          lastName: user.lastName || '',
+          nurId,
+        };
+        localStorage.setItem('nurse', JSON.stringify(nurseObj));
+      }
+
+      if (roleToSend === 'lab_assistant') {
+        const labId = user.labId || 'LAB_UNKNOWN';
+        localStorage.setItem('labId', String(labId));
+
+        const labObj = {
+          firstName: user.firstName || 'Lab',
+          lastName: user.lastName || 'Assistant',
+          labId,
+        };
+        localStorage.setItem('labAssistant', JSON.stringify(labObj));
+      }
+
+      // ---- Navigate based on top-level userType (which dashboard) ----
       if (userType === 'doctor') {
         navigate('/doctor');
       } else if (userType === 'admin') {
@@ -70,10 +105,18 @@ function LoginPage() {
       }
     } catch (err) {
       setError(
-        err.response?.data?.message || 'Login failed. Please check your credentials.'
+        err.response?.data?.message ||
+          'Login failed. Please check your credentials.'
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUserTypeClick = (type) => {
+    setUserType(type);
+    if (type !== 'staff') {
+      setStaffRole('nurse');
     }
   };
 
@@ -85,15 +128,24 @@ function LoginPage() {
         <p className="login-subtitle">Sign in to access your dashboard</p>
 
         <div className="user-types">
-          <div className={`user-type ${userType === 'doctor' ? 'active' : ''}`} onClick={() => setUserType('doctor')}>
+          <div
+            className={`user-type ${userType === 'doctor' ? 'active' : ''}`}
+            onClick={() => handleUserTypeClick('doctor')}
+          >
             <FaUserMd className="user-type-icon" />
             <div className="user-type-label">Doctor</div>
           </div>
-          <div className={`user-type ${userType === 'admin' ? 'active' : ''}`} onClick={() => setUserType('admin')}>
+          <div
+            className={`user-type ${userType === 'admin' ? 'active' : ''}`}
+            onClick={() => handleUserTypeClick('admin')}
+          >
             <MdAdminPanelSettings className="user-type-icon" />
             <div className="user-type-label">Admin</div>
           </div>
-          <div className={`user-type ${userType === 'staff' ? 'active' : ''}`} onClick={() => setUserType('staff')}>
+          <div
+            className={`user-type ${userType === 'staff' ? 'active' : ''}`}
+            onClick={() => handleUserTypeClick('staff')}
+          >
             <FaUserTie className="user-type-icon" />
             <div className="user-type-label">Staff</div>
           </div>
@@ -101,33 +153,68 @@ function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           {error && (
-            <div style={{ color: '#dc3545', marginBottom: '15px', padding: '10px', backgroundColor: '#f8d7da', borderRadius: '5px', border: '1px solid #f5c6cb' }}>
+            <div
+              style={{
+                color: '#dc3545',
+                marginBottom: '15px',
+                padding: '10px',
+                backgroundColor: '#f8d7da',
+                borderRadius: '5px',
+                border: '1px solid #f5c6cb',
+              }}
+            >
               {error}
             </div>
           )}
+
+          {/* Staff role dropdown */}
+          {userType === 'staff' && (
+            <div className="form-group">
+              <label className="form-label">
+                <strong>Staff Role</strong>
+              </label>
+              <div className="input-with-icon no-icon">
+                {/* no icon, but reuse same box style */}
+                <select
+                  className="staff-role-select"
+                  value={staffRole}
+                  onChange={(e) => setStaffRole(e.target.value)}
+                >
+                  <option value="nurse">Nurse</option>
+                  <option value="lab_assistant">Lab Assistant</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="form-group">
-            <label className="form-label"><strong>Email Address</strong></label>
+            <label className="form-label">
+              <strong>Email Address</strong>
+            </label>
             <div className="input-with-icon">
               <MdEmail className="input-icon" />
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
+              <input
+                type="email"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required 
+                required
               />
             </div>
           </div>
+
           <div className="form-group">
-            <label className="form-label"><strong>Password</strong></label>
+            <label className="form-label">
+              <strong>Password</strong>
+            </label>
             <div className="input-with-icon">
               <MdLock className="input-icon" />
-              <input 
-                type="password" 
-                placeholder="Enter your password" 
+              <input
+                type="password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required 
+                required
               />
             </div>
           </div>
@@ -139,12 +226,18 @@ function LoginPage() {
 
         {userType !== 'admin' && (
           <div className="create-account">
-            Don't have an account? <Link to={`/create-account?type=${userType}`} className="link">Create new account</Link>
+            Don't have an account?{' '}
+            <Link to={`/create-account?type=${userType}`} className="link">
+              Create new account
+            </Link>
           </div>
         )}
 
         <div className="support-text">
-          Having Trouble to login? <a href="#" className="link">Contact Support</a>
+          Having Trouble to login?{' '}
+          <a href="#" className="link">
+            Contact Support
+          </a>
         </div>
       </div>
     </div>
