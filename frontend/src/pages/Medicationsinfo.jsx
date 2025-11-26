@@ -1,95 +1,158 @@
 import { useParams, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SegmentedControl from "../components/SegmentedControl";
-import './css/style.css'
 import TableN1 from "../components/tableN1";
 import SimpleButton from "../components/buttons";
-const MedicationsInfo = () =>{
-     const { id } = useParams();
-      const navigate = useNavigate();
-      const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
-     
-      const [selectedFilter, setSelectedFilter] = useState("Medications");
-      const handleIssuePrescription = () => {
-        navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
-      };
-      // Load prescriptions from localStorage
-      const [prescriptions, setPrescriptions] = useState([]);
-      React.useEffect(() => {
-        const keys = Object.keys(localStorage).filter(k => k.startsWith(`prescription_${id}_`));
-        const loaded = keys.map(k => {
-          try {
-            return JSON.parse(localStorage.getItem(k));
-          } catch {
-            return null;
+import httpClient from "../services/httpClient";
+import "./css/style.css";
+
+const MedicationsInfo = () => {
+  const { id } = useParams(); // patient PHN
+  const navigate = useNavigate();
+
+  const filterOptions = [
+    "Basic",
+    "Report",
+    "Allergies",
+    "Medications",
+    "Visit History",
+  ];
+
+  const [selectedFilter, setSelectedFilter] = useState("Medications");
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ----------------------------------------------------
+  // LOAD FROM BACKEND (FHIR BUNDLE)
+  // ----------------------------------------------------
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await httpClient.get(`/fhir/MedicationRequest/${id}`);
+
+        const entries = res?.data?.data?.entry || [];
+
+        const mapped = entries.map((item) => {
+          const r = item.resource;
+
+          // Extract complaint
+          let complaint = "-";
+          if (r.note && r.note.length > 0) {
+            // note looks like "Complaint: Headache"
+            complaint = r.note[0].text.replace("Complaint:", "").trim();
           }
-        }).filter(Boolean);
-        setPrescriptions(loaded);
-      }, [id]);
 
-      const columns = [
-        { label: 'Complaint', key: 'complaint' },
-        { label: 'Doctor', key: 'doctor' },
-        { label: 'Prescribe Date', key: 'prescribeDate' },
-        { label: 'Status', key: 'status' },
-        { label: 'View', key: 'view' }
-      ];
+          // Extract doctor ID (Practitioner/MED12345 → MED12345)
+          const doctorRef = r.requester?.reference || "-";
+          const doctor = doctorRef.includes("/") ? doctorRef.split("/")[1] : doctorRef;
 
-      // Map prescriptions to table rows
-      const data = prescriptions.map((p, idx) => ({
-        complaint: p.meta.complaint,
-        doctor: p.meta.doctor,
-        prescribeDate: p.meta.prescribeDate,
-        status: p.meta.status,
-        view: <button onClick={() => alert(JSON.stringify(p, null, 2))}>View</button>
-      }));
-  
-      const handleTabChange = (option) => {
-        setSelectedFilter(option);
-    
-        
-        switch(option) {
-          case "Basic":
-            navigate(`/doctor/visitpatient/${id}`);
-            break;
-          case "Report":
-            navigate(`/doctor/patient/${id}/reportinfo`);
-            break;
-          case "Allergies":
-            navigate(`/doctor/patient/${id}/allergiesinfo`);
-            break;
-          case "Medications":
-            navigate(`/doctor/patient/${id}/medicationsinfo`);
-            break;
-          case "Visit History":
-            navigate(`/doctor/patient/${id}/historyinfo`);
-            break;
-          default:
-            navigate(`/doctor/patient/${id}`);
-        }
-      };
-      return(
-        <div  className="patientDetailsMain">
-            <h2 className="patientDetailsHeder">Patients - Naveen Bimsara</h2>
-            <SegmentedControl 
-            options={filterOptions}
-            selected={selectedFilter}
-            onChange={handleTabChange}
-            />
-            <TableN1
-              columns={columns}
-              data={data}
-              showHeader={true}
-              showActions={false}
-            />
-            <div className="inlineButton" style={{ justifyContent: "flex-end" }}>
-                <SimpleButton 
-                label="Issue New Prescription" 
-                onClick={handleIssuePrescription}
-                />
-            </div>
-        </div>
-      )
-}
+          // Extract visit type
+          let visitType = "-";
+          if (r.extension) {
+            const visitExt = r.extension.find((e) =>
+              e.url.includes("visit-type")
+            );
+            if (visitExt) visitType = visitExt.valueString;
+          }
+
+          return {
+            prescriptionId: r.id,
+            complaint,
+            doctor,
+            visitType,
+            status: r.status || "-",
+            date: r.authoredOn
+              ? new Date(r.authoredOn).toLocaleDateString()
+              : "-",
+            full: r,
+          };
+        });
+
+        setPrescriptions(mapped);
+      } catch (err) {
+        console.error("Error loading prescriptions:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [id]);
+
+  // ----------------------------------------------------
+  // TABLE COLUMNS
+  // ----------------------------------------------------
+  const columns = [
+    { label: "Prescription ID", key: "prescriptionId" },
+    { label: "Complaint", key: "complaint" },
+    { label: "Doctor", key: "doctor" },
+    { label: "Visit Type", key: "visitType" },
+    { label: "Date", key: "date" },
+    { label: "Status", key: "status" },
+    { label: "View", key: "view" },
+  ];
+
+  const data = prescriptions.map((p) => ({
+    ...p,
+    view: (
+      <button onClick={() => alert(JSON.stringify(p.full, null, 2))}>
+        View
+      </button>
+    ),
+  }));
+
+  // ----------------------------------------------------
+  // TAB LOGIC
+  // ----------------------------------------------------
+  const handleTabChange = (option) => {
+    setSelectedFilter(option);
+
+    const base = `/doctor/patient/${id}`;
+
+    const routes = {
+      Basic: `/doctor/patient/${id}`,
+      Report: `${base}/reportinfo`,
+      Allergies: `${base}/allergiesinfo`,
+      Medications: `${base}/medicationsinfo`,
+      "Visit History": `${base}/historyinfo`,
+    };
+
+    navigate(routes[option] || base);
+  };
+
+  const handleIssuePrescription = () => {
+    navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
+  };
+
+  return (
+    <div className="patientDetailsMain">
+      <h2 className="patientDetailsHeder">Patients - Medication Records</h2>
+
+      <SegmentedControl
+        options={filterOptions}
+        selected={selectedFilter}
+        onChange={handleTabChange}
+      />
+
+      {loading ? (
+        <p>Loading prescriptions...</p>
+      ) : (
+        <TableN1
+          columns={columns}
+          data={data}
+          showHeader={true}
+          showActions={false}
+        />
+      )}
+
+      <div className="inlineButton" style={{ justifyContent: "flex-end" }}>
+        <SimpleButton
+          label="Issue New Prescription"
+          onClick={handleIssuePrescription}
+        />
+      </div>
+    </div>
+  );
+};
 
 export default MedicationsInfo;

@@ -1,179 +1,157 @@
-.allergies-main {
+/* PAGE LAYOUT */
+.allergies-page-layout {
   display: flex;
-  margin-top: 20px;
+  flex-direction: column;
+  gap: 32px;
 }
 
-/* ---------- Single centered card ---------- */
-
-.allergy-card-wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.allergy-card {
+/* CARDS */
+.allergy-form-card,
+.allergy-list-card {
   background: #ffffff;
-  width: 640px;              /* similar width to screenshot */
-  max-width: 95%;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-  border: 1px solid #eef2ff;
+  padding: 32px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
-.allergy-card-title {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  color: #111827;
+/* TITLE */
+.form-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #0f172a;
 }
 
-/* ---------- Form layout (label column + field column) ---------- */
-
-.allergy-form .form-row {
+/* ---------- FORM ROW STRUCTURE ---------- */
+.form-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 22px;
+  margin-bottom: 18px;
 }
 
-.allergy-form label {
-  width: 160px;              /* fixed label column */
-  margin-bottom: 0;
-  color: #111827;
+/* LABEL LEFT SIDE */
+.form-label {
+  width: 160px;
+  font-size: 15px;
   font-weight: 600;
-  text-align: left;
-  font-size: 13px;
+  color: #0f172a;
 }
 
-.required-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
+/* REQUIRED STAR */
 .required-star {
-  color: #d9534f;
+  color: red;
 }
 
-/* Inputs / textarea */
-
-.allergy-form input[type="text"],
-.allergy-form textarea {
+/* INPUT RIGHT SIDE */
+.form-row input,
+.form-row select,
+.form-row textarea {
   flex: 1;
-  height: 36px;
-  padding: 8px 10px;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 10px;
   border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  background: #fff;
-  font-size: 14px;
-  color: #111827;
-  box-shadow: none;
+  background: #f8fafc;
 }
 
-.allergy-form textarea {
-  height: 88px;
-  resize: vertical;
+/* Bigger textarea */
+.form-row textarea {
+  min-height: 90px;
 }
 
-.allergy-form input:focus,
-.allergy-form textarea:focus {
+/* Focus styling */
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  border-color: #2563eb;
+  background: #ffffff;
   outline: none;
-  border-color: #4e73df;
-  box-shadow: 0 0 0 4px rgba(78,115,223,0.12);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
-/* Status radio buttons */
-
-.radio-group {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.radio-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #111827;
-}
-
-.radio-item input {
-  width: 16px;
-  height: 16px;
-}
-
-input[type="radio"] {
-  accent-color: #4e73df;
-}
-
-/* Hint and actions aligned under inputs column */
-
+/* Hint text */
 .form-hint {
-  margin-top: 8px;
-  margin-left: 160px;        /* same as label width */
-  font-size: 12px;
-  color: #111827;
-  font-weight: 600;
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: -5px;
 }
 
+/* BUTTONS */
 .form-actions {
-  margin-top: 16px;
-  margin-left: 160px;        /* same as label width */
   display: flex;
-  gap: 10px;
-}
-
-/* Buttons similar to screenshot */
-
-.save-btn,
-.cancel-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid rgba(0,0,0,0.08);
-  cursor: pointer;
-  font-weight: 600;
+  gap: 14px;
+  margin-top: 10px;
 }
 
 .save-btn {
-  background: linear-gradient(#4e73df, #3956c6);
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(62,80,170,0.18);
-}
-
-.save-btn:active {
-  transform: translateY(1px);
+  background: #2563eb;
+  color: white;
+  padding: 10px 26px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .cancel-btn {
-  background: #ffffff;
+  background: #e5e7eb;
   color: #111827;
-  border-color: #d1d5db;
+  padding: 10px 26px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-/* Small responsive tweak: keep labels around 140–180px */
-
-@media (min-width: 1000px) {
-  .allergy-form label {
-    width: 180px;
-  }
-  .form-hint,
-  .form-actions {
-    margin-left: 180px;
-  }
+/* ---------- TABLE ---------- */
+.allergy-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-@media (max-width: 640px) {
-  .allergy-card {
-    padding: 16px;
+.allergy-table th {
+  padding: 12px;
+  text-align: left;
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+.allergy-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.delete-btn {
+  padding: 6px 12px;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 720px) {
+  .form-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .allergy-form label {
-    width: 140px;
+  .form-label {
+    width: 100%;
   }
 
-  .form-hint,
   .form-actions {
-    margin-left: 140px;
+    flex-direction: column;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    width: 100%;
+    text-align: center;
   }
 }
