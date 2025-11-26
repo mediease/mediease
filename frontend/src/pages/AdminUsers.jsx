@@ -1,28 +1,43 @@
 import React, { useState } from 'react';
 import { FaSearch, FaPlus, FaTimes, FaTrash } from 'react-icons/fa';
 import './css/AdminUsers.css';
+import httpClient from '../services/httpClient'; // make sure this path is correct
 
 const AdminUsers = () => {
   const [activeTab, setActiveTab] = useState('Doctors');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // ------- Doctor approve modal state -------
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [pendingDoctors, setPendingDoctors] = useState([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [pendingError, setPendingError] = useState('');
+  const [approvingId, setApprovingId] = useState(null);
+
+  // ------- Nurse approve modal state -------
+  const [isApproveNurseModalOpen, setIsApproveNurseModalOpen] = useState(false);
+  const [pendingNurses, setPendingNurses] = useState([]);
+  const [pendingNurseLoading, setPendingNurseLoading] = useState(false);
+  const [pendingNurseError, setPendingNurseError] = useState('');
+  const [approvingNurseId, setApprovingNurseId] = useState(null);
+
+  // ------- Lab assistant approve modal state -------
+  const [isApproveLabModalOpen, setIsApproveLabModalOpen] = useState(false);
+  const [pendingLabAssistants, setPendingLabAssistants] = useState([]);
+  const [pendingLabLoading, setPendingLabLoading] = useState(false);
+  const [pendingLabError, setPendingLabError] = useState('');
+  const [approvingLabId, setApprovingLabId] = useState(null);
+
+  // Delete modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    speciality: '',
-    phoneNumber: '+1 (555) 245-38869',
-    dateOfBirth: '',
-    status: ''
-  });
 
-  // Sample data based on the image - converted to state for deletion
+  // Sample data (your existing table data)
   const [doctorsData, setDoctorsData] = useState([
     { id: 1, name: 'Dr. Anya Sharma', speciality: 'Cardiology', email: 'anya.sharma@mediease.com', phone: 'Nentiom', status: 'Active' },
     { id: 2, name: 'Dr. Ben Carter', speciality: 'Neurology', email: '+1 (555) 123-4567', phone: 'Active', status: 'Active' },
     { id: 3, name: 'Ben Carter', speciality: 'Pedatics', email: '+1 (555) 123-4567', phone: 'Inactive', status: 'Active' },
-    { id: 4, name: 'Chloe Lee', speciality: 'Pedatrics', email: '+1 (555) 123-4567', phone: 'Active', status: 'Active' },
+    { id: 4, name: 'Chloe Lee', speciality: 'Pedatics', email: '+1 (555) 123-4567', phone: 'Active', status: 'Active' },
     { id: 5, name: 'David Chen', speciality: 'Oncology', email: '+1 (555) 123-4567', phone: 'Active', status: 'Active' },
     { id: 6, name: 'Dermology', speciality: 'Dermology', email: '+1 (555) 123-4567', phone: 'Active', status: 'Active' },
   ]);
@@ -36,6 +51,8 @@ const AdminUsers = () => {
     { id: 1, name: 'John Doe', speciality: 'N/A', email: 'john.doe@email.com', phone: '+1 (555) 456-7890', status: 'Active' },
     { id: 2, name: 'Jane Smith', speciality: 'N/A', email: 'jane.smith@email.com', phone: '+1 (555) 567-8901', status: 'Active' },
   ]);
+
+  // ------------------ helpers for current tab table ------------------
 
   const getCurrentData = () => {
     switch (activeTab) {
@@ -56,38 +73,339 @@ const AdminUsers = () => {
     item.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddNew = () => {
-    setIsModalOpen(true);
+  // ------------------ generic helpers for pending data ------------------
+
+  const getDoctorDisplayName = (doc) => {
+    if (doc.user?.firstName || doc.user?.lastName) {
+      return `Dr. ${doc.user.firstName || ''} ${doc.user.lastName || ''}`.trim();
+    }
+    if (doc.firstName || doc.lastName) {
+      return `Dr. ${doc.firstName || ''} ${doc.lastName || ''}`.trim();
+    }
+    return doc.name || 'Unknown Doctor';
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    // Reset form data
-    setFormData({
-      fullName: '',
-      email: '',
-      speciality: '',
-      phoneNumber: '+1 (555) 245-38869',
-      dateOfBirth: '',
-      status: ''
-    });
+  const getUserDisplayName = (u, prefix = '') => {
+    if (u.user?.firstName || u.user?.lastName) {
+      return `${prefix}${u.user.firstName || ''} ${u.user.lastName || ''}`.trim();
+    }
+    if (u.firstName || u.lastName) {
+      return `${prefix}${u.firstName || ''} ${u.lastName || ''}`.trim();
+    }
+    return u.name || 'Unknown';
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const getEmail = (u) => {
+    if (u.user?.email) return u.user.email;
+    if (u.email) return u.email;
+    return 'N/A';
   };
 
-  const handleSaveDoctor = (e) => {
-    e.preventDefault();
-    // Handle save doctor logic here
-    console.log('Saving doctor:', formData);
-    // Add the new doctor to the list (you would typically make an API call here)
-    handleCloseModal();
+  const getDoctorDivision = (doc) => {
+    if (doc.division) return doc.division;
+
+    const qual = doc.resource?.qualification?.[0];
+    const divisionExt = qual?.extension?.find(
+      (ext) => ext.url === 'urn:hospital:practitioner:division'
+    );
+    return divisionExt?.valueString || 'N/A';
   };
+
+  const getDoctorMedicalLicenseId = (doc) => {
+    if (doc.medicalLicenseId) return doc.medicalLicenseId;
+    if (doc.user?.medicalLicenseId) return doc.user.medicalLicenseId;
+    if (doc.practitioner?.medicalLicenseId) return doc.practitioner.medicalLicenseId;
+
+    const identifiers = doc.resource?.identifier || [];
+    const licenseId = identifiers.find(
+      (id) => id.system === 'urn:hospital:practitioner:license'
+    )?.value;
+
+    return licenseId || null;
+  };
+
+  const getNurseId = (n) => {
+    if (n.nurId) return n.nurId;
+    if (n.user?.nurId) return n.user.nurId;
+
+    const identifiers = n.resource?.identifier || [];
+    const nur = identifiers.find(
+      (id) => id.system === 'urn:hospital:nurse:nurid'
+    )?.value;
+
+    return nur || null;
+  };
+
+  const getLabAssistantId = (la) => {
+    if (la.labId) return la.labId;
+    if (la.user?.labId) return la.user.labId;
+    return null;
+  };
+
+  // ------------------ approve DOCTORS flow ------------------
+
+  const openApproveModal = async () => {
+    setIsApproveModalOpen(true);
+    setPendingLoading(true);
+    setPendingError('');
+
+    try {
+      const res = await httpClient.get('/auth/pending-users');
+      const raw = res.data?.data;
+      let doctors = [];
+
+      if (raw && Array.isArray(raw.doctors)) {
+        doctors = raw.doctors;
+      } else if (Array.isArray(raw)) {
+        doctors = raw.filter((u) => u.role === 'doctor' || u.user?.role === 'doctor');
+      } else {
+        const arr = Array.isArray(raw?.users) ? raw.users : [];
+        doctors = arr.filter((u) => u.role === 'doctor' || u.user?.role === 'doctor');
+      }
+
+      setPendingDoctors(doctors);
+    } catch (err) {
+      console.error('Error fetching pending doctors:', err);
+      setPendingError(
+        err?.response?.data?.message || 'Failed to load pending doctors.'
+      );
+    } finally {
+      setPendingLoading(false);
+    }
+  };
+
+  const closeApproveModal = () => {
+    setIsApproveModalOpen(false);
+    setPendingDoctors([]);
+    setPendingError('');
+    setApprovingId(null);
+  };
+
+  const handleApproveDoctor = async (doctor) => {
+    const medicalLicenseId = getDoctorMedicalLicenseId(doctor);
+
+    if (!medicalLicenseId) {
+      alert('No medicalLicenseId found for this doctor.');
+      return;
+    }
+
+    try {
+      setApprovingId(medicalLicenseId);
+
+      const res = await httpClient.put(
+        `/auth/approve/doctor/${medicalLicenseId}`
+      );
+
+      const approved = res.data?.data;
+
+      if (approved) {
+        const { user, practitioner } = approved;
+
+        setDoctorsData((prev) => [
+          ...prev,
+          {
+            id: user.id,
+            name: `Dr. ${user.firstName} ${user.lastName}`,
+            speciality: getDoctorDivision(practitioner) || 'N/A',
+            email: user.email,
+            phone: 'N/A',
+            status: user.status === 'approved' ? 'Active' : user.status,
+          },
+        ]);
+      }
+
+      setPendingDoctors((prev) =>
+        prev.filter(
+          (d) => getDoctorMedicalLicenseId(d) !== medicalLicenseId
+        )
+      );
+    } catch (err) {
+      console.error('Error approving doctor:', err);
+      alert(
+        err?.response?.data?.message ||
+        'Failed to approve doctor. Please try again.'
+      );
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  // ------------------ approve NURSES flow ------------------
+
+  const openApproveNurseModal = async () => {
+    setIsApproveNurseModalOpen(true);
+    setPendingNurseLoading(true);
+    setPendingNurseError('');
+
+    try {
+      const res = await httpClient.get('/auth/pending-users');
+      const raw = res.data?.data;
+      let nurses = [];
+
+      if (raw && Array.isArray(raw.nurses)) {
+        nurses = raw.nurses;
+      } else if (Array.isArray(raw)) {
+        nurses = raw.filter((u) => u.role === 'nurse' || u.user?.role === 'nurse');
+      } else {
+        const arr = Array.isArray(raw?.users) ? raw.users : [];
+        nurses = arr.filter((u) => u.role === 'nurse' || u.user?.role === 'nurse');
+      }
+
+      setPendingNurses(nurses);
+    } catch (err) {
+      console.error('Error fetching pending nurses:', err);
+      setPendingNurseError(
+        err?.response?.data?.message || 'Failed to load pending nurses.'
+      );
+    } finally {
+      setPendingNurseLoading(false);
+    }
+  };
+
+  const closeApproveNurseModal = () => {
+    setIsApproveNurseModalOpen(false);
+    setPendingNurses([]);
+    setPendingNurseError('');
+    setApprovingNurseId(null);
+  };
+
+  const handleApproveNurse = async (nurse) => {
+    const nurId = getNurseId(nurse);
+
+    if (!nurId) {
+      alert('No nurId found for this nurse.');
+      return;
+    }
+
+    try {
+      setApprovingNurseId(nurId);
+
+      const res = await httpClient.put(
+        `/auth/approve/nurse/${nurId}`
+      );
+
+      // response:
+      // { success, message, data: { user, practitioner } }
+      const approved = res.data?.data;
+
+      if (approved) {
+        const { user } = approved;
+
+        setStaffData((prev) => [
+          ...prev,
+          {
+            id: user.id,
+            name: `Nurse ${user.firstName} ${user.lastName}`,
+            speciality: 'Nurse',
+            email: user.email,
+            phone: 'N/A',
+            status: user.status === 'approved' ? 'Active' : user.status,
+          },
+        ]);
+      }
+
+      setPendingNurses((prev) =>
+        prev.filter((n) => getNurseId(n) !== nurId)
+      );
+    } catch (err) {
+      console.error('Error approving nurse:', err);
+      alert(
+        err?.response?.data?.message ||
+        'Failed to approve nurse. Please try again.'
+      );
+    } finally {
+      setApprovingNurseId(null);
+    }
+  };
+
+  // ------------------ approve LAB ASSISTANTS flow ------------------
+
+  const openApproveLabModal = async () => {
+    setIsApproveLabModalOpen(true);
+    setPendingLabLoading(true);
+    setPendingLabError('');
+
+    try {
+      const res = await httpClient.get('/auth/pending-users');
+      const raw = res.data?.data;
+      let labs = [];
+
+      if (raw && Array.isArray(raw.labAssistants)) {
+        labs = raw.labAssistants;
+      } else if (Array.isArray(raw)) {
+        labs = raw.filter((u) => u.role === 'lab_assistant' || u.user?.role === 'lab_assistant');
+      } else {
+        const arr = Array.isArray(raw?.users) ? raw.users : [];
+        labs = arr.filter((u) => u.role === 'lab_assistant' || u.user?.role === 'lab_assistant');
+      }
+
+      setPendingLabAssistants(labs);
+    } catch (err) {
+      console.error('Error fetching pending lab assistants:', err);
+      setPendingLabError(
+        err?.response?.data?.message || 'Failed to load pending lab assistants.'
+      );
+    } finally {
+      setPendingLabLoading(false);
+    }
+  };
+
+  const closeApproveLabModal = () => {
+    setIsApproveLabModalOpen(false);
+    setPendingLabAssistants([]);
+    setPendingLabError('');
+    setApprovingLabId(null);
+  };
+
+  const handleApproveLabAssistant = async (lab) => {
+    const labId = getLabAssistantId(lab);
+
+    if (!labId) {
+      alert('No labId found for this lab assistant.');
+      return;
+    }
+
+    try {
+      setApprovingLabId(labId);
+
+      const res = await httpClient.put(
+        `/auth/approve/lab-assistant/${labId}`
+      );
+
+      // response:
+      // { success, message, data: { user } }
+      const approved = res.data?.data;
+      if (approved) {
+        const { user } = approved;
+
+        setStaffData((prev) => [
+          ...prev,
+          {
+            id: user.id,
+            name: `Lab Assistant ${user.firstName} ${user.lastName}`,
+            speciality: 'Lab Assistant',
+            email: user.email,
+            phone: 'N/A',
+            status: user.status === 'approved' ? 'Active' : user.status,
+          },
+        ]);
+      }
+
+      setPendingLabAssistants((prev) =>
+        prev.filter((l) => getLabAssistantId(l) !== labId)
+      );
+    } catch (err) {
+      console.error('Error approving lab assistant:', err);
+      alert(
+        err?.response?.data?.message ||
+        'Failed to approve lab assistant. Please try again.'
+      );
+    } finally {
+      setApprovingLabId(null);
+    }
+  };
+
+  // ------------------ delete existing rows ------------------
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user);
@@ -97,19 +415,18 @@ const AdminUsers = () => {
   const handleConfirmDelete = () => {
     if (userToDelete) {
       const userType = activeTab.toLowerCase();
-      
+
       if (userType === 'doctors') {
-        setDoctorsData(prev => prev.filter(user => user.id !== userToDelete.id));
+        setDoctorsData((prev) => prev.filter((u) => u.id !== userToDelete.id));
       } else if (userType === 'staff') {
-        setStaffData(prev => prev.filter(user => user.id !== userToDelete.id));
+        setStaffData((prev) => prev.filter((u) => u.id !== userToDelete.id));
       } else if (userType === 'patients') {
-        setPatientsData(prev => prev.filter(user => user.id !== userToDelete.id));
+        setPatientsData((prev) => prev.filter((u) => u.id !== userToDelete.id));
       }
-      
-      // You would typically make an API call here to delete from backend
+
       console.log(`Deleting ${userType}:`, userToDelete);
     }
-    
+
     setIsDeleteModalOpen(false);
     setUserToDelete(null);
   };
@@ -119,10 +436,12 @@ const AdminUsers = () => {
     setUserToDelete(null);
   };
 
+  // ------------------ render ------------------
+
   return (
     <div className="admin-users-container">
       <h1 className="admin-users-title">Users</h1>
-      
+
       {/* Tabs */}
       <div className="admin-users-tabs">
         <button
@@ -145,7 +464,7 @@ const AdminUsers = () => {
         </button>
       </div>
 
-      {/* Search and Add Button */}
+      {/* Search + Approve Buttons */}
       <div className="admin-users-actions">
         <div className="admin-users-search">
           <FaSearch className="search-icon" />
@@ -157,13 +476,37 @@ const AdminUsers = () => {
             className="admin-users-search-input"
           />
         </div>
-        <button className="admin-users-add-btn" onClick={handleAddNew}>
-          <FaPlus className="add-icon" />
-          Add New {activeTab === 'Doctors' ? 'Doctor' : activeTab === 'Staff' ? 'Staff' : 'Patient'}
-        </button>
+
+        {/* Doctors tab: Approve Doctors */}
+        {activeTab === 'Doctors' && (
+          <button className="admin-users-add-btn" onClick={openApproveModal}>
+            <FaPlus className="add-icon" />
+            Approve Doctors
+          </button>
+        )}
+
+        {/* Staff tab: Approve Nurse + Lab Assistant */}
+        {activeTab === 'Staff' && (
+          <div className="admin-users-approve-group">
+            <button
+              className="admin-users-add-btn"
+              onClick={openApproveNurseModal}
+            >
+              <FaPlus className="add-icon" />
+              Approve Nurses
+            </button>
+            <button
+              className="admin-users-add-btn"
+              onClick={openApproveLabModal}
+            >
+              <FaPlus className="add-icon" />
+              Approve Lab Assistants
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Table */}
+      {/* Main Table */}
       <div className="admin-users-table-wrapper">
         <table className="admin-users-table">
           <thead>
@@ -209,113 +552,172 @@ const AdminUsers = () => {
         </table>
       </div>
 
-      {/* Add New Doctor Modal */}
-      {isModalOpen && (
-        <div className="admin-users-modal-overlay" onClick={handleCloseModal}>
+      {/* ---- Approve Doctors Modal ---- */}
+      {isApproveModalOpen && (
+        <div className="admin-users-modal-overlay" onClick={closeApproveModal}>
           <div className="admin-users-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-users-modal-header">
-              <h2 className="admin-users-modal-title">Add New Doctor</h2>
-              <button className="admin-users-modal-close" onClick={handleCloseModal}>
+              <h2 className="admin-users-modal-title">Pending Doctors for Approval</h2>
+              <button className="admin-users-modal-close" onClick={closeApproveModal}>
                 <FaTimes />
               </button>
             </div>
-            
-            <form className="admin-users-modal-form" onSubmit={handleSaveDoctor}>
-              <div className="admin-users-form-group">
-                <label className="admin-users-form-label">Full Name</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  className="admin-users-form-input"
-                  placeholder="Enter full name"
-                  required
-                />
-              </div>
 
-              <div className="admin-users-form-group">
-                <label className="admin-users-form-label">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="admin-users-form-input"
-                  placeholder="Enter email"
-                  required
-                />
-              </div>
+            <div className="admin-users-modal-body">
+              {pendingLoading && <p>Loading pending doctors...</p>}
+              {pendingError && <p className="error-text">{pendingError}</p>}
+              {!pendingLoading && !pendingError && pendingDoctors.length === 0 && (
+                <p>No pending doctors to approve.</p>
+              )}
 
-              <div className="admin-users-form-group">
-                <label className="admin-users-form-label">Speciality</label>
-                <input
-                  type="text"
-                  name="speciality"
-                  value={formData.speciality}
-                  onChange={handleInputChange}
-                  className="admin-users-form-input"
-                  placeholder="Enter speciality"
-                  required
-                />
-              </div>
+              {!pendingLoading && !pendingError && pendingDoctors.length > 0 && (
+                <table className="admin-users-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Division</th>
+                      <th>Medical License ID</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pendingDoctors.map((doc) => {
+                      const license = getDoctorMedicalLicenseId(doc);
+                      return (
+                        <tr key={doc._id || license}>
+                          <td>{getDoctorDisplayName(doc)}</td>
+                          <td>{getEmail(doc)}</td>
+                          <td>{getDoctorDivision(doc)}</td>
+                          <td>{license || 'N/A'}</td>
+                          <td>
+                            <button
+                              className="admin-users-approve-btn"
+                              onClick={() => handleApproveDoctor(doc)}
+                              disabled={approvingId === license}
+                            >
+                              {approvingId === license ? 'Approving...' : 'Approve'}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
-              <div className="admin-users-form-group">
-                <label className="admin-users-form-label">Phone Number</label>
-                <input
-                  type="text"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  className="admin-users-form-input"
-                  placeholder="Enter phone number"
-                  required
-                />
-              </div>
+      {/* ---- Approve Nurses Modal ---- */}
+      {isApproveNurseModalOpen && (
+        <div className="admin-users-modal-overlay" onClick={closeApproveNurseModal}>
+          <div className="admin-users-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-users-modal-header">
+              <h2 className="admin-users-modal-title">Pending Nurses for Approval</h2>
+              <button className="admin-users-modal-close" onClick={closeApproveNurseModal}>
+                <FaTimes />
+              </button>
+            </div>
 
-              <div className="admin-users-form-group">
-                <label className="admin-users-form-label">Date of Birth</label>
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
-                  onChange={handleInputChange}
-                  className="admin-users-form-input"
-                  required
-                />
-              </div>
+            <div className="admin-users-modal-body">
+              {pendingNurseLoading && <p>Loading pending nurses...</p>}
+              {pendingNurseError && <p className="error-text">{pendingNurseError}</p>}
+              {!pendingNurseLoading && !pendingNurseError && pendingNurses.length === 0 && (
+                <p>No pending nurses to approve.</p>
+              )}
 
-              <div className="admin-users-form-group">
-                <label className="admin-users-form-label">Status</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="admin-users-form-select"
-                  required
-                >
-                  <option value="">Select Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
+              {!pendingNurseLoading && !pendingNurseError && pendingNurses.length > 0 && (
+                <table className="admin-users-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Nurse ID</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pendingNurses.map((n) => {
+                      const nurId = getNurseId(n);
+                      return (
+                        <tr key={n._id || nurId}>
+                          <td>{getUserDisplayName(n, 'Nurse ')}</td>
+                          <td>{getEmail(n)}</td>
+                          <td>{nurId || 'N/A'}</td>
+                          <td>
+                            <button
+                              className="admin-users-approve-btn"
+                              onClick={() => handleApproveNurse(n)}
+                              disabled={approvingNurseId === nurId}
+                            >
+                              {approvingNurseId === nurId ? 'Approving...' : 'Approve'}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
-              <div className="admin-users-modal-actions">
-                <button
-                  type="button"
-                  className="admin-users-modal-cancel"
-                  onClick={handleCloseModal}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="admin-users-modal-save"
-                >
-                  Save Doctor
-                </button>
-              </div>
-            </form>
+      {/* ---- Approve Lab Assistants Modal ---- */}
+      {isApproveLabModalOpen && (
+        <div className="admin-users-modal-overlay" onClick={closeApproveLabModal}>
+          <div className="admin-users-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-users-modal-header">
+              <h2 className="admin-users-modal-title">Pending Lab Assistants for Approval</h2>
+              <button className="admin-users-modal-close" onClick={closeApproveLabModal}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="admin-users-modal-body">
+              {pendingLabLoading && <p>Loading pending lab assistants...</p>}
+              {pendingLabError && <p className="error-text">{pendingLabError}</p>}
+              {!pendingLabLoading && !pendingLabError && pendingLabAssistants.length === 0 && (
+                <p>No pending lab assistants to approve.</p>
+              )}
+
+              {!pendingLabLoading && !pendingLabError && pendingLabAssistants.length > 0 && (
+                <table className="admin-users-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Lab Assistant ID</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pendingLabAssistants.map((l) => {
+                      const labId = getLabAssistantId(l);
+                      return (
+                        <tr key={l._id || labId}>
+                          <td>{getUserDisplayName(l, 'Lab Assistant ')}</td>
+                          <td>{getEmail(l)}</td>
+                          <td>{labId || 'N/A'}</td>
+                          <td>
+                            <button
+                              className="admin-users-approve-btn"
+                              onClick={() => handleApproveLabAssistant(l)}
+                              disabled={approvingLabId === labId}
+                            >
+                              {approvingLabId === labId ? 'Approving...' : 'Approve'}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -330,7 +732,7 @@ const AdminUsers = () => {
                 <FaTimes />
               </button>
             </div>
-            
+
             <div className="admin-users-delete-modal-content">
               <p className="admin-users-delete-message">
                 Are you sure you want to delete <strong>{userToDelete?.name}</strong>?
@@ -359,9 +761,9 @@ const AdminUsers = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
 
 export default AdminUsers;
-
