@@ -1,7 +1,9 @@
 import asyncHandler from 'express-async-handler';
+import axios from 'axios';
 import Prescription from '../models/prescription.model.js';
 import FHIRPatient from '../models/fhirPatient.model.js';
 import User from '../models/user.model.js';
+import FHIREncounter from '../models/fhirEncounter.model.js';
 import { validateEncounterBeforePrescription, attachPrescriptionToEncounter } from '../services/prescriptionEncounter.service.js';
 import { runAiValidation } from '../services/aiPrescriptionValidation.service.js';
 
@@ -15,6 +17,121 @@ const mapStatusToFHIR = (status) => {
   };
   return map[normalized] || 'draft';
 };
+
+/**
+ * @desc    Validate a prescription draft using AI (NO DB SAVE)
+ * @route   POST /fhir/MedicationRequest/validate
+ * @access  Private (doctor/nurse/admin)
+ */
+export const validatePrescriptionDraft = asyncHandler(async (req, res) => {
+  const {
+    patientPhn,
+    medicalLicenseId,
+    complaint,
+    visitType,
+    status,
+    prescriptionItems
+  } = req.body;
+
+  if (!patientPhn || !medicalLicenseId || !visitType || !Array.isArray(prescriptionItems) || prescriptionItems.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'patientPhn, medicalLicenseId, visitType and non-empty prescriptionItems are required'
+    });
+  }
+
+  // Validate patient
+  const patient = await FHIRPatient.findOne({ phn: patientPhn });
+  if (!patient) {
+    return res.status(404).json({ success: false, message: 'Patient not found' });
+  }
+
+  // Validate doctor
+  const doctor = await User.findOne({ role: 'doctor', medicalLicenseId });
+  if (!doctor) {
+    return res.status(404).json({ success: false, message: 'Doctor not found' });
+  }
+
+  // ❗ IMPORTANT FIX:
+  // Validation mode DOES NOT need encounterCheck
+
+  // Build dosageInstruction-like structure from draft
+  const medicines = prescriptionItems.map(item => ({
+    name: item.name || item.drugName,
+    rxNormId: null,
+    dose: item.dose || null,
+    frequency: item.frequency || null,
+    period: item.period || null,
+    instructions: item.doseComment || item.comment || ""
+  }));
+
+  // Collect ALL past encounter complaints
+  const past = await FHIREncounter.find({
+    patientPhn
+  });
+
+  const allComplaints = past
+    .map(e => e.complaint)
+    .filter(Boolean)
+    .map(c => c.trim())
+    .filter(c => c.length > 0);
+
+  const uniqueConditions = [...new Set(allComplaints.map(c => c.toLowerCase()))]
+    .map(c => c.charAt(0).toUpperCase() + c.slice(1));
+
+  const payload = {
+    patientPhn,
+    patientConditions: uniqueConditions,
+    currentComplaint: complaint || null,
+    medicines
+  };
+
+  console.log('=== VALIDATE DRAFT PAYLOAD TO AI ===');
+  console.log(JSON.stringify(payload, null, 2));
+
+  try {
+    const response = await axios.post(
+      'http://0.0.0.0:8000/ai/validate-prescription',
+      payload,
+      { timeout: 10000 }
+    );
+
+    // Deduplicate warnings
+    if (Array.isArray(response.data?.warnings)) {
+      const unique = [];
+      const seen = new Set();
+
+      for (const w of response.data.warnings) {
+        const key = `${w.medicineName}-${w.drugClass}-${w.relatedCondition}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(w);
+        }
+      }
+
+      response.data.warnings = unique;
+      response.data.safe = unique.length === 0;
+    }
+
+    return res.json({
+      success: true,
+      aiValidation: response.data
+    });
+
+  } catch (error) {
+    console.error('AI validate draft error:', error.message);
+    return res.json({
+      success: false,
+      aiValidation: {
+        success: false,
+        warnings: [],
+        safe: true,
+        error: error.response?.data?.error || error.message
+      }
+    });
+  }
+});
+
 
 /**
  * @desc    Create a single FHIR MedicationRequest with multiple dosageInstruction items
@@ -57,23 +174,23 @@ export const createPrescription = asyncHandler(async (req, res) => {
   // Build dosageInstruction array per specification
   const dosageInstruction = [];
   for (const item of prescriptionItems) {
-    // Backward compatibility: accept either 'name' or 'drugName'
-    const { name, drugName, dose, frequency, period, doseComment } = item;
-    const medicationName = name || drugName; // prioritize 'name'
+    const { name, drugName, dose, frequency, period, doseComment, comment } = item;
+    const medicationName = name || drugName;
     if (!medicationName) {
       return res.status(400).json({ success: false, message: 'Each prescription item must include name or drugName' });
     }
+    const effectiveDoseComment = doseComment ?? comment ?? '';
     const textParts = [];
     if (dose) textParts.push(`Dose: ${dose}`);
     if (frequency) textParts.push(`Frequency: ${frequency}`);
     if (period) textParts.push(`Period: ${period}`);
-    if (doseComment) textParts.push(`Comment: ${doseComment}`);
+    if (effectiveDoseComment) textParts.push(`Comment: ${effectiveDoseComment}`);
     dosageInstruction.push({
       medication: medicationName,
       dose,
       frequency,
       period,
-      doseComment,
+      doseComment: effectiveDoseComment,
       text: textParts.join(', ')
     });
   }
@@ -104,33 +221,43 @@ export const createPrescription = asyncHandler(async (req, res) => {
     subject: { reference: `Patient/${patientPhn}` },
     requester: { reference: `Practitioner/${medicalLicenseId}` },
     authoredOn,
-    dosageInstruction: dosageInstruction.map(di => ({ text: di.text, extension: [ { url: 'http://example.org/fhir/StructureDefinition/prescription-medication', valueString: di.medication } ], ...(di.dose && { doseAndRate: [{ doseQuantity: { value: di.dose } }] }) })),
+    dosageInstruction: dosageInstruction.map(di => ({
+      text: di.text,
+      extension: [
+        {
+          url: 'http://example.org/fhir/StructureDefinition/prescription-medication',
+          valueString: di.medication
+        }
+      ],
+      ...(di.dose && {
+        doseAndRate: [{
+          doseQuantity: { value: di.dose }
+        }]
+      })
+    })),
     note: []
   };
   if (complaint) {
     resource.note.push({ text: `Complaint: ${complaint}` });
   }
-  // Add visitType and original structured dosageInstruction via extensions
   resource.extension = [
     { url: 'http://example.org/fhir/StructureDefinition/visit-type', valueString: visitType },
     { url: 'http://example.org/fhir/StructureDefinition/raw-dosageInstruction', valueString: JSON.stringify(dosageInstruction) }
   ];
 
   prescDoc.resource = resource;
-  // Persist
   await prescDoc.save();
 
   // Attach prescription to encounter
   await attachPrescriptionToEncounter(encounterCheck.encounter._id, prescDoc._id);
 
-  // Add encounter reference extension for convenience if not already
   resource.extension = resource.extension || [];
   resource.extension.push({
     url: 'http://example.org/fhir/StructureDefinition/encounter-reference',
     valueString: encounterCheck.encounter.encId
   });
 
-  // Run AI validation for the newly created prescription only
+  // Run AI validation (post-save)
   const aiResult = await runAiValidation(patientPhn, encounterCheck.encounter._id, prescDoc._id);
 
   return res.status(201).json({

@@ -78,6 +78,11 @@ const NewPrescription = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [qrUrl, setQrUrl] = useState("");
 
+  // --- AI validation modal ---
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [validationResult, setValidationResult] = useState(null);
+  const [isValidating, setIsValidating] = useState(false);
+
   // ============================
   //  LOAD PATIENT + DOCTOR DATA
   // ============================
@@ -266,7 +271,55 @@ const NewPrescription = () => {
   };
 
   // ============================
-  //  BACKEND: SAVE PRESCRIPTION
+  //  BACKEND: VALIDATE PRESCRIPTION (AI only)
+  // ============================
+  const handleValidatePrescription = async () => {
+    try {
+      if (!doctorLicense) {
+        alert("Doctor license not found. Please login again.");
+        return;
+      }
+
+      if (!prescriptionItems.length) {
+        alert("Add at least one medicine before validating.");
+        return;
+      }
+
+      const itemsPayload = prescriptionItems.map((item) => ({
+        name: item.name,
+        dose: item.dose,
+        frequency: item.frequency,
+        period: item.period,
+        doseComment: item.doseComment,
+      }));
+
+      const payload = {
+        patientPhn,
+        medicalLicenseId: doctorLicense,
+        visitType: prescriptionMeta.visitType,
+        status: prescriptionMeta.status,
+        complaint: prescriptionMeta.complaint,
+        prescriptionItems: itemsPayload,
+      };
+
+      setIsValidating(true);
+      const res = await httpClient.post(
+        "/fhir/MedicationRequest/validate",
+        payload
+      );
+
+      setValidationResult(res.data?.aiValidation || null);
+      setShowValidationModal(true);
+    } catch (err) {
+      console.error("Failed to validate prescription", err?.response?.data || err);
+      alert("Failed to validate prescription.");
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  // ============================
+  //  BACKEND: SAVE PRESCRIPTION (actual DB save)
   // ============================
   const handleSavePrescription = async () => {
     try {
@@ -297,13 +350,14 @@ const NewPrescription = () => {
         return;
       }
 
-      const encounterId = activeEncounter.encId; // IMPORTANT: FHIR encounter identifier
+      const encounterId = activeEncounter.encId; // FHIR encounter identifier
 
       const itemsPayload = prescriptionItems.map((item) => ({
         name: item.name,
         dose: item.dose,
         frequency: item.frequency,
         period: item.period,
+        doseComment: item.doseComment,
         comment: item.doseComment,
       }));
 
@@ -321,6 +375,7 @@ const NewPrescription = () => {
       console.log("MedicationRequest created:", res.data);
 
       alert("Prescription created successfully.");
+      setShowValidationModal(false);
       navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
     } catch (err) {
       console.error("Failed to save prescription", err?.response?.data || err);
@@ -789,12 +844,107 @@ const NewPrescription = () => {
           </button>
           <button
             className="action-btn primary"
-            onClick={handleSavePrescription}
+            onClick={handleValidatePrescription}
             type="button"
+            disabled={isValidating}
           >
-            Save
+            {isValidating ? "Validating..." : "Validate"}
           </button>
         </div>
+
+        {/* AI Validation Modal */}
+        {showValidationModal && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h3>AI Validation Result</h3>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => setShowValidationModal(false)}
+                  aria-label="Close validation"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="modal-body">
+                {!validationResult ? (
+                  <p>Loading...</p>
+                ) : (
+                  <>
+                    <p>
+                      <strong>Safe:</strong>{" "}
+                      {validationResult.safe ? "Yes" : "No"}
+                    </p>
+                    <p>
+                      <strong>Warnings count:</strong>{" "}
+                      {validationResult.warnings?.length || 0}
+                    </p>
+
+                    {validationResult.warnings &&
+                      validationResult.warnings.length > 0 && (
+                        <div className="modal-table-wrapper">
+                          <table className="modal-table">
+                            <thead>
+                              <tr>
+                                <th>Medicine</th>
+                                <th>Drug Class</th>
+                                <th>Condition</th>
+                                <th>Severity</th>
+                                <th>Message</th>
+                                <th>Alternatives</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {validationResult.warnings.map((w, idx) => (
+                                <tr key={idx}>
+                                  <td>{w.medicineName}</td>
+                                  <td>{w.drugClass}</td>
+                                  <td>{w.relatedCondition}</td>
+                                  <td>{w.severity}</td>
+                                  <td>{w.message}</td>
+                                  <td>
+                                    {Array.isArray(w.suggestedAlternatives) &&
+                                    w.suggestedAlternatives.length > 0
+                                      ? w.suggestedAlternatives.join(", ")
+                                      : "-"}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
+                    {(!validationResult.warnings ||
+                      validationResult.warnings.length === 0) && (
+                      <p className="selection-helper">
+                        No warnings. Prescription appears safe.
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+              <div
+                className="modal-footer"
+                style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
+              >
+                <button
+                  className="action-btn secondary"
+                  onClick={() => setShowValidationModal(false)}
+                >
+                  Edit Prescription
+                </button>
+                <button
+                  className="action-btn primary"
+                  onClick={handleSavePrescription}
+                  type="button"
+                >
+                  Save Prescription
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Preview Modal */}
         {showPreview && (
