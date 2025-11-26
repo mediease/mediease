@@ -90,3 +90,36 @@
 .action-cell span:hover {
   color: #007bff;
 }
+
+.appointment-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.appointment-table th,
+.appointment-table td {
+  padding: 14px 18px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-row:hover {
+  background-color: #f0f7ff;
+  transition: 0.2s ease;
+}
+
+.appointment-table-wrapper {
+  overflow-x: auto;
+}
+
+.even-row {
+  background-color: #f9f9f9;
+}
+
+.action-cell span {
+  margin-right: 10px;
+  cursor: pointer;
+}

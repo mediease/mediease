@@ -8,7 +8,8 @@ const TableN1 = ({
   data,
   compact,
   showHeader = true,
-  showActions = false
+  showActions = false,
+  handleRowClick
 }) => {
   return (
     <div className={`appointment-container ${compact ? 'compact-table' : ''}`}>
@@ -18,6 +19,7 @@ const TableN1 = ({
           {buttonLink && <button className="see-all-btn" onClick={buttonLink}>See All</button>}
         </div>
       )}
+
       <div className="appointment-table-wrapper">
         <table className="appointment-table">
           <thead>
@@ -28,12 +30,19 @@ const TableN1 = ({
               {showActions && <th>Action</th>}
             </tr>
           </thead>
+
           <tbody>
             {data.map((row, rowIndex) => (
-              <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'even-row' : ''}>
+              <tr
+                key={rowIndex}
+                className={rowIndex % 2 === 0 ? 'even-row' : ''}
+                onClick={() => handleRowClick && handleRowClick(row)}   // 🔥 ADDED
+                style={{ cursor: handleRowClick ? "pointer" : "default" }} // 🔥 ADDED
+              >
                 {columns.map((col, colIndex) => (
                   <td key={colIndex}>{row[col.key]}</td>
                 ))}
+
                 {showActions && (
                   <td className="action-cell">
                     <span role="button">👁️</span>
@@ -44,6 +53,7 @@ const TableN1 = ({
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
     </div>

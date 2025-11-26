@@ -1,19 +1,38 @@
+// models/labRequest.model.js
+
 import mongoose from 'mongoose';
 import { createLABID } from '../utils/idGenerators.js';
 
-const labRequestSchema = new mongoose.Schema({
-  labId: { type: String, unique: true },
-  patientPhn: { type: String, required: true, index: true },
-  doctorLicense: { type: String, required: true, index: true },
-  encounterId: { type: mongoose.Schema.Types.ObjectId, ref: 'FHIREncounter', required: true },
-  testType: { type: String, required: true },
-  status: { type: String, enum: ['pending', 'completed'], default: 'pending' },
-  fileUrl: { type: String },
-  resultText: { type: String },
-  parameters: { type: Object },
-  completedAt: { type: Date },
-}, { timestamps: true });
+const labRequestSchema = new mongoose.Schema(
+  {
+    labId: { type: String, unique: true }, // Format: LAB00001
+    patientPhn: { type: String, required: true, index: true },
+    doctorLicense: { type: String, required: true, index: true },
+    encounterId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'FHIREncounter',
+      required: true,
+      index: true
+    },
+    testType: {
+      type: String,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'completed'],
+      default: 'pending',
+      index: true
+    },
+    fileUrl: { type: String },
+    resultText: { type: String },
+    parameters: { type: Object }, // strict param map
+    completedAt: { type: Date }
+  },
+  { timestamps: true }
+);
 
+// Generate labId before saving if not present
 labRequestSchema.pre('save', async function (next) {
   if (!this.labId) {
     this.labId = await createLABID();

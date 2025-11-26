@@ -6,7 +6,7 @@ import httpClient from "../services/httpClient";
 import "./css/style.css";
 
 const ReportInfo = () => {
-  const { id } = useParams(); // PHN
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
@@ -15,7 +15,6 @@ const ReportInfo = () => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Map backend testTypes → readable names
   const TEST_LABELS = {
     ecg: "ECG",
     blood_sugar: "Blood Sugar",
@@ -27,7 +26,6 @@ const ReportInfo = () => {
     kft: "Kidney Function Test"
   };
 
-  // Columns for table
   const columns = [
     { label: "Lab ID", key: "labId" },
     { label: "Test", key: "testName" },
@@ -38,22 +36,23 @@ const ReportInfo = () => {
     { label: "Reviewed By", key: "reviewedBy" },
   ];
 
-  // ---------------------- Load Reports ----------------------
+  // Load reports
   useEffect(() => {
     const load = async () => {
       try {
         const res = await httpClient.get(`/api/lab/patient/${id}`);
         const { requests = [], reports = [] } = res.data.data;
 
-        // map request + report data into table rows
-        const combined = requests.map(req => {
+        const list = requests.map(req => {
           const report = reports.find(r => r.labId === req.labId);
 
           return {
-            labId: req.labId,
-            testName: TEST_LABELS[req.testType] || req.testType,
-            doctor: req.doctorLicense,
-            requested: new Date(req.createdAt).toLocaleDateString(),
+            labId: req.labId || "-",
+            testName: TEST_LABELS[req.testType] || req.testType || "-",
+            doctor: req.doctorLicense || "-",
+            requested: req.createdAt
+              ? new Date(req.createdAt).toLocaleDateString()
+              : "-",
             status: req.status === "pending" ? "Pending" : "Completed",
             lastUpdate: report?.reviewedAt
               ? new Date(report.reviewedAt).toLocaleDateString()
@@ -64,7 +63,7 @@ const ReportInfo = () => {
           };
         });
 
-        setRows(combined);
+        setRows(list);
       } catch (err) {
         console.error("Load report info failed:", err);
       } finally {
@@ -75,7 +74,10 @@ const ReportInfo = () => {
     load();
   }, [id]);
 
-  // ---------------------- Navigation ----------------------
+  const handleRowClick = (row) => {
+    navigate(`/doctor/reports/${row.labId}`);
+  };
+
   const handleTabChange = (option) => {
     setSelectedFilter(option);
 
@@ -119,6 +121,7 @@ const ReportInfo = () => {
           compact
           showHeader={true}
           showActions={false}
+          handleRowClick={handleRowClick}
         />
       )}
     </div>
