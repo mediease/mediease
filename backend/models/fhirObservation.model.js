@@ -1,12 +1,14 @@
 import mongoose from 'mongoose';
 
-const observationSchema = new mongoose.Schema({
-  patientPhn: { type: String, required: true, index: true },
-  encounterEncId: { type: String, required: true, index: true },
-  labRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'LabRequest', required: true, index: true },
-  testType: { type: String, required: true },
-  resource: { type: Object, required: true },
+const fhirObservationSchema = new mongoose.Schema({
+  patientPhn: { type: String },
+  encounterEncId: { type: String },
+  labRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'LabRequest' },
+  testType: { type: String },
+  resource: { type: Object, required: true }
 }, { timestamps: true });
 
-const FHIRObservation = mongoose.model('FHIRObservation', observationSchema);
+fhirObservationSchema.index({ patientPhn: 1 });
+
+const FHIRObservation = mongoose.model('FHIRObservation', fhirObservationSchema);
 export default FHIRObservation;

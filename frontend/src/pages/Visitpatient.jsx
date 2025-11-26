@@ -36,9 +36,15 @@ const Visitpatient = () => {
   const { id } = useParams(); // PHN
   const navigate = useNavigate();
 
-  const filterOptions = ["Basic", "Report", "Allergies", "Medications", "Visit History"];
-  const [selectedFilter, setSelectedFilter] = useState("Basic");
+  const filterOptions = [
+    "Basic",
+    "Report",
+    "Allergies",
+    "Medications",
+    "Visit History"
+  ];
 
+  const [selectedFilter, setSelectedFilter] = useState("Basic");
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
@@ -57,10 +63,39 @@ const Visitpatient = () => {
     load();
   }, [id]);
 
+  // ------------------ FIXED Navigation ------------------
+  const handleTabChange = (option) => {
+    setSelectedFilter(option);
+
+    switch (option) {
+      case "Basic":
+        navigate(`/doctor/patient/${id}`);
+        break;
+
+      case "Report":
+        navigate(`/doctor/patient/${id}/reportinfo`);
+        break;
+
+      case "Allergies":
+        navigate(`/doctor/patient/${id}/allergiesinfo`);
+        break;
+
+      case "Medications":
+        navigate(`/doctor/patient/${id}/medicationsinfo`);
+        break;
+
+      case "Visit History":
+        navigate(`/doctor/patient/${id}/historyinfo`);
+        break;
+
+      default:
+        navigate(`/doctor/patient/${id}`);
+    }
+  };
+
   // ------------------ Close Visit Handler ------------------
   const handleCloseVisit = async () => {
     try {
-      // 1. Logged-in doctor license
       const doctorRaw = localStorage.getItem("doctor");
       const doctor = doctorRaw ? JSON.parse(doctorRaw) : {};
       const doctorLicense = doctor?.medicalLicenseId;
@@ -70,14 +105,12 @@ const Visitpatient = () => {
         return;
       }
 
-      // 2. Fetch all encounters of this patient
       const encRes = await httpClient.get("/fhir/Encounter", {
         params: { patient: id }
       });
 
       const encounters = encRes?.data?.data || [];
 
-      // 3. Find active encounter (status=in-progress + doctor matches)
       const activeEncounter = encounters.find(enc =>
         enc.metadata?.status === "in-progress" &&
         enc.metadata?.doctorLicense === doctorLicense
@@ -90,7 +123,6 @@ const Visitpatient = () => {
 
       const encounterId = activeEncounter.id;
 
-      // 4. PUT update to backend to close encounter
       await httpClient.put(`/fhir/Encounter/${encounterId}`, {
         status: "finished",
         endTime: new Date().toISOString()
@@ -105,12 +137,6 @@ const Visitpatient = () => {
     }
   };
 
-  // ------------------ Navigation ------------------
-  const handleTabChange = (option) => {
-    setSelectedFilter(option);
-    navigate(`/doctor/patient/${id}/${option.toLowerCase().replace(" ", "")}`);
-  };
-
   const clickVisit = () =>
     navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
 
@@ -123,17 +149,14 @@ const Visitpatient = () => {
   const handleRequestSummary = () => setIsSummaryModalOpen(true);
   const handleCloseSummary = () => setIsSummaryModalOpen(false);
 
-  // ------------------ UI LOADING ------------------
   if (loading) return <p>Loading...</p>;
 
-  // ------------------ Extract Patient Details ------------------
   const fullName = resolveName(patient);
   const phn = resolvePhn(patient);
   const nic = resolveNic(patient);
   const gender = patient?.resource?.gender || "-";
   const dob = patient?.resource?.birthDate || "-";
 
-  // ------------------ Render ------------------
   return (
     <div className="patientDetailsMain">
       <h2 className="patientDetailsHeder">Patients - {fullName}</h2>
