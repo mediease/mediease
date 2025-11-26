@@ -17,18 +17,24 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Helper: delete uploaded file if we need to reject
+// Helper: delete uploaded file if rejected
 function safeDeleteUploadedFile(file) {
   if (!file) return;
   try {
     fs.unlinkSync(file.path);
-  } catch (err) {
-    console.error('Error deleting file:', err.message);
-  }
+  } catch {}
 }
 
-// Helper to build FHIR DiagnosticReport
-function buildDiagnosticReport({ patientPhn, encounterEncId, testType, resultText, fileUrl, mimeType, parameters }) {
+// Build FHIR DiagnosticReport
+function buildDiagnosticReport({
+  patientPhn,
+  encounterEncId,
+  testType,
+  resultText,
+  fileUrl,
+  mimeType,
+  parameters
+}) {
   const coding = getLabTestCoding(testType);
   const report = {
     resourceType: 'DiagnosticReport',
@@ -37,309 +43,201 @@ function buildDiagnosticReport({ patientPhn, encounterEncId, testType, resultTex
     encounter: { reference: `Encounter/${encounterEncId}` },
     code: { coding: [coding] },
     conclusion: resultText || undefined,
-    issued: new Date().toISOString(),
+    issued: new Date().toISOString()
   };
 
-  if (fileUrl && mimeType) {
+  if (fileUrl) {
     report.presentedForm = [
       {
         contentType: mimeType,
-        url: fileUrl,
-      },
+        url: fileUrl
+      }
     ];
   }
 
   return report;
 }
 
-// Helper to build FHIR Observation with components for parameters
-function buildObservation({ patientPhn, encounterEncId, testType, resultText, parameters }) {
+// Build Observation with parameters
+function buildObservation({
+  patientPhn,
+  encounterEncId,
+  testType,
+  resultText,
+  parameters
+}) {
   const coding = getLabTestCoding(testType);
-  const observation = {
+
+  const obs = {
     resourceType: 'Observation',
     status: 'final',
     subject: { reference: `Patient/${patientPhn}` },
     encounter: { reference: `Encounter/${encounterEncId}` },
     code: { coding: [coding] },
-    effectiveDateTime: new Date().toISOString(),
+    effectiveDateTime: new Date().toISOString()
   };
 
   if (parameters && Object.keys(parameters).length > 0) {
-    observation.component = Object.entries(parameters).map(([key, value]) => ({
-      code: {
-        text: key,
-      },
-      valueString: String(value),
+    obs.component = Object.entries(parameters).map(([key, value]) => ({
+      code: { text: key },
+      valueString: String(value)
     }));
   } else if (resultText) {
-    observation.valueString = resultText;
+    obs.valueString = resultText;
   }
 
-  return observation;
+  return obs;
 }
 
-// Helper: validate parameters for a given test type
+// Validate strict test parameters
 function validateAndExtractParameters(testType, body) {
   const config = getLabTestConfig(testType);
-  if (!config) {
-    return { error: `Unsupported testType: ${testType}` };
-  }
+  if (!config) return { error: `Unsupported testType: ${testType}` };
 
   const requiredParams = config.requiredParams || [];
-  const parameters = {};
   const missing = [];
+  const parameters = {};
 
-  for (const paramName of requiredParams) {
-    const value = body[paramName];
-    if (value === undefined || value === null || String(value).trim() === '') {
-      missing.push(paramName);
+  for (const param of requiredParams) {
+    if (!body[param] || String(body[param]).trim() === '') {
+      missing.push(param);
     } else {
-      parameters[paramName] = value;
+      parameters[param] = body[param];
     }
   }
 
   if (missing.length > 0) {
-    return {
-      error: `Missing required parameters for ${testType}: ${missing.join(', ')}`,
-    };
+    return { error: `Missing required parameters: ${missing.join(', ')}` };
   }
 
   return { parameters };
 }
 
-/**
- * @desc Doctor creates lab test request linked to encounter
- * @route POST /api/lab/request
- * @access Private/Doctor
- */
+/* 
+--------------------------------------------------------
+    CREATE LAB REQUEST (Doctor Only)
+--------------------------------------------------------
+*/
 export const createLabRequest = asyncHandler(async (req, res) => {
   const { patientPhn, encounterId, testType } = req.body;
 
   if (!patientPhn || !encounterId || !testType) {
     return res.status(400).json({
       success: false,
-      message: 'patientPhn, encounterId and testType are required',
+      message: 'patientPhn, encounterId and testType are required'
     });
   }
 
-  const config = getLabTestConfig(testType);
-  if (!config) {
+  if (!getLabTestConfig(testType)) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid or unsupported testType',
+      message: 'Invalid test type'
     });
   }
 
-  // Validate patient
   const patient = await FHIRPatient.findOne({ phn: patientPhn });
-  if (!patient) {
-    return res.status(404).json({
-      success: false,
-      message: 'Patient not found',
-    });
-  }
+  if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
 
-  // Validate encounter (query by custom encId)
   const encounter = await FHIREncounter.findOne({ encId: encounterId });
-  if (!encounter) {
-    return res.status(404).json({
-      success: false,
-      message: 'Encounter not found',
-    });
-  }
+  if (!encounter) return res.status(404).json({ success: false, message: 'Encounter not found' });
 
-  if (!encounter.isActive) {
-    return res.status(400).json({
-      success: false,
-      message: 'Encounter is not active',
-    });
-  }
+  if (!encounter.isActive)
+    return res.status(400).json({ success: false, message: 'Encounter not active' });
 
-  if (encounter.patientPhn !== patientPhn) {
-    return res.status(400).json({
-      success: false,
-      message: 'Encounter does not belong to patient',
-    });
-  }
+  if (encounter.patientPhn !== patientPhn)
+    return res.status(400).json({ success: false, message: 'Encounter mismatch' });
 
-  // Validate doctor
-  if (req.user.role !== 'doctor') {
-    return res.status(403).json({
-      success: false,
-      message: 'Only doctor can create lab requests',
-    });
-  }
+  // Doctor validation
+  if (req.user.role !== 'doctor')
+    return res.status(403).json({ success: false, message: 'Only doctor allowed' });
 
-  if (encounter.doctorLicense !== req.user.medicalLicenseId) {
-    return res.status(403).json({
-      success: false,
-      message: 'You can only create lab requests for your encounters',
-    });
-  }
+  if (encounter.doctorLicense !== req.user.medicalLicenseId)
+    return res.status(403).json({ success: false, message: 'Doctor mismatch' });
 
   const labRequest = await LabRequest.create({
     patientPhn,
     doctorLicense: req.user.medicalLicenseId,
     encounterId: encounter._id,
-    testType,
+    testType
   });
 
-  return res.status(201).json({
+  res.status(201).json({
     success: true,
     message: 'Lab request created',
-    data: {
-      labId: labRequest.labId,
-      _id: labRequest._id,
-      patientPhn: labRequest.patientPhn,
-      testType: labRequest.testType,
-      status: labRequest.status,
-      createdAt: labRequest.createdAt,
-    },
+    data: labRequest
   });
 });
 
-/**
- * @desc Lab assistant views pending lab requests
- * @route GET /api/lab/pending
- * @access Private/Lab Assistant
- */
+/* 
+--------------------------------------------------------
+    GET PENDING LAB REQUESTS (Lab Assistant)
+--------------------------------------------------------
+*/
 export const getPendingLabRequests = asyncHandler(async (req, res) => {
-  const pending = await LabRequest.find({ status: 'pending' })
-    .sort({ createdAt: -1 })
-    .lean();
-
-  return res.json({
-    success: true,
-    count: pending.length,
-    data: pending,
-  });
+  const pending = await LabRequest.find({ status: 'pending' }).sort({ createdAt: -1 });
+  res.json({ success: true, count: pending.length, data: pending });
 });
 
-/**
- * @desc Doctor views lab reports for a specific encounter
- * @route GET /api/lab/reports?encounterId=XXX
- * @access Private/Doctor
- */
+/* 
+--------------------------------------------------------
+    GET REPORTS BY ENCOUNTER (Doctor)
+--------------------------------------------------------
+*/
 export const getLabReportsForEncounter = asyncHandler(async (req, res) => {
   const { encounterId } = req.query;
-  if (!encounterId) {
-    return res.status(400).json({
-      success: false,
-      message: 'encounterId is required',
-    });
-  }
 
   const encounter = await FHIREncounter.findOne({ encId: encounterId });
-  if (!encounter) {
-    return res.status(404).json({
-      success: false,
-      message: 'Encounter not found',
-    });
-  }
+  if (!encounter) return res.status(404).json({ success: false, message: 'Encounter not found' });
 
-  if (req.user.role !== 'doctor' || encounter.doctorLicense !== req.user.medicalLicenseId) {
-    return res.status(403).json({
-      success: false,
-      message: 'Access denied',
-    });
-  }
+  if (req.user.role !== 'doctor' || encounter.doctorLicense !== req.user.medicalLicenseId)
+    return res.status(403).json({ success: false, message: 'Access denied' });
 
-  const requests = await LabRequest.find({ encounterId: encounter._id }).lean();
-  const reports = await FHIRDiagnosticReport.find({ encounterEncId: encounter.encId }).lean();
+  const requests = await LabRequest.find({ encounterId: encounter._id });
+  const reports = await FHIRDiagnosticReport.find({ encounterEncId: encounter.encId });
 
-  return res.json({
-    success: true,
-    data: {
-      requests,
-      reports,
-    },
-  });
+  res.json({ success: true, data: { requests, reports } });
 });
 
-/**
- * @desc Doctor views all lab reports for a specific patient
- * @route GET /api/lab/patient/:phn
- * @access Private/Doctor
- */
+/* 
+--------------------------------------------------------
+    GET REPORTS FOR A PATIENT (Doctor)
+--------------------------------------------------------
+*/
 export const getLabReportsForPatient = asyncHandler(async (req, res) => {
   const { phn } = req.params;
 
-  if (!phn) {
-    return res.status(400).json({
-      success: false,
-      message: 'Patient PHN is required',
-    });
-  }
-
-  if (req.user.role !== 'doctor') {
-    return res.status(403).json({
-      success: false,
-      message: 'Only doctors can view patient lab reports',
-    });
-  }
-
   const patient = await FHIRPatient.findOne({ phn });
-  if (!patient) {
-    return res.status(404).json({
-      success: false,
-      message: 'Patient not found',
-    });
-  }
+  if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
 
-  const requests = await LabRequest.find({ patientPhn: phn }).lean();
-  const labRequestIds = requests.map((r) => r._id);
-
+  const requests = await LabRequest.find({ patientPhn: phn });
   const reports = await FHIRDiagnosticReport.find({
-    labRequestId: { $in: labRequestIds },
-  }).lean();
-
-  return res.json({
-    success: true,
-    data: {
-      patientPhn: phn,
-      requests,
-      reports,
-    },
+    labRequestId: { $in: requests.map(r => r._id) }
   });
+
+  res.json({ success: true, data: { requests, reports } });
 });
 
-/**
- * @desc Doctor views lab reports requested by this doctor (all patients)
- * @route GET /api/lab/doctor/reports
- * @access Private/Doctor
- */
+/* 
+--------------------------------------------------------
+    GET REPORTS REQUESTED BY DOCTOR
+--------------------------------------------------------
+*/
 export const getDoctorRequestedReports = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'doctor') {
-    return res.status(403).json({
-      success: false,
-      message: 'Only doctors can view requested reports',
-    });
-  }
-
   const doctorLicense = req.user.medicalLicenseId;
 
-  const requests = await LabRequest.find({ doctorLicense }).lean();
-  const labRequestIds = requests.map((r) => r._id);
-
+  const requests = await LabRequest.find({ doctorLicense });
   const reports = await FHIRDiagnosticReport.find({
-    labRequestId: { $in: labRequestIds },
-  }).lean();
-
-  return res.json({
-    success: true,
-    data: {
-      doctorLicense,
-      requests,
-      reports,
-    },
+    labRequestId: { $in: requests.map(r => r._id) }
   });
+
+  res.json({ success: true, data: { requests, reports } });
 });
 
-/**
- * @desc Upload lab report and complete request
- * @route POST /api/lab/upload/:labRequestId
- * @access Private/Lab Assistant
- */
+/* 
+--------------------------------------------------------
+    UPLOAD LAB REPORT (Lab Assistant)
+--------------------------------------------------------
+*/
 export const uploadLabReport = asyncHandler(async (req, res) => {
   const { labRequestId } = req.params;
   const { resultText } = req.body;
@@ -352,58 +250,43 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
 
   if (labRequest.status === 'completed') {
     safeDeleteUploadedFile(req.file);
-    return res.status(400).json({ success: false, message: 'LabRequest already completed' });
+    return res.status(400).json({ success: false, message: 'Already completed' });
   }
 
   const config = getLabTestConfig(labRequest.testType);
-  if (!config) {
-    safeDeleteUploadedFile(req.file);
-    return res.status(400).json({ success: false, message: 'Unsupported testType for this lab request' });
-  }
 
-  // Validate file type rules
+  // Validate file rules
+  if (config.file.required && !req.file)
+    return res.status(400).json({ success: false, message: 'File required' });
+
   if (config.file.prohibited && req.file) {
     safeDeleteUploadedFile(req.file);
-    return res.status(400).json({
-      success: false,
-      message: `File upload is not allowed for test type: ${labRequest.testType}`,
-    });
-  }
-
-  if (config.file.required && !req.file) {
-    return res.status(400).json({
-      success: false,
-      message: `File is required for test type: ${labRequest.testType}`,
-    });
+    return res.status(400).json({ success: false, message: 'File not allowed' });
   }
 
   if (req.file && config.file.allowedMimeTypes?.length) {
     if (!config.file.allowedMimeTypes.includes(req.file.mimetype)) {
-      const allowedText = config.file.allowedMimeTypes.join(', ');
       safeDeleteUploadedFile(req.file);
       return res.status(400).json({
         success: false,
-        message: `Invalid file type for ${labRequest.testType}. Allowed: ${allowedText}`,
+        message: `Invalid file type. Allowed: ${config.file.allowedMimeTypes.join(', ')}`
       });
     }
   }
 
-  // Validate required parameters
+  // Parameter validation
   const { error, parameters } = validateAndExtractParameters(
     labRequest.testType,
     req.body
   );
   if (error) {
     safeDeleteUploadedFile(req.file);
-    return res.status(400).json({
-      success: false,
-      message: error,
-    });
+    return res.status(400).json({ success: false, message: error });
   }
 
   const fileUrl = req.file ? `/uploads/lab/${req.file.filename}` : undefined;
 
-  // Update lab request
+  // Update LabRequest
   labRequest.status = 'completed';
   labRequest.fileUrl = fileUrl;
   labRequest.resultText = resultText;
@@ -411,31 +294,25 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
   labRequest.completedAt = new Date();
   await labRequest.save();
 
-  // Build & save FHIR resources
+  // Build FHIR diagnostic resources
   const encounter = await FHIREncounter.findById(labRequest.encounterId);
-  if (!encounter) {
-    return res.status(404).json({
-      success: false,
-      message: 'Encounter not found',
-    });
-  }
 
-  const diagnosticReportResource = buildDiagnosticReport({
+  const diagResource = buildDiagnosticReport({
     patientPhn: labRequest.patientPhn,
     encounterEncId: encounter.encId,
     testType: labRequest.testType,
     resultText,
     fileUrl,
     mimeType: req.file?.mimetype,
-    parameters,
+    parameters
   });
 
-  const observationResource = buildObservation({
+  const obsResource = buildObservation({
     patientPhn: labRequest.patientPhn,
     encounterEncId: encounter.encId,
     testType: labRequest.testType,
     resultText,
-    parameters,
+    parameters
   });
 
   const diag = await FHIRDiagnosticReport.create({
@@ -445,7 +322,7 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
     labRequestId: labRequest._id,
     testType: labRequest.testType,
     status: 'final',
-    resource: diagnosticReportResource,
+    resource: diagResource
   });
 
   const obs = await FHIRObservation.create({
@@ -453,111 +330,93 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
     encounterEncId: encounter.encId,
     labRequestId: labRequest._id,
     testType: labRequest.testType,
-    resource: observationResource,
+    resource: obsResource
   });
 
-  return res.status(201).json({
+  res.status(201).json({
     success: true,
     message: 'Lab report uploaded',
     data: {
       labId: labRequest.labId,
-      labRequest,
-      diagnosticReport: {
-        id: diag._id,              // FIXED
-        ...diag.resource,
-      },
-      observation: {
-        id: obs._id,
-        ...obs.resource,
-      },
-    },
+      diagnosticReportId: diag._id,
+      observationId: obs._id
+    }
   });
 });
 
-/**
- * @desc Doctor reviews lab report
- * @route PUT /api/lab/review/:diagnosticReportId
- * @access Private/Doctor
- */
+/* 
+--------------------------------------------------------
+    GET LAB REPORT BY LAB ID (Doctor + Lab Assistant)
+--------------------------------------------------------
+*/
+export const getLabReportByLabId = asyncHandler(async (req, res) => {
+  const { labId } = req.params;
+
+  const diag = await FHIRDiagnosticReport.findOne({ labId }).lean();
+  if (!diag)
+    return res.status(404).json({ success: false, message: 'Diagnostic report not found' });
+
+  // Only doctor or lab assistant
+  if (!['doctor', 'lab', 'lab_assistant'].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+
+  const labRequest = await LabRequest.findOne({ labId }).lean();
+  const observation = await FHIRObservation.findOne({ labRequestId: labRequest?._id }).lean();
+  const encounter = await FHIREncounter.findOne({ encId: diag.encounterEncId }).lean();
+  const patient = await FHIRPatient.findOne({ phn: diag.patientPhn }).lean();
+
+  res.json({
+    success: true,
+    data: {
+      diagnosticReport: diag,
+      observation,
+      labRequest,
+      encounter,
+      patient
+    }
+  });
+});
+
+/* 
+--------------------------------------------------------
+    REVIEW LAB REPORT (Doctor)
+--------------------------------------------------------
+*/
 export const reviewLabReport = asyncHandler(async (req, res) => {
   const { diagnosticReportId } = req.params;
   const { reviewNotes } = req.body;
 
-  if (!reviewNotes) {
-    return res.status(400).json({
-      success: false,
-      message: 'reviewNotes is required',
-    });
-  }
+  const diag = await FHIRDiagnosticReport.findById(diagnosticReportId);
+  if (!diag)
+    return res.status(404).json({ success: false, message: 'Report not found' });
 
-  const report = await FHIRDiagnosticReport.findById(diagnosticReportId);
-  if (!report) {
-    return res.status(404).json({
-      success: false,
-      message: 'Diagnostic Report not found',
-    });
-  }
+  if (diag.status === 'amended')
+    return res.status(400).json({ success: false, message: 'Already reviewed' });
 
-  if (report.status === 'amended') {
-    return res.status(400).json({
-      success: false,
-      message: 'Report already reviewed',
-    });
-  }
+  const labRequest = await LabRequest.findById(diag.labRequestId);
+  if (!labRequest)
+    return res.status(404).json({ success: false, message: 'Lab request missing' });
 
-  // Verify doctor owns the encounter
-  const labRequest = await LabRequest.findById(report.labRequestId);
-  if (!labRequest) {
-    return res.status(404).json({
-      success: false,
-      message: 'Lab Request not found',
-    });
-  }
+  const encounter = await FHIREncounter.findOne({ encId: diag.encounterEncId });
+  if (encounter.doctorLicense !== req.user.medicalLicenseId)
+    return res.status(403).json({ success: false, message: 'Not your patient' });
 
-  if (labRequest.status !== 'completed') {
-    return res.status(400).json({
-      success: false,
-      message: 'Lab request must be completed before reviewing the report',
-    });
-  }
+  // Update status (FHIR-compliant)
+  diag.status = 'amended';
+  diag.reviewNotes = reviewNotes;
+  diag.reviewedAt = new Date();
+  diag.reviewedBy = req.user.medicalLicenseId;
 
-  const encounter = await FHIREncounter.findOne({ encId: report.encounterEncId });
-  if (!encounter) {
-    return res.status(404).json({
-      success: false,
-      message: 'Encounter not found',
-    });
-  }
+  await diag.save();
 
-  if (
-    req.user.role !== 'doctor' ||
-    encounter.doctorLicense !== req.user.medicalLicenseId
-  ) {
-    return res.status(403).json({
-      success: false,
-      message: 'Only the treating doctor can review this report',
-    });
-  }
-
-  // Update to REVIEWED
-  report.status = 'amended';
-  report.reviewedBy = req.user.medicalLicenseId;
-  report.reviewNotes = reviewNotes;
-  report.reviewedAt = new Date();
-  await report.save();
-
-  return res.json({
+  res.json({
     success: true,
-    message: 'Lab report reviewed successfully',
+    message: 'Report reviewed',
     data: {
-      report: {
-        id: report._id,
-        testType: report.testType,
-        status: report.status,
-        reviewedBy: report.reviewedBy,
-        reviewNotes: report.reviewNotes,
-        reviewedAt: report.reviewedAt,
-      },
-    },
+      id: diag._id,
+      status: diag.status,
+      reviewNotes: diag.reviewNotes
+    }
   });
 });
