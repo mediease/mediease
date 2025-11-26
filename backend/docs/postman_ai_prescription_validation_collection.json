@@ -1,0 +1,195 @@
+{
+  "info": {
+    "name": "AI Prescription Validation Test",
+    "description": "Test collection for AI prescription validation feature",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login (Get Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const jsonData = pm.response.json();",
+              "    if (jsonData.data && jsonData.data.token) {",
+              "        pm.environment.set('authToken', jsonData.data.token);",
+              "        pm.environment.set('userRole', jsonData.data.user.role);",
+              "        pm.environment.set('medicalLicenseId', jsonData.data.user.medicalLicenseId || '');",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"doctor@hospital.com\",\n  \"password\": \"password123\",\n  \"role\": \"doctor\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        },
+        "description": "Login to get authentication token. Update email/password/role as needed."
+      }
+    },
+    {
+      "name": "2. Create Encounter (Required First)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"complaint\": \"Fever and headache\",\n  \"weight\": 70,\n  \"notes\": \"Patient presents with fever and headache for 2 days\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/clinic/start/{{patientPhn}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["clinic", "start", "{{patientPhn}}"]
+        },
+        "description": "Create an active encounter for the patient. Required before creating prescription."
+      }
+    },
+    {
+      "name": "3. Create Prescription with AI Validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Response has aiValidation field', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('aiValidation');",
+              "    pm.expect(jsonData.aiValidation).to.have.property('success');",
+              "    pm.expect(jsonData.aiValidation).to.have.property('warnings');",
+              "    pm.expect(jsonData.aiValidation).to.have.property('safe');",
+              "});",
+              "",
+              "pm.test('AI Validation response structure', function () {",
+              "    const jsonData = pm.response.json();",
+              "    if (jsonData.aiValidation.warnings && jsonData.aiValidation.warnings.length > 0) {",
+              "        pm.expect(jsonData.aiValidation.warnings[0]).to.have.property('medicineName');",
+              "        pm.expect(jsonData.aiValidation.warnings[0]).to.have.property('drugClass');",
+              "        pm.expect(jsonData.aiValidation.warnings[0]).to.have.property('severity');",
+              "    }",
+              "});",
+              "",
+              "// Log AI validation result",
+              "const jsonData = pm.response.json();",
+              "console.log('AI Validation Result:', JSON.stringify(jsonData.aiValidation, null, 2));",
+              "if (jsonData.aiValidation.warnings && jsonData.aiValidation.warnings.length > 0) {",
+              "    console.log('⚠️ Warnings found:', jsonData.aiValidation.warnings.length);",
+              "    jsonData.aiValidation.warnings.forEach((w, i) => {",
+              "        console.log(`  ${i + 1}. ${w.medicineName} - ${w.severity} risk: ${w.message}`);",
+              "    });",
+              "} else {",
+              "    console.log('✅ No warnings - prescription is safe');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"visitType\": \"OPD\",\n  \"status\": \"Draft\",\n  \"complaint\": \"Fever and headache\",\n  \"prescriptionItems\": [\n    {\n      \"name\": \"Ibuprofen 200mg Tablet\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"TDS\",\n      \"period\": \"5 days\",\n      \"doseComment\": \"After meals\"\n    },\n    {\n      \"name\": \"Paracetamol 500mg\",\n      \"dose\": \"2 tablets\",\n      \"frequency\": \"BD\",\n      \"period\": \"3 days\",\n      \"doseComment\": \"With water\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/fhir/MedicationRequest",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "MedicationRequest"]
+        },
+        "description": "Create a prescription. This will automatically trigger AI validation and include results in the response."
+      }
+    },
+    {
+      "name": "4. Test with Risky Drug (NSAID + Gastritis)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"patientPhn\": \"{{patientPhn}}\",\n  \"medicalLicenseId\": \"{{medicalLicenseId}}\",\n  \"visitType\": \"OPD\",\n  \"status\": \"Draft\",\n  \"complaint\": \"Stomach pain\",\n  \"prescriptionItems\": [\n    {\n      \"name\": \"Ibuprofen 200mg Tablet\",\n      \"dose\": \"1 tablet\",\n      \"frequency\": \"TDS\",\n      \"period\": \"7 days\",\n      \"doseComment\": \"After meals\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/fhir/MedicationRequest",
+          "host": ["{{baseUrl}}"],
+          "path": ["fhir", "MedicationRequest"]
+        },
+        "description": "Test with a risky combination - Ibuprofen (NSAID) for a patient who has Gastritis in their history. This should trigger a warning."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patientPhn",
+      "value": "PH00001",
+      "type": "string"
+    },
+    {
+      "key": "medicalLicenseId",
+      "value": "MED12345",
+      "type": "string"
+    },
+    {
+      "key": "userRole",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
+
