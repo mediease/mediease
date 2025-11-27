@@ -1,0 +1,14 @@
+.lab-dashboard-container {
+  padding: 30px;
+}
+
+.lab-dashboard-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.lab-dashboard-row {
+  display: flex;
+  gap: 25px;
+}
