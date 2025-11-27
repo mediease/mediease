@@ -369,3 +369,4 @@ This is a proprietary microservice for the MediEase EMR system.
 
 For issues or questions, contact the development team.
 
+Set-Location 'd:\applications\mediease\ai_service'; .\venv\Scripts\python.exe -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload

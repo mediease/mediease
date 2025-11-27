@@ -33,8 +33,9 @@ import UserRegister from './pages/UserRegister';
 // Lab Assistant Pages
 import LabAssistantDashboard from './pages/LabAssistantDashboard';
 import AddLabReport from './pages/AddLabReport';
+import AddLabReportForm from './pages/AddLabReportForm';
 
-// System
+// System Pages
 import CreateAccount from './pages/CreateAccount';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -42,7 +43,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 import { useLocation } from 'react-router-dom';
 
-// LAYOUT
+
+// -------------------------
+// MAIN LAYOUT
+// -------------------------
 function MainLayout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
@@ -60,7 +64,10 @@ function MainLayout() {
   );
 }
 
+
+// -------------------------
 // APP ROUTES
+// -------------------------
 function App() {
   return (
     <Router>
@@ -98,7 +105,6 @@ function App() {
           <Route path="doctor/patient/:id/medicationsinfo/newprescription" element={<ProtectedRoute allowedRoles={['doctor']}><NewPrescription /></ProtectedRoute>} />
           <Route path="doctor/patient/:id/historyinfo" element={<ProtectedRoute allowedRoles={['doctor']}><HistoryInfo /></ProtectedRoute>} />
 
-          {/* Fix: Report Routes */}
           <Route path="doctor/reports/:id" element={<ProtectedRoute allowedRoles={['doctor']}><SingleReport /></ProtectedRoute>} />
           <Route path="doctor/report/:labId" element={<ProtectedRoute allowedRoles={['doctor']}><SingleReport /></ProtectedRoute>} />
 
@@ -128,7 +134,7 @@ function App() {
             path="lab-assistant/add-report/:id"
             element={
               <ProtectedRoute allowedRoles={['lab_assistant']}>
-                <div>Report Form Coming Soon</div>
+                <AddLabReportForm />
               </ProtectedRoute>
             }
           />
