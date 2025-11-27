@@ -7,19 +7,23 @@ import SimpleButton from "../components/buttons";
 import RedButton from "../components/Redbutton";
 import PatientSummaryModal from "../components/PatientSummaryModal";
 import httpClient from "../services/httpClient";
+
+// ✅ Correct CSS path based on your folder structure
+import "../components/css/PatientSummaryModal.css";
+
 import "./css/style.css";
 
 // ------------------ Helper Extractors ------------------
 const resolvePhn = (p) => {
   if (p?.metadata?.patientPhn) return p.metadata.patientPhn;
   const ids = p?.resource?.identifier || [];
-  const obj = ids.find(i => (i.system || "").includes("phn"));
+  const obj = ids.find((i) => (i.system || "").includes("phn"));
   return obj?.value || "-";
 };
 
 const resolveNic = (p) => {
   const ids = p?.resource?.identifier || [];
-  const obj = ids.find(i => (i.system || "").includes("nic"));
+  const obj = ids.find((i) => (i.system || "").includes("nic"));
   return obj?.value || "-";
 };
 
@@ -33,7 +37,7 @@ const resolveName = (p) => {
 
 // ------------------ Component ------------------
 const Visitpatient = () => {
-  const { id } = useParams(); // PHN
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const filterOptions = [
@@ -41,13 +45,15 @@ const Visitpatient = () => {
     "Report",
     "Allergies",
     "Medications",
-    "Visit History"
+    "Visit History",
   ];
 
   const [selectedFilter, setSelectedFilter] = useState("Basic");
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [summaryData, setSummaryData] = useState("");
 
   // ------------------ Load Patient ------------------
   useEffect(() => {
@@ -63,37 +69,22 @@ const Visitpatient = () => {
     load();
   }, [id]);
 
-  // ------------------ FIXED Navigation ------------------
+  // ------------------ Tab Navigation ------------------
   const handleTabChange = (option) => {
     setSelectedFilter(option);
 
-    switch (option) {
-      case "Basic":
-        navigate(`/doctor/patient/${id}`);
-        break;
+    const routes = {
+      Basic: `/doctor/patient/${id}`,
+      Report: `/doctor/patient/${id}/reportinfo`,
+      Allergies: `/doctor/patient/${id}/allergiesinfo`,
+      Medications: `/doctor/patient/${id}/medicationsinfo`,
+      "Visit History": `/doctor/patient/${id}/historyinfo`,
+    };
 
-      case "Report":
-        navigate(`/doctor/patient/${id}/reportinfo`);
-        break;
-
-      case "Allergies":
-        navigate(`/doctor/patient/${id}/allergiesinfo`);
-        break;
-
-      case "Medications":
-        navigate(`/doctor/patient/${id}/medicationsinfo`);
-        break;
-
-      case "Visit History":
-        navigate(`/doctor/patient/${id}/historyinfo`);
-        break;
-
-      default:
-        navigate(`/doctor/patient/${id}`);
-    }
+    navigate(routes[option] || `/doctor/patient/${id}`);
   };
 
-  // ------------------ Close Visit Handler ------------------
+  // ------------------ Close Visit ------------------
   const handleCloseVisit = async () => {
     try {
       const doctorRaw = localStorage.getItem("doctor");
@@ -106,14 +97,15 @@ const Visitpatient = () => {
       }
 
       const encRes = await httpClient.get("/fhir/Encounter", {
-        params: { patient: id }
+        params: { patient: id },
       });
 
       const encounters = encRes?.data?.data || [];
 
-      const activeEncounter = encounters.find(enc =>
-        enc.metadata?.status === "in-progress" &&
-        enc.metadata?.doctorLicense === doctorLicense
+      const activeEncounter = encounters.find(
+        (enc) =>
+          enc.metadata?.status === "in-progress" &&
+          enc.metadata?.doctorLicense === doctorLicense
       );
 
       if (!activeEncounter) {
@@ -121,32 +113,49 @@ const Visitpatient = () => {
         return;
       }
 
-      const encounterId = activeEncounter.id;
-
-      await httpClient.put(`/fhir/Encounter/${encounterId}`, {
+      await httpClient.put(`/fhir/Encounter/${activeEncounter.id}`, {
         status: "finished",
-        endTime: new Date().toISOString()
+        endTime: new Date().toISOString(),
       });
 
       alert("Visit closed successfully.");
       navigate("/doctor/patients");
-
     } catch (error) {
       console.error("Close visit failed:", error);
       alert("Failed to close visit.");
     }
   };
 
+  // ------------------ New Prescription ------------------
   const clickVisit = () =>
     navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
 
+  // ------------------ Add Allergy ------------------
   const handleAddAllergy = () =>
     navigate(`/doctor/patient/${id}/allergiesinfo`);
 
+  // ------------------ Order Report ------------------
   const handleOrderNewReport = () =>
     navigate(`/doctor/visitpatient/${id}/order-report`);
 
-  const handleRequestSummary = () => setIsSummaryModalOpen(true);
+  // ------------------ Request Summary ------------------
+  const handleRequestSummary = async () => {
+    try {
+      const phn = resolvePhn(patient);
+
+      const res = await httpClient.get(`/ai/summary/${phn}`);
+
+      // Your API returns summary inside res.data.data.summary
+      const summary = res.data?.data?.summary || "No summary available.";
+
+      setSummaryData(summary);
+      setIsSummaryModalOpen(true);
+    } catch (error) {
+      console.error("Summary request failed:", error);
+      alert("Failed to generate summary.");
+    }
+  };
+
   const handleCloseSummary = () => setIsSummaryModalOpen(false);
 
   if (loading) return <p>Loading...</p>;
@@ -194,12 +203,18 @@ const Visitpatient = () => {
 
           <div className="buttonContainer">
             <div className="inlineButton">
-              <SimpleButton label="Order New Report" onClick={handleOrderNewReport} />
+              <SimpleButton
+                label="Order New Report"
+                onClick={handleOrderNewReport}
+              />
               <SimpleButton label="Add Allergies" onClick={handleAddAllergy} />
             </div>
 
             <div className="inlineButton">
-              <SimpleButton label="Request Summary" onClick={handleRequestSummary} />
+              <SimpleButton
+                label="Request Summary"
+                onClick={handleRequestSummary}
+              />
               <SimpleButton label="New Prescription" onClick={clickVisit} />
             </div>
 
@@ -210,10 +225,11 @@ const Visitpatient = () => {
         </div>
       </div>
 
+      {/* ------------------ Summary Modal ------------------ */}
       <PatientSummaryModal
         isOpen={isSummaryModalOpen}
         onClose={handleCloseSummary}
-        patientData={{}}
+        patientData={summaryData}
       />
     </div>
   );

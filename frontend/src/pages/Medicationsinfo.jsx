@@ -4,6 +4,7 @@ import SegmentedControl from "../components/SegmentedControl";
 import TableN1 from "../components/tableN1";
 import SimpleButton from "../components/buttons";
 import httpClient from "../services/httpClient";
+import QRCode from "react-qr-code";
 import "./css/style.css";
 
 const MedicationsInfo = () => {
@@ -21,6 +22,8 @@ const MedicationsInfo = () => {
   const [selectedFilter, setSelectedFilter] = useState("Medications");
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPrescription, setSelectedPrescription] = useState(null);
 
   // ----------------------------------------------------
   // LOAD FROM BACKEND (FHIR BUNDLE)
@@ -95,7 +98,10 @@ const MedicationsInfo = () => {
   const data = prescriptions.map((p) => ({
     ...p,
     view: (
-      <button onClick={() => alert(JSON.stringify(p.full, null, 2))}>
+      <button onClick={() => {
+        setSelectedPrescription(p.full);
+        setShowModal(true);
+      }}>
         View
       </button>
     ),
@@ -122,6 +128,11 @@ const MedicationsInfo = () => {
 
   const handleIssuePrescription = () => {
     navigate(`/doctor/patient/${id}/medicationsinfo/newprescription`);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedPrescription(null);
   };
 
   return (
@@ -151,6 +162,87 @@ const MedicationsInfo = () => {
           onClick={handleIssuePrescription}
         />
       </div>
+
+      {showModal && selectedPrescription && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={closeModal}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "2rem",
+              borderRadius: "8px",
+              maxWidth: "600px",
+              maxHeight: "80vh",
+              overflow: "auto",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeModal}
+              style={{
+                position: "absolute",
+                top: "1rem",
+                right: "1rem",
+                border: "none",
+                background: "#f44336",
+                color: "white",
+                padding: "0.5rem 1rem",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Close
+            </button>
+
+            <h3 style={{ marginBottom: "1rem" }}>Prescription Details</h3>
+
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p><strong>Prescription ID:</strong> {selectedPrescription.id || '-'}</p>
+              <p><strong>Status:</strong> {selectedPrescription.status || '-'}</p>
+              <p><strong>Patient:</strong> {selectedPrescription.subject?.display || selectedPrescription.subject?.reference || '-'}</p>
+              <p><strong>Doctor:</strong> {selectedPrescription.requester?.display || selectedPrescription.requester?.reference || '-'}</p>
+              <p><strong>Medication:</strong> {selectedPrescription.medicationCodeableConcept?.text || '-'}</p>
+              <p><strong>Date:</strong> {selectedPrescription.authoredOn ? new Date(selectedPrescription.authoredOn).toLocaleString() : '-'}</p>
+              
+              {selectedPrescription.dosageInstruction && selectedPrescription.dosageInstruction.length > 0 && (
+                <p><strong>Dosage:</strong> {selectedPrescription.dosageInstruction[0].text || '-'}</p>
+              )}
+              
+              {selectedPrescription.note && selectedPrescription.note.length > 0 && (
+                <p><strong>Notes:</strong> {selectedPrescription.note[0].text || '-'}</p>
+              )}
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+              <h4 style={{ marginBottom: "1rem" }}>Prescription QR Code</h4>
+              <div style={{ background: "white", padding: "1rem", display: "inline-block" }}>
+                <QRCode
+                  value={JSON.stringify(selectedPrescription)}
+                  size={200}
+                  level="M"
+                />
+              </div>
+              <p style={{ marginTop: "0.5rem", fontSize: "0.85rem", color: "#666" }}>
+                Scan to view full prescription details
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
