@@ -37,12 +37,13 @@ export const validatePatientData = (req, res, next) => {
     'gender',
     'contactNumber',
     'dob',
-    'address',
-    'guardianNIC',
-    'guardianName'
+    'address'
   ];
 
-  const missingFields = requiredFields.filter(field => !req.body[field]);
+  const missingFields = requiredFields.filter(field => {
+    const value = req.body[field];
+    return value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
+  });
 
   if (missingFields.length > 0) {
     return res.status(400).json({
@@ -62,10 +63,13 @@ export const validatePatientData = (req, res, next) => {
   }
 
   // Validate contact number format (basic check)
-  if (!/^\+?[\d\s-()]+$/.test(req.body.contactNumber)) {
+  // Allow digits, spaces, dashes, parentheses, and optional + at start
+  // Also allow common formats like +94xxxxxxxxx or 0xxxxxxxxx
+  const contactNumber = String(req.body.contactNumber).trim();
+  if (contactNumber && !/^\+?[\d\s\-()]+$/.test(contactNumber)) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid contact number format'
+      message: 'Invalid contact number format. Please use digits, spaces, dashes, or parentheses. Example: +94771234567 or 0771234567'
     });
   }
 
@@ -96,11 +100,11 @@ export const validateAppointmentData = (req, res, next) => {
     });
   }
 
-  // Validate Nurse ID format
-  if (!/^NUR\d{5}$/.test(req.body.nurseId)) {
+  // Validate Nurse ID is provided (format validation removed - accepts any format)
+  if (!req.body.nurseId || String(req.body.nurseId).trim() === '') {
     return res.status(400).json({
       success: false,
-      message: 'Invalid Nurse ID format. Must be NUR followed by 5 digits (e.g., NUR00001)'
+      message: 'Nurse ID is required'
     });
   }
 

@@ -36,6 +36,7 @@ app.use('/admin', fhirAppointmentRoutes); // admin appointment routes
 app.use('/admin', authRoutes); // admin approval routes
 app.use('/clinic', fhirEncounterRoutes); // clinic encounter routes
 app.use('/doctor', fhirAppointmentRoutes); // doctor appointment routes
+app.use('/staff', fhirAppointmentRoutes); // staff/nurse appointment routes
 
 // Health check
 app.get('/ping', (req, res) => {

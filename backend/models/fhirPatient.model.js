@@ -52,11 +52,11 @@ const fhirPatientSchema = new mongoose.Schema({
   },
   guardianNIC: {
     type: String,
-    required: true
+    required: false
   },
   guardianName: {
     type: String,
-    required: true
+    required: false
   },
   // Optional vital signs
   height: Number,

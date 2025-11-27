@@ -17,6 +17,7 @@ import NewPrescription from './pages/NewPrescription';
 import SingleReport from './pages/SingleReport';
 import AdminPanel from './pages/AdminPanel';
 import AdminSidebar from './components/AdminSidebar';
+import StaffSidebar from './components/StaffSidebar';
 import CreateAccount from './pages/CreateAccount';
 import LoginPage from './pages/LoginPage';
 import AdminDocAppointments from './pages/AdminDocAppointments';
@@ -27,6 +28,10 @@ import PatientNew from './pages/PatientNew';
 import AppointmentView from './pages/AppointmentView';
 import UserRegister from './pages/UserRegister';
 import OrderNewReport from './pages/OrderNewReport';
+import StaffHome from './pages/StaffHome';
+import StaffPatients from './pages/StaffPatients';
+import StaffAppointments from './pages/StaffAppointments';
+import StaffAppointmentNew from './pages/StaffAppointmentNew';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 import { useLocation } from 'react-router-dom';
@@ -36,10 +41,11 @@ import { useLocation } from 'react-router-dom';
 function MainLayout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isStaffRoute = location.pathname.startsWith('/staff');
 
   return (
     <div className="app-container">
-      {isAdminRoute ? <AdminSidebar /> : <Sidebar />}
+      {isAdminRoute ? <AdminSidebar /> : isStaffRoute ? <StaffSidebar /> : <Sidebar />}
       <div className="main-content">
         <Header />
         <div className="content-container">
@@ -98,6 +104,14 @@ function App() {
           <Route path="admin/allappointments" element={<ProtectedRoute allowedRoles={['admin']}><AdminAllAppointments /></ProtectedRoute>} />
           <Route path="admin/userregister" element={<ProtectedRoute allowedRoles={['admin']}><UserRegister /></ProtectedRoute>} />
           <Route path="admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><Settings /></ProtectedRoute>} />
+
+          {/* STAFF PAGES */}
+          <Route path="staff" element={<ProtectedRoute allowedRoles={['nurse', 'lab_assistant']}><StaffHome /></ProtectedRoute>} />
+          <Route path="staff/patients" element={<ProtectedRoute allowedRoles={['nurse', 'lab_assistant']}><StaffPatients /></ProtectedRoute>} />
+          <Route path="staff/patients/new" element={<ProtectedRoute allowedRoles={['nurse', 'lab_assistant']}><PatientNew /></ProtectedRoute>} />
+          <Route path="staff/appointments" element={<ProtectedRoute allowedRoles={['nurse', 'lab_assistant']}><StaffAppointments /></ProtectedRoute>} />
+          <Route path="staff/appointments/new" element={<ProtectedRoute allowedRoles={['nurse', 'lab_assistant']}><StaffAppointmentNew /></ProtectedRoute>} />
+          <Route path="staff/settings" element={<ProtectedRoute allowedRoles={['nurse', 'lab_assistant']}><Settings /></ProtectedRoute>} />
 
         </Route>
       </Routes>

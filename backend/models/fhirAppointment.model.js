@@ -31,8 +31,7 @@ const fhirAppointmentSchema = new mongoose.Schema({
   },
   nurseId: {
     type: String,
-    required: true,
-    match: [/^NUR\d{5}$/, 'Nurse ID must be in format NUR00001']
+    required: true
   },
   roomNo: {
     type: String,

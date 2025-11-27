@@ -3,12 +3,13 @@ import {
   createAppointment,
   getAppointment,
   getDoctorAppointments,
+  getNurseAppointments,
   getAllAppointments,
   updateAppointment,
   cancelAppointment
 } from '../controllers/fhirAppointment.controller.js';
 import { protect } from '../middleware/authMiddleware.js';
-import { nurseOnly, doctorOnly, adminOnly, checkApprovalStatus } from '../middleware/roleMiddleware.js';
+import { nurseOnly, staffOnly, doctorOnly, adminOnly, checkApprovalStatus } from '../middleware/roleMiddleware.js';
 import { validateAppointmentData } from '../middleware/fhirValidationMiddleware.js';
 
 const router = express.Router();
@@ -31,6 +32,10 @@ router.delete('/Appointment/:id', checkApprovalStatus, cancelAppointment);
 
 // Doctor routes - get their appointments
 router.get('/appointments/:medicalLicenseId', doctorOnly, getDoctorAppointments);
+
+// Nurse/Staff routes - get their appointments
+router.get('/staff/appointments', staffOnly, getNurseAppointments);
+router.get('/staff/appointments/:nurseId', staffOnly, getNurseAppointments);
 
 // Admin routes - get all appointments
 router.get('/appointments', adminOnly, getAllAppointments);

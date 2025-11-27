@@ -2,11 +2,34 @@
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
+  background-color: #f5f5f5;
+  min-height: 100vh;
 }
 
 .patient-new h2 {
   color: #333;
   margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.alert-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
 }
 
 .form-section {
@@ -40,14 +63,15 @@
   border: 1px solid #e0e7ff;
   border-radius: 4px;
   font-size: 1rem;
-  background-color: #f0f7ff;
+  background-color: #ffffff;
 }
 
 .input-group input:focus,
 .input-group select:focus {
   outline: none;
-  border-color: #007bff;
-  background-color: #f8fbff;
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .form-actions {
@@ -72,12 +96,12 @@
 }
 
 .save-btn {
-  background-color: #007bff;
+  background-color: #2563eb;
   color: white;
 }
 
 .save-btn:hover {
-  background-color: #0056b3;
+  background-color: #1d4ed8;
 }
 
 .cancel-btn:hover {

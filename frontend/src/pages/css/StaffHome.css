@@ -1,0 +1,101 @@
+.staff-home-container {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.staff-welcome {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 40px;
+  font-family: Arial, sans-serif;
+}
+
+.staff-action-cards {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.staff-action-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e6f2ff;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 24px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.card-icon-large {
+  font-size: 64px;
+  color: #2563eb;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-content-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.appointment-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: #2563eb;
+  flex: 1;
+  text-align: center;
+}
+
+.card-icon-right {
+  font-size: 48px;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.staff-action-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  max-width: 200px;
+  font-family: Arial, sans-serif;
+}
+
+.staff-action-btn:hover {
+  background: #1d4ed8;
+}
+
+.staff-action-btn:active {
+  background: #1e40af;
+}
+
+

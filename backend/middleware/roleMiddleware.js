@@ -161,3 +161,32 @@ export const labAssistantOnly = (req, res, next) => {
 
   next();
 };
+
+/**
+ * Staff only middleware (nurse or lab_assistant with approval check)
+ */
+export const staffOnly = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Not authorized, please login'
+    });
+  }
+
+  if (req.user.role !== 'nurse' && req.user.role !== 'lab_assistant') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Staff privileges required (nurse or lab assistant).'
+    });
+  }
+
+  if (req.user.status !== 'approved') {
+    return res.status(403).json({
+      success: false,
+      message: `Your account is ${req.user.status}. Please wait for admin approval.`,
+      status: req.user.status
+    });
+  }
+
+  next();
+};

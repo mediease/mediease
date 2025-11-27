@@ -15,11 +15,24 @@ export const createAppointment = asyncHandler(async (req, res) => {
   const { patientPhn, doctorLicense, nurseId, roomNo, type, appointmentDate } = req.body;
 
   // Verify nurse ID matches logged-in user
-  if (req.user.role === 'nurse' && req.user.nurId !== nurseId) {
-    return res.status(403).json({
-      success: false,
-      message: 'Nurse ID does not match your credentials'
-    });
+  // Normalize both values for comparison (handle case where DB has "444444" but form sends "NUR44444")
+  if (req.user.role === 'nurse') {
+    const userNurId = String(req.user.nurId || '').trim();
+    const submittedNurId = String(nurseId || '').trim();
+    
+    // Extract numeric part for comparison (handles both "444444" and "NUR44444")
+    const userNurIdNum = userNurId.replace(/^NUR/i, '');
+    const submittedNurIdNum = submittedNurId.replace(/^NUR/i, '');
+    
+    // Also check exact match and normalized match
+    if (userNurId !== submittedNurId && 
+        userNurId.toUpperCase() !== submittedNurId.toUpperCase() &&
+        userNurIdNum !== submittedNurIdNum) {
+      return res.status(403).json({
+        success: false,
+        message: `Nurse ID does not match your credentials. Your ID: ${userNurId}, Submitted: ${submittedNurId}`
+      });
+    }
   }
 
   // Verify patient exists
@@ -97,15 +110,71 @@ export const createAppointment = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get appointment by APID or ID
+ * @desc    Get appointment by APID or ID, or list appointments by nurseId
  * @route   GET /fhir/Appointment/:id
  * @route   GET /fhir/Appointment?identifier=AP00001
+ * @route   GET /fhir/Appointment?nurseId=444444
  * @access  Private
  */
 export const getAppointment = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { identifier } = req.query;
+  const { identifier, nurseId, status, page = 1, limit = 100 } = req.query;
 
+  // If nurseId is provided, return list of appointments for that nurse
+  if (nurseId) {
+    // If user is a nurse, verify they can only access their own appointments
+    let targetNurseId = String(nurseId).trim();
+    if (req.user.role === 'nurse' && req.user.nurId) {
+      // Nurses can only access their own appointments - use ID from JWT token
+      targetNurseId = String(req.user.nurId).trim();
+    } else if (req.user.role === 'lab_assistant') {
+      // Lab assistants don't have nurseId, return empty list
+      return res.json({
+        success: true,
+        count: 0,
+        total: 0,
+        totalPages: 0,
+        currentPage: page,
+        data: []
+      });
+    }
+
+    const query = { nurseId: targetNurseId };
+    if (status) {
+      query.status = status;
+    }
+
+    const appointments = await FHIRAppointment.find(query)
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .sort({ appointmentDate: -1 });
+
+    const count = await FHIRAppointment.countDocuments(query);
+
+    return res.json({
+      success: true,
+      count: appointments.length,
+      total: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      data: appointments.map(apt => ({
+        id: apt._id,
+        apid: apt.apid,
+        resource: apt.resource,
+        metadata: {
+          patientPhn: apt.patientPhn,
+          doctorLicense: apt.doctorLicense,
+          nurseId: apt.nurseId,
+          roomNo: apt.roomNo,
+          type: apt.type,
+          status: apt.status,
+          appointmentDate: apt.appointmentDate
+        }
+      }))
+    });
+  }
+
+  // Otherwise, get single appointment by ID or identifier
   let appointment;
 
   if (identifier) {
@@ -119,7 +188,7 @@ export const getAppointment = asyncHandler(async (req, res) => {
   } else {
     return res.status(400).json({
       success: false,
-      message: 'Please provide appointment ID or identifier (APID)'
+      message: 'Please provide appointment ID, identifier (APID), or nurseId'
     });
   }
 
@@ -178,6 +247,82 @@ export const getDoctorAppointments = asyncHandler(async (req, res) => {
   }
 
   const query = { doctorLicense };
+
+  if (status) {
+    query.status = status;
+  }
+
+  const appointments = await FHIRAppointment.find(query)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .sort({ appointmentDate: -1 });
+
+  const count = await FHIRAppointment.countDocuments(query);
+
+  res.json({
+    success: true,
+    count: appointments.length,
+    total: count,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+    data: appointments.map(apt => ({
+      id: apt._id,
+      apid: apt.apid,
+      resource: apt.resource,
+      metadata: {
+        patientPhn: apt.patientPhn,
+        doctorLicense: apt.doctorLicense,
+        nurseId: apt.nurseId,
+        roomNo: apt.roomNo,
+        type: apt.type,
+        status: apt.status,
+        appointmentDate: apt.appointmentDate
+      }
+    }))
+  });
+});
+
+/**
+ * @desc    Get nurse's appointments by nurse ID
+ * @route   GET /fhir/Appointment?nurseId=NUR00001
+ * @route   GET /staff/appointments/:nurseId
+ * @access  Private/Nurse
+ */
+export const getNurseAppointments = asyncHandler(async (req, res) => {
+  const { nurseId } = req.params;
+  const { nurseId: queryNurseId } = req.query;
+  const { status, page = 1, limit = 100 } = req.query;
+
+  const finalNurseId = nurseId || queryNurseId;
+
+  // If user is a nurse, use their own nurse ID from token (priority)
+  let targetNurseId = null;
+  if (req.user.role === 'nurse' && req.user.nurId) {
+    // Nurses can only access their own appointments - use ID from JWT token
+    targetNurseId = String(req.user.nurId).trim();
+  } else if (req.user.role === 'lab_assistant') {
+    // Lab assistants don't have nurseId, so return empty list or handle differently
+    // For now, return empty list since lab assistants typically don't create appointments
+    return res.json({
+      success: true,
+      count: 0,
+      total: 0,
+      totalPages: 0,
+      currentPage: page,
+      data: []
+    });
+  } else if (finalNurseId) {
+    // If nurse ID provided in params/query, use it (for admin/staff viewing specific nurse)
+    targetNurseId = String(finalNurseId).trim();
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: 'Nurse ID is required'
+    });
+  }
+
+  // Build query - exact match on nurseId
+  const query = { nurseId: targetNurseId };
 
   if (status) {
     query.status = status;
