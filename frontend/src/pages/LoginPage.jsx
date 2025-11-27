@@ -1,44 +1,38 @@
-import React, { useState } from 'react';
-import { MdEmail, MdLock, MdAdminPanelSettings } from 'react-icons/md';
-import { FaUserMd, FaUserTie } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
-import httpClient from '../services/httpClient';
-import './css/LoginPage.css';
-import logo from '../assets/logo2.png';
+import React, { useState } from "react";
+import { MdEmail, MdLock, MdAdminPanelSettings } from "react-icons/md";
+import { FaUserMd, FaUserTie } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+import httpClient from "../services/httpClient";
+import "./css/LoginPage.css";
+import logo from "../assets/logo2.png";
 
 function LoginPage() {
-  const [userType, setUserType] = useState('doctor');   // doctor | admin | staff
-  const [staffRole, setStaffRole] = useState('nurse');  // nurse | lab_assistant (only used when userType === 'staff')
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [userType, setUserType] = useState("doctor"); // doctor | admin | staff
+  const [staffRole, setStaffRole] = useState("nurse"); // nurse | lab_assistant
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
-    // Decide which role to send to backend
     const roleToSend =
-      userType === 'staff'
-        ? staffRole                      // "nurse" or "lab_assistant"
-        : userType;                      // "doctor" or "admin"
+      userType === "staff" ? staffRole : userType; // nurse/lab or doctor/admin
 
     try {
-      const response = await httpClient.post('/auth/login', {
+      const response = await httpClient.post("/auth/login", {
         email,
         password,
         role: roleToSend,
       });
 
-      console.log('Login response raw:', response.data);
-
       const data = response.data?.data || {};
       const user = data.user || data;
 
-      // ---- Save token ----
       const token =
         data.token ||
         response.data?.token ||
@@ -46,67 +40,74 @@ function LoginPage() {
         response.data?.jwt;
 
       if (token) {
-        localStorage.setItem('authToken', token);
-      } else {
-        console.warn('No token field found in login response');
+        localStorage.setItem("authToken", token);
       }
 
-      // Save actual backend role ("doctor", "admin", "nurse", "lab_assistant")
-      if (user.role) {
-        localStorage.setItem('userRole', user.role);
-      } else {
-        localStorage.setItem('userRole', roleToSend);
+      // Save role
+      localStorage.setItem("userRole", user.role || roleToSend);
+
+      // Doctor extra info
+      if (roleToSend === "doctor") {
+        const medicalLicenseId = user.medicalLicenseId || "MED_UNKNOWN";
+        localStorage.setItem("medicalLicenseId", String(medicalLicenseId));
+        localStorage.setItem(
+          "doctor",
+          JSON.stringify({
+            firstName: user.firstName || "Doctor",
+            lastName: user.lastName || "",
+            medicalLicenseId,
+          })
+        );
       }
 
-      // ---- Store extra info for specific roles ----
-      if (roleToSend === 'doctor') {
-        const medicalLicenseId = user.medicalLicenseId || 'MED_UNKNOWN';
-        localStorage.setItem('medicalLicenseId', String(medicalLicenseId));
-
-        const doctorObj = {
-          firstName: user.firstName || 'Doctor',
-          lastName: user.lastName || '',
-          medicalLicenseId,
-        };
-        localStorage.setItem('doctor', JSON.stringify(doctorObj));
+      // Nurse extra info
+      if (roleToSend === "nurse") {
+        const nurId = user.nurId || "NUR_UNKNOWN";
+        localStorage.setItem("nurId", String(nurId));
+        localStorage.setItem(
+          "nurse",
+          JSON.stringify({
+            firstName: user.firstName || "Nurse",
+            lastName: user.lastName || "",
+            nurId,
+          })
+        );
       }
 
-      if (roleToSend === 'nurse') {
-        const nurId = user.nurId || 'NUR_UNKNOWN';
-        localStorage.setItem('nurId', String(nurId));
-
-        const nurseObj = {
-          firstName: user.firstName || 'Nurse',
-          lastName: user.lastName || '',
-          nurId,
-        };
-        localStorage.setItem('nurse', JSON.stringify(nurseObj));
+      // Lab Assistant extra info
+      if (roleToSend === "lab_assistant") {
+        const labId = user.labId || "LAB_UNKNOWN";
+        localStorage.setItem("labId", String(labId));
+        localStorage.setItem(
+          "labAssistant",
+          JSON.stringify({
+            firstName: user.firstName || "Lab",
+            lastName: user.lastName || "Assistant",
+            labId,
+          })
+        );
       }
 
-      if (roleToSend === 'lab_assistant') {
-        const labId = user.labId || 'LAB_UNKNOWN';
-        localStorage.setItem('labId', String(labId));
+      // -------------------------------
+      // 🔥 Redirect Logic
+      // -------------------------------
+      if (userType === "doctor") {
+        navigate("/doctor");
 
-        const labObj = {
-          firstName: user.firstName || 'Lab',
-          lastName: user.lastName || 'Assistant',
-          labId,
-        };
-        localStorage.setItem('labAssistant', JSON.stringify(labObj));
-      }
+      } else if (userType === "admin") {
+        navigate("/admin");
 
-      // ---- Navigate based on top-level userType (which dashboard) ----
-      if (userType === 'doctor') {
-        navigate('/doctor');
-      } else if (userType === 'admin') {
-        navigate('/admin');
-      } else if (userType === 'staff') {
-        navigate('/staff');
+      } else if (userType === "staff") {
+        if (staffRole === "lab_assistant") {
+          navigate("/lab-assistant"); // ✅ Correct redirect
+        } else if (staffRole === "nurse") {
+          navigate("/nurse");
+        }
       }
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          'Login failed. Please check your credentials.'
+          "Login failed. Please check your credentials."
       );
     } finally {
       setLoading(false);
@@ -115,8 +116,8 @@ function LoginPage() {
 
   const handleUserTypeClick = (type) => {
     setUserType(type);
-    if (type !== 'staff') {
-      setStaffRole('nurse');
+    if (type !== "staff") {
+      setStaffRole("nurse");
     }
   };
 
@@ -129,22 +130,24 @@ function LoginPage() {
 
         <div className="user-types">
           <div
-            className={`user-type ${userType === 'doctor' ? 'active' : ''}`}
-            onClick={() => handleUserTypeClick('doctor')}
+            className={`user-type ${userType === "doctor" ? "active" : ""}`}
+            onClick={() => handleUserTypeClick("doctor")}
           >
             <FaUserMd className="user-type-icon" />
             <div className="user-type-label">Doctor</div>
           </div>
+
           <div
-            className={`user-type ${userType === 'admin' ? 'active' : ''}`}
-            onClick={() => handleUserTypeClick('admin')}
+            className={`user-type ${userType === "admin" ? "active" : ""}`}
+            onClick={() => handleUserTypeClick("admin")}
           >
             <MdAdminPanelSettings className="user-type-icon" />
             <div className="user-type-label">Admin</div>
           </div>
+
           <div
-            className={`user-type ${userType === 'staff' ? 'active' : ''}`}
-            onClick={() => handleUserTypeClick('staff')}
+            className={`user-type ${userType === "staff" ? "active" : ""}`}
+            onClick={() => handleUserTypeClick("staff")}
           >
             <FaUserTie className="user-type-icon" />
             <div className="user-type-label">Staff</div>
@@ -155,26 +158,24 @@ function LoginPage() {
           {error && (
             <div
               style={{
-                color: '#dc3545',
-                marginBottom: '15px',
-                padding: '10px',
-                backgroundColor: '#f8d7da',
-                borderRadius: '5px',
-                border: '1px solid #f5c6cb',
+                color: "#dc3545",
+                marginBottom: "15px",
+                padding: "10px",
+                backgroundColor: "#f8d7da",
+                borderRadius: "5px",
+                border: "1px solid #f5c6cb",
               }}
             >
               {error}
             </div>
           )}
 
-          {/* Staff role dropdown */}
-          {userType === 'staff' && (
+          {userType === "staff" && (
             <div className="form-group">
               <label className="form-label">
                 <strong>Staff Role</strong>
               </label>
               <div className="input-with-icon no-icon">
-                {/* no icon, but reuse same box style */}
                 <select
                   className="staff-role-select"
                   value={staffRole}
@@ -220,13 +221,13 @@ function LoginPage() {
           </div>
 
           <button type="submit" className="signin-button" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        {userType !== 'admin' && (
+        {userType !== "admin" && (
           <div className="create-account">
-            Don't have an account?{' '}
+            Don't have an account?{" "}
             <Link to={`/create-account?type=${userType}`} className="link">
               Create new account
             </Link>
@@ -234,7 +235,7 @@ function LoginPage() {
         )}
 
         <div className="support-text">
-          Having Trouble to login?{' '}
+          Having Trouble to login?{" "}
           <a href="#" className="link">
             Contact Support
           </a>
