@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+
+// Doctor Pages
 import Home from './pages/Home';
 import Patients from './pages/Patients';
 import Reports from './pages/Reports';
@@ -15,22 +17,30 @@ import MedicationsInfo from './pages/medicationsinfo';
 import HistoryInfo from './pages/historyinfo';
 import NewPrescription from './pages/NewPrescription';
 import SingleReport from './pages/SingleReport';
+import PatientNew from './pages/PatientNew';
+import AppointmentView from './pages/AppointmentView';
+import OrderNewReport from './pages/OrderNewReport';
+
+// Admin Pages
 import AdminPanel from './pages/AdminPanel';
 import AdminSidebar from './components/AdminSidebar';
-import CreateAccount from './pages/CreateAccount';
-import LoginPage from './pages/LoginPage';
 import AdminDocAppointments from './pages/AdminDocAppointments';
 import DocAllAppointment from './pages/DocAllAppointment';
 import AdminAllAppointments from './pages/AdminAllAppointments';
 import AdminUsers from './pages/AdminUsers';
-import PatientNew from './pages/PatientNew';
-import AppointmentView from './pages/AppointmentView';
 import UserRegister from './pages/UserRegister';
-import OrderNewReport from './pages/OrderNewReport';
+
+// Lab Assistant Pages
+import LabAssistantDashboard from './pages/LabAssistantDashboard';
+import AddLabReport from './pages/AddLabReport';
+
+// System
+import CreateAccount from './pages/CreateAccount';
+import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
+
 import './App.css';
 import { useLocation } from 'react-router-dom';
-
 
 // LAYOUT
 function MainLayout() {
@@ -50,7 +60,6 @@ function MainLayout() {
   );
 }
 
-
 // APP ROUTES
 function App() {
   return (
@@ -65,6 +74,9 @@ function App() {
         {/* PROTECTED ROUTES */}
         <Route path="*" element={<MainLayout />}>
 
+          {/* ======================= */}
+          {/*       DOCTOR ROUTES     */}
+          {/* ======================= */}
           <Route path="doctor" element={<ProtectedRoute allowedRoles={['doctor']}><Home /></ProtectedRoute>} />
           <Route path="doctor/patients" element={<ProtectedRoute allowedRoles={['doctor']}><Patients /></ProtectedRoute>} />
           <Route path="doctor/patients/new" element={<ProtectedRoute allowedRoles={['doctor']}><PatientNew /></ProtectedRoute>} />
@@ -86,11 +98,54 @@ function App() {
           <Route path="doctor/patient/:id/medicationsinfo/newprescription" element={<ProtectedRoute allowedRoles={['doctor']}><NewPrescription /></ProtectedRoute>} />
           <Route path="doctor/patient/:id/historyinfo" element={<ProtectedRoute allowedRoles={['doctor']}><HistoryInfo /></ProtectedRoute>} />
 
-          {/* ⭐ FIXED ⭐ */}
+          {/* Fix: Report Routes */}
           <Route path="doctor/reports/:id" element={<ProtectedRoute allowedRoles={['doctor']}><SingleReport /></ProtectedRoute>} />
           <Route path="doctor/report/:labId" element={<ProtectedRoute allowedRoles={['doctor']}><SingleReport /></ProtectedRoute>} />
 
-          {/* ADMIN PAGES */}
+
+          {/* ======================= */}
+          {/*   LAB ASSISTANT ROUTES  */}
+          {/* ======================= */}
+          <Route
+            path="lab-assistant"
+            element={
+              <ProtectedRoute allowedRoles={['lab_assistant']}>
+                <LabAssistantDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="lab-assistant/add-report"
+            element={
+              <ProtectedRoute allowedRoles={['lab_assistant']}>
+                <AddLabReport />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="lab-assistant/add-report/:id"
+            element={
+              <ProtectedRoute allowedRoles={['lab_assistant']}>
+                <div>Report Form Coming Soon</div>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="lab-assistant/update-report"
+            element={
+              <ProtectedRoute allowedRoles={['lab_assistant']}>
+                <div>Update Report Coming Soon</div>
+              </ProtectedRoute>
+            }
+          />
+
+
+          {/* ======================= */}
+          {/*       ADMIN ROUTES      */}
+          {/* ======================= */}
           <Route path="admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminPanel /></ProtectedRoute>} />
           <Route path="admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
           <Route path="admin/docappointments" element={<ProtectedRoute allowedRoles={['admin']}><AdminDocAppointments /></ProtectedRoute>} />
