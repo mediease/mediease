@@ -38,6 +38,1106 @@
   "Heart Failure": {
     "risky_classes": ["NSAID", "Beta-blocker", "Calcium Channel Blocker"],
     "message": "These drugs may worsen heart failure symptoms and require careful monitoring."
+  },
+  "Chronic Obstructive Pulmonary Disease": {
+    "risky_classes": ["Beta-blocker", "Sedative", "Opioid"],
+    "message": "These drugs can cause respiratory depression and worsen breathing difficulties."
+  },
+  "Glaucoma": {
+    "risky_classes": ["Anticholinergic", "Steroid", "Sympathomimetic"],
+    "message": "These drugs can increase intraocular pressure and worsen glaucoma."
+  },
+  "Seizure Disorder": {
+    "risky_classes": ["Tramadol", "Antipsychotic", "Antidepressant"],
+    "message": "These drugs can lower seizure threshold and increase seizure risk."
+  },
+  "Gout": {
+    "risky_classes": ["Diuretic", "Aspirin"],
+    "message": "These drugs can increase uric acid levels and trigger gout attacks."
+  },
+  "Thyroid Disease": {
+    "risky_classes": ["Amiodarone", "Lithium", "Interferon"],
+    "message": "These drugs can affect thyroid function and may require monitoring."
+  },
+  "Osteoporosis": {
+    "risky_classes": ["Steroid", "Proton Pump Inhibitor", "Anticonvulsant"],
+    "message": "These drugs can decrease bone density and increase fracture risk."
+  },
+  "Myasthenia Gravis": {
+    "risky_classes": ["Aminoglycoside", "Fluoroquinolone", "Muscle Relaxant"],
+    "message": "These drugs can worsen muscle weakness and precipitate myasthenic crisis."
+  },
+  "Prostate Enlargement": {
+    "risky_classes": ["Anticholinergic", "Decongestant", "Opioid"],
+    "message": "These drugs can cause urinary retention and worsen obstructive symptoms."
+  },
+  "Depression": {
+    "risky_classes": ["Beta-blocker", "Steroid", "Interferon"],
+    "message": "These drugs may worsen depressive symptoms and require monitoring."
+  },
+  "Anxiety Disorder": {
+    "risky_classes": ["Stimulant", "Caffeine", "Decongestant"],
+    "message": "These drugs can increase anxiety symptoms and trigger panic attacks."
+  },
+  "Arrhythmia": {
+    "risky_classes": ["Antiarrhythmic", "Macrolide", "Fluoroquinolone"],
+    "message": "These drugs can prolong QT interval and increase arrhythmia risk."
+  },
+  "Coronary Artery Disease": {
+    "risky_classes": ["NSAID", "Stimulant", "Vasopressor"],
+    "message": "These drugs can increase cardiac workload and risk of ischemia."
+  },
+  "Stroke History": {
+    "risky_classes": ["Anticoagulant", "Antiplatelet", "Thrombolytic"],
+    "message": "These drugs require careful monitoring to balance bleeding and clotting risk."
+  },
+  "Alzheimer Disease": {
+    "risky_classes": ["Anticholinergic", "Benzodiazepine", "Antipsychotic"],
+    "message": "These drugs can worsen cognitive impairment and increase fall risk."
+  },
+  "Parkinson Disease": {
+    "risky_classes": ["Antipsychotic", "Metoclopramide", "Prochlorperazine"],
+    "message": "These drugs can worsen Parkinsonian symptoms and motor control."
+  },
+  "Migraine": {
+    "risky_classes": ["Vasodilator", "Nitrate", "Estrogen"],
+    "message": "These drugs may trigger or worsen migraine headaches."
+  },
+  "Inflammatory Bowel Disease": {
+    "risky_classes": ["NSAID", "Antibiotic"],
+    "message": "These drugs can trigger flares and worsen intestinal inflammation."
+  },
+  "Celiac Disease": {
+    "risky_classes": ["Gluten-containing medication"],
+    "message": "These medications may contain gluten and trigger symptoms."
+  },
+  "Lactose Intolerance": {
+    "risky_classes": ["Lactose-containing medication"],
+    "message": "These medications may contain lactose and cause digestive symptoms."
+  },
+  "Peanut Allergy": {
+    "risky_classes": ["Peanut oil-containing medication"],
+    "message": "These medications may contain peanut products and trigger allergic reactions."
+  },
+  "Sulfa Allergy": {
+    "risky_classes": ["Sulfonamide", "Sulfonylurea"],
+    "message": "These drugs may cause cross-reactivity in sulfa-allergic patients."
+  },
+  "Penicillin Allergy": {
+    "risky_classes": ["Beta-lactam", "Cephalosporin"],
+    "message": "These drugs may cause cross-reactivity in penicillin-allergic patients."
+  },
+  "G6PD Deficiency": {
+    "risky_classes": ["Sulfonamide", "Antimalarial", "Nitrofurantoin"],
+    "message": "These drugs can trigger hemolytic anemia in G6PD deficient patients."
+  },
+  "Porphyria": {
+    "risky_classes": ["Barbiturate", "Sulfonamide", "Estrogen"],
+    "message": "These drugs can precipitate acute porphyria attacks."
+  },
+  "Long QT Syndrome": {
+    "risky_classes": ["Antiarrhythmic", "Antipsychotic", "Antihistamine"],
+    "message": "These drugs can further prolong QT interval and increase arrhythmia risk."
+  },
+  "Malignant Hyperthermia": {
+    "risky_classes": ["Volatile anesthetic", "Succinylcholine"],
+    "message": "These drugs can trigger life-threatening hyperthermia reaction."
+  },
+  "Systemic Lupus Erythematosus": {
+    "risky_classes": ["Hydralazine", "Procainamide", "Isoniazid"],
+    "message": "These drugs can induce or worsen lupus symptoms."
+  },
+  "Rheumatoid Arthritis": {
+    "risky_classes": ["Immunosuppressant", "Biologic"],
+    "message": "These drugs require monitoring for infections and adverse effects."
+  },
+  "Multiple Sclerosis": {
+    "risky_classes": ["Immunosuppressant", "Interferon"],
+    "message": "These drugs require careful monitoring of immune function and side effects."
+  },
+  "HIV/AIDS": {
+    "risky_classes": ["Protease Inhibitor", "Immunosuppressant"],
+    "message": "These drugs have multiple drug interactions and require careful management."
+  },
+  "Hepatitis B": {
+    "risky_classes": ["Immunosuppressant", "Chemotherapy"],
+    "message": "These drugs can cause hepatitis B reactivation and require monitoring."
+  },
+  "Hepatitis C": {
+    "risky_classes": ["Hepatotoxic drug", "High-dose Antibiotic"],
+    "message": "These drugs can worsen liver function in hepatitis C patients."
+  },
+  "Tuberculosis": {
+    "risky_classes": ["Immunosuppressant", "TNF inhibitor"],
+    "message": "These drugs can cause TB reactivation and require screening."
+  },
+  "Chronic Kidney Disease Stage 3": {
+    "risky_classes": ["NSAID", "Metformin", "Gadolinium"],
+    "message": "These drugs require dose adjustment or avoidance in moderate kidney disease."
+  },
+  "Chronic Kidney Disease Stage 4": {
+    "risky_classes": ["NSAID", "Metformin", "Enoxaparin"],
+    "message": "These drugs are contraindicated or require significant dose reduction in advanced kidney disease."
+  },
+  "Dialysis": {
+    "risky_classes": ["Nephrotoxic drug", "Renally cleared drug"],
+    "message": "These drugs require special dosing considerations in dialysis patients."
+  },
+  "Cirrhosis": {
+    "risky_classes": ["Hepatotoxic drug", "Sedative", "Opioid"],
+    "message": "These drugs can worsen hepatic encephalopathy and liver function."
+  },
+  "Alcohol Use Disorder": {
+    "risky_classes": ["Paracetamol", "Benzodiazepine", "Opioid"],
+    "message": "These drugs have increased toxicity risk or abuse potential in alcohol users."
+  },
+  "Substance Abuse History": {
+    "risky_classes": ["Opioid", "Benzodiazepine", "Stimulant"],
+    "message": "These controlled substances require careful monitoring due to abuse potential."
+  },
+  "Bipolar Disorder": {
+    "risky_classes": ["Antidepressant", "Steroid", "Stimulant"],
+    "message": "These drugs can trigger manic episodes and require mood stabilizer coverage."
+  },
+  "Schizophrenia": {
+    "risky_classes": ["Antipsychotic", "Stimulant"],
+    "message": "These drugs require monitoring for metabolic effects and drug interactions."
+  },
+  "Eating Disorder": {
+    "risky_classes": ["Bupropion", "Stimulant"],
+    "message": "These drugs can increase seizure risk and worsen eating disorder symptoms."
+  },
+  "Sleep Apnea": {
+    "risky_classes": ["Benzodiazepine", "Opioid", "Sedative"],
+    "message": "These drugs can worsen respiratory depression during sleep."
+  },
+  "Obesity": {
+    "risky_classes": ["Steroid", "Antipsychotic", "Insulin"],
+    "message": "These drugs can promote weight gain and worsen metabolic complications."
+  },
+  "Anorexia": {
+    "risky_classes": ["Stimulant", "Appetite suppressant"],
+    "message": "These drugs can worsen nutritional status and electrolyte imbalances."
+  },
+  "Hyperlipidemia": {
+    "risky_classes": ["Steroid", "Protease Inhibitor", "Thiazide"],
+    "message": "These drugs can worsen lipid profiles and cardiovascular risk."
+  },
+  "Hyperthyroidism": {
+    "risky_classes": ["Sympathomimetic", "Amiodarone"],
+    "message": "These drugs can worsen thyrotoxicosis and cardiac symptoms."
+  },
+  "Hypothyroidism": {
+    "risky_classes": ["Lithium", "Amiodarone", "Interferon"],
+    "message": "These drugs can worsen thyroid function and may require dose adjustment."
+  },
+  "Addison Disease": {
+    "risky_classes": ["Steroid withdrawal", "Rifampin"],
+    "message": "These situations can precipitate adrenal crisis in adrenal insufficiency."
+  },
+  "Cushing Syndrome": {
+    "risky_classes": ["Steroid"],
+    "message": "Additional steroids can worsen metabolic and cardiovascular complications."
+  },
+  "Acromegaly": {
+    "risky_classes": ["Growth hormone"],
+    "message": "These drugs can worsen symptoms and complications of excess growth hormone."
+  },
+  "Hyperparathyroidism": {
+    "risky_classes": ["Calcium supplement", "Vitamin D", "Thiazide"],
+    "message": "These drugs can worsen hypercalcemia and related complications."
+  },
+  "Hypoparathyroidism": {
+    "risky_classes": ["Loop diuretic", "Bisphosphonate"],
+    "message": "These drugs can worsen hypocalcemia and require monitoring."
+  },
+  "Pheochromocytoma": {
+    "risky_classes": ["Beta-blocker alone", "Sympathomimetic", "Tricyclic Antidepressant"],
+    "message": "These drugs can precipitate hypertensive crisis in pheochromocytoma."
+  },
+  "Carcinoid Syndrome": {
+    "risky_classes": ["Sympathomimetic", "Serotonergic drug"],
+    "message": "These drugs can trigger carcinoid crisis and worsen symptoms."
+  },
+  "Mastocytosis": {
+    "risky_classes": ["Opioid", "Radiocontrast", "NSAID"],
+    "message": "These drugs can trigger mast cell degranulation and anaphylaxis."
+  },
+  "Sickle Cell Disease": {
+    "risky_classes": ["Dehydrating drug", "Vasoconstrictive drug"],
+    "message": "These drugs can precipitate sickle cell crisis and vaso-occlusion."
+  },
+  "Hemophilia": {
+    "risky_classes": ["Anticoagulant", "Antiplatelet", "NSAID"],
+    "message": "These drugs significantly increase bleeding risk in hemophilia patients."
+  },
+  "Thrombophilia": {
+    "risky_classes": ["Estrogen", "Oral contraceptive"],
+    "message": "These drugs increase thrombotic risk in hypercoagulable states."
+  },
+  "Antiphospholipid Syndrome": {
+    "risky_classes": ["Estrogen", "Oral contraceptive"],
+    "message": "These drugs significantly increase thrombotic risk in APS patients."
+  },
+  "Polycythemia": {
+    "risky_classes": ["Erythropoietin", "Testosterone"],
+    "message": "These drugs can worsen blood viscosity and thrombotic risk."
+  },
+  "Anemia": {
+    "risky_classes": ["NSAID", "Anticoagulant"],
+    "message": "These drugs can worsen anemia through bleeding or other mechanisms."
+  },
+  "Thrombocytopenia": {
+    "risky_classes": ["Anticoagulant", "Antiplatelet", "NSAID"],
+    "message": "These drugs significantly increase bleeding risk with low platelets."
+  },
+  "Neutropenia": {
+    "risky_classes": ["Immunosuppressant", "Chemotherapy"],
+    "message": "These drugs increase infection risk in patients with low white blood cells."
+  },
+  "Bone Marrow Suppression": {
+    "risky_classes": ["Myelosuppressive drug", "Antibiotic"],
+    "message": "These drugs can worsen cytopenias and increase infection risk."
+  },
+  "Post-Transplant": {
+    "risky_classes": ["Immunosuppressant interaction", "Live vaccine"],
+    "message": "These require careful monitoring to maintain immunosuppression and prevent rejection."
+  },
+  "Immunodeficiency": {
+    "risky_classes": ["Live vaccine", "Immunosuppressant"],
+    "message": "These can cause severe infections in immunocompromised patients."
+  },
+  "Splenectomy": {
+    "risky_classes": ["Live vaccine"],
+    "message": "These patients require special vaccination protocols and infection prophylaxis."
+  },
+  "Cystic Fibrosis": {
+    "risky_classes": ["Respiratory depressant"],
+    "message": "These drugs can worsen respiratory function in CF patients."
+  },
+  "Bronchiectasis": {
+    "risky_classes": ["Respiratory depressant", "Immunosuppressant"],
+    "message": "These drugs increase infection risk and worsen respiratory function."
+  },
+  "Interstitial Lung Disease": {
+    "risky_classes": ["Amiodarone", "Methotrexate", "Nitrofurantoin"],
+    "message": "These drugs can cause or worsen pulmonary fibrosis."
+  },
+  "Pulmonary Hypertension": {
+    "risky_classes": ["Beta-blocker", "NSAID"],
+    "message": "These drugs can worsen pulmonary pressures and right heart function."
+  },
+  "Pulmonary Embolism History": {
+    "risky_classes": ["Estrogen", "Oral contraceptive"],
+    "message": "These drugs increase risk of recurrent thromboembolism."
+  },
+  "Deep Vein Thrombosis History": {
+    "risky_classes": ["Estrogen", "Oral contraceptive", "Long immobilization"],
+    "message": "These increase risk of recurrent venous thromboembolism."
+  },
+  "Atrial Fibrillation": {
+    "risky_classes": ["QT-prolonging drug", "Sympathomimetic"],
+    "message": "These drugs can worsen arrhythmia control and increase stroke risk."
+  },
+  "Bradycardia": {
+    "risky_classes": ["Beta-blocker", "Calcium Channel Blocker", "Digoxin"],
+    "message": "These drugs can cause severe bradycardia and heart block."
+  },
+  "Tachycardia": {
+    "risky_classes": ["Sympathomimetic", "Anticholinergic", "Stimulant"],
+    "message": "These drugs can worsen tachycardia and increase cardiac workload."
+  },
+  "Aortic Stenosis": {
+    "risky_classes": ["Vasodilator", "Diuretic"],
+    "message": "These drugs can cause severe hypotension in aortic stenosis."
+  },
+  "Mitral Stenosis": {
+    "risky_classes": ["Tachycardia-inducing drug"],
+    "message": "These drugs reduce diastolic filling time and worsen symptoms."
+  },
+  "Cardiomyopathy": {
+    "risky_classes": ["Cardiotoxic drug", "NSAID"],
+    "message": "These drugs can worsen cardiac function and heart failure."
+  },
+  "Myocarditis": {
+    "risky_classes": ["Cardiotoxic drug", "NSAID"],
+    "message": "These drugs can worsen myocardial inflammation and function."
+  },
+  "Pericarditis": {
+    "risky_classes": ["Anticoagulant"],
+    "message": "These drugs increase risk of hemopericardium and cardiac tamponade."
+  },
+  "Endocarditis": {
+    "risky_classes": ["Immunosuppressant"],
+    "message": "These drugs can worsen infection control and increase complications."
+  },
+  "Peripheral Arterial Disease": {
+    "risky_classes": ["Beta-blocker", "Vasoconstrictive drug"],
+    "message": "These drugs can worsen peripheral perfusion and claudication."
+  },
+  "Raynaud Phenomenon": {
+    "risky_classes": ["Beta-blocker", "Ergotamine", "Vasoconstrictive drug"],
+    "message": "These drugs can trigger or worsen vasospastic episodes."
+  },
+  "Varicose Veins": {
+    "risky_classes": ["Estrogen", "Oral contraceptive"],
+    "message": "These drugs can worsen venous insufficiency and thrombosis risk."
+  },
+  "Lymphedema": {
+    "risky_classes": ["Calcium Channel Blocker"],
+    "message": "These drugs can worsen fluid retention and edema."
+  },
+  "Gastroesophageal Reflux Disease": {
+    "risky_classes": ["NSAID", "Bisphosphonate", "Calcium Channel Blocker"],
+    "message": "These drugs can worsen reflux symptoms and esophageal damage."
+  },
+  "Barrett Esophagus": {
+    "risky_classes": ["NSAID"],
+    "message": "These drugs can worsen esophageal inflammation and cancer risk."
+  },
+  "Esophageal Varices": {
+    "risky_classes": ["NSAID", "Anticoagulant", "Antiplatelet"],
+    "message": "These drugs significantly increase risk of life-threatening variceal bleeding."
+  },
+  "Hiatal Hernia": {
+    "risky_classes": ["NSAID", "Bisphosphonate"],
+    "message": "These drugs can worsen reflux and esophageal complications."
+  },
+  "Dysphagia": {
+    "risky_classes": ["Large tablet", "Bisphosphonate"],
+    "message": "These medications may be difficult to swallow or cause esophageal injury."
+  },
+  "Achalasia": {
+    "risky_classes": ["Anticholinergic"],
+    "message": "These drugs can worsen esophageal motility and dysphagia."
+  },
+  "Dumping Syndrome": {
+    "risky_classes": ["High osmolar solution"],
+    "message": "These can trigger dumping symptoms after gastric surgery."
+  },
+  "Short Bowel Syndrome": {
+    "risky_classes": ["Extended release formulation"],
+    "message": "These may not be absorbed properly in short bowel syndrome."
+  },
+  "Malabsorption Syndrome": {
+    "risky_classes": ["Fat-soluble vitamin", "Extended release formulation"],
+    "message": "These may not be absorbed effectively and require alternative formulations."
+  },
+  "Gastroparesis": {
+    "risky_classes": ["Anticholinergic", "Opioid", "GLP-1 agonist"],
+    "message": "These drugs can worsen gastric emptying and digestive symptoms."
+  },
+  "Irritable Bowel Syndrome": {
+    "risky_classes": ["Laxative abuse", "Opioid"],
+    "message": "These drugs can worsen bowel symptoms and motility."
+  },
+  "Diverticulitis": {
+    "risky_classes": ["NSAID", "Opioid"],
+    "message": "These drugs may increase complication risk and mask symptoms."
+  },
+  "Diverticulosis": {
+    "risky_classes": ["NSAID"],
+    "message": "These drugs may increase risk of diverticular bleeding and perforation."
+  },
+  "Colitis": {
+    "risky_classes": ["NSAID", "Antibiotic"],
+    "message": "These drugs can trigger flares and worsen intestinal inflammation."
+  },
+  "Constipation": {
+    "risky_classes": ["Opioid", "Anticholinergic", "Calcium supplement"],
+    "message": "These drugs can worsen constipation and require prophylactic laxatives."
+  },
+  "Diarrhea": {
+    "risky_classes": ["Laxative", "Magnesium supplement"],
+    "message": "These drugs can worsen diarrhea and electrolyte imbalances."
+  },
+  "Hemorrhoids": {
+    "risky_classes": ["NSAID", "Anticoagulant"],
+    "message": "These drugs increase risk of rectal bleeding."
+  },
+  "Anal Fissure": {
+    "risky_classes": ["NSAID", "Opioid"],
+    "message": "These drugs can worsen pain and delay healing."
+  },
+  "Cholecystitis": {
+    "risky_classes": ["Opioid", "Anticholinergic"],
+    "message": "These drugs can worsen biliary spasm and mask symptoms."
+  },
+  "Gallstones": {
+    "risky_classes": ["Fibrate", "Estrogen", "Rapid weight loss drug"],
+    "message": "These drugs can promote gallstone formation or complications."
+  },
+  "Pancreatitis": {
+    "risky_classes": ["Azathioprine", "Valproic acid", "Estrogen"],
+    "message": "These drugs can cause or worsen pancreatitis."
+  },
+  "Chronic Pancreatitis": {
+    "risky_classes": ["Alcohol", "High-dose pancreatic enzyme"],
+    "message": "These can worsen pancreatic inflammation and function."
+  },
+  "Pancreatic Insufficiency": {
+    "risky_classes": ["Proton Pump Inhibitor"],
+    "message": "These drugs can reduce effectiveness of pancreatic enzyme replacement."
+  },
+  "Benign Prostatic Hyperplasia": {
+    "risky_classes": ["Anticholinergic", "Decongestant", "Testosterone"],
+    "message": "These drugs can worsen urinary obstruction and retention."
+  },
+  "Urinary Retention": {
+    "risky_classes": ["Anticholinergic", "Opioid", "Calcium Channel Blocker"],
+    "message": "These drugs can worsen or precipitate acute urinary retention."
+  },
+  "Urinary Incontinence": {
+    "risky_classes": ["Diuretic", "Alpha-blocker", "Sedative"],
+    "message": "These drugs can worsen incontinence symptoms."
+  },
+  "Overactive Bladder": {
+    "risky_classes": ["Diuretic", "Caffeine"],
+    "message": "These drugs can worsen urgency and frequency symptoms."
+  },
+  "Interstitial Cystitis": {
+    "risky_classes": ["Acidifying agent", "Caffeine"],
+    "message": "These can trigger bladder pain and worsen symptoms."
+  },
+  "Urinary Tract Infection Recurrent": {
+    "risky_classes": ["Immunosuppressant"],
+    "message": "These drugs increase risk of recurrent and complicated UTIs."
+  },
+  "Nephrolithiasis": {
+    "risky_classes": ["Calcium supplement", "Vitamin D", "Loop diuretic"],
+    "message": "These drugs can promote kidney stone formation."
+  },
+  "Chronic Pelvic Pain": {
+    "risky_classes": ["NSAID long-term"],
+    "message": "Long-term NSAID use requires monitoring for adverse effects."
+  },
+  "Endometriosis": {
+    "risky_classes": ["Estrogen"],
+    "message": "Estrogen can stimulate endometrial tissue growth and worsen symptoms."
+  },
+  "Polycystic Ovary Syndrome": {
+    "risky_classes": ["Steroid", "Insulin resistance drug"],
+    "message": "These drugs require monitoring of metabolic parameters."
+  },
+  "Menopause": {
+    "risky_classes": ["Estrogen in high-risk patients"],
+    "message": "Hormone therapy requires careful assessment of risks and benefits."
+  },
+  "Osteopenia": {
+    "risky_classes": ["Steroid", "Aromatase Inhibitor"],
+    "message": "These drugs can accelerate bone loss and increase fracture risk."
+  },
+  "Vitamin D Deficiency": {
+    "risky_classes": ["Bisphosphonate"],
+    "message": "Vitamin D should be repleted before starting bisphosphonate therapy."
+  },
+  "Hypercalcemia": {
+    "risky_classes": ["Calcium supplement", "Vitamin D", "Thiazide"],
+    "message": "These drugs can worsen hypercalcemia and related complications."
+  },
+  "Hypocalcemia": {
+    "risky_classes": ["Loop diuretic", "Bisphosphonate", "Proton Pump Inhibitor"],
+    "message": "These drugs can worsen hypocalcemia and require monitoring."
+  },
+  "Hypokalemia": {
+    "risky_classes": ["Diuretic", "Laxative", "Steroid"],
+    "message": "These drugs can worsen potassium depletion and cardiac arrhythmias."
+  },
+  "Hyperkalemia": {
+    "risky_classes": ["ACE Inhibitor", "Potassium supplement", "Potassium-sparing diuretic"],
+    "message": "These drugs can cause life-threatening hyperkalemia."
+  },
+  "Hyponatremia": {
+    "risky_classes": ["Diuretic", "SSRI", "Carbamazepine"],
+    "message": "These drugs can worsen hyponatremia and neurological symptoms."
+  },
+  "Hypernatremia": {
+    "risky_classes": ["Sodium-containing medication"],
+    "message": "These can worsen hypernatremia and require monitoring."
+  },
+  "Hypomagnesemia": {
+    "risky_classes": ["Proton Pump Inhibitor", "Loop diuretic"],
+    "message": "These drugs can cause or worsen magnesium depletion."
+  },
+  "Metabolic Acidosis": {
+    "risky_classes": ["Metformin", "Topiramate"],
+    "message": "These drugs can worsen acidosis and require monitoring."
+  },
+  "Metabolic Alkalosis": {
+    "risky_classes": ["Diuretic"],
+    "message": "These drugs can worsen alkalosis and electrolyte imbalances."
+  },
+  "Dehydration": {
+    "risky_classes": ["Diuretic", "Laxative", "SGLT2 Inhibitor"],
+    "message": "These drugs can worsen dehydration and cause complications."
+  },
+  "Syndrome of Inappropriate Antidiuretic Hormone": {
+    "risky_classes": ["SSRI", "Carbamazepine", "NSAID"],
+    "message": "These drugs can worsen SIADH and hyponatremia."
+  },
+  "Diabetes Insipidus": {
+    "risky_classes": ["Lithium", "Demeclocycline"],
+    "message": "These drugs can cause or worsen diabetes insipidus."
+  },
+  "Erectile Dysfunction": {
+    "risky_classes": ["Beta-blocker", "Diuretic", "Antidepressant"],
+    "message": "These drugs can worsen erectile dysfunction."
+  },
+  "Priapism History": {
+    "risky_classes": ["Phosphodiesterase Inhibitor", "Trazodone"],
+    "message": "These drugs increase risk of recurrent priapism."
+  },
+  "Testicular Torsion History": {
+    "risky_classes": ["Antipsychotic"],
+    "message": "Some antipsychotics may increase torsion risk through hormonal effects."
+  },
+  "Gynecomastia": {
+    "risky_classes": ["Spironolactone", "Finasteride", "Antipsychotic"],
+    "message": "These drugs can cause or worsen gynecomastia."
+  },
+  "Hirsutism": {
+    "risky_classes": ["Testosterone", "Anabolic steroid"],
+    "message": "These drugs can worsen unwanted hair growth."
+  },
+  "Alopecia": {
+    "risky_classes": ["Chemotherapy", "Anticoagulant"],
+    "message": "These drugs can cause or worsen hair loss."
+  },
+  "Psoriasis": {
+    "risky_classes": ["Beta-blocker", "Lithium", "Antimalarial"],
+    "message": "These drugs can trigger or worsen psoriatic flares."
+  },
+  "Eczema": {
+    "risky_classes": ["Topical steroid long-term"],
+    "message": "Long-term topical steroids require monitoring for skin atrophy."
+  },
+  "Rosacea": {
+    "risky_classes": ["Topical steroid", "Vasodilator"],
+    "message": "These drugs can trigger or worsen rosacea flares."
+  },
+  "Photosensitivity": {
+    "risky_classes": ["Tetracycline", "Fluoroquinolone", "Thiazide"],
+    "message": "These drugs increase risk of severe sunburn and skin reactions."
+  },
+  "Vitiligo": {
+    "risky_classes": ["Depigmenting agent"],
+    "message": "These should be used cautiously to avoid worsening depigmentation."
+  },
+  "Melasma": {
+    "risky_classes": ["Estrogen", "Oral contraceptive"],
+    "message": "These drugs can trigger or worsen melasma."
+  },
+  "Acne": {
+    "risky_classes": ["Steroid", "Testosterone", "Lithium"],
+    "message": "These drugs can trigger or worsen acne."
+  },
+  "Stevens-Johnson Syndrome History": {
+    "risky_classes": ["Allopurinol", "Anticonvulsant", "Sulfonamide"],
+    "message": "These drugs have highest risk of causing recurrent severe skin reactions."
+  },
+  "Angioedema History": {
+    "risky_classes": ["ACE Inhibitor", "NSAID"],
+    "message": "These drugs can cause recurrent life-threatening angioedema."
+  },
+  "Urticaria": {
+    "risky_classes": ["Aspirin", "NSAID", "ACE Inhibitor"],
+    "message": "These drugs can trigger or worsen hives."
+  },
+  "Contact Dermatitis": {
+    "risky_classes": ["Topical antibiotic", "Topical anesthetic"],
+    "message": "These can cause allergic contact dermatitis in sensitized patients."
+  },
+  "Wound Healing Impairment": {
+    "risky_classes": ["Steroid", "Immunosuppressant", "Chemotherapy"],
+    "message": "These drugs can delay wound healing and increase infection risk."
+  },
+  "Diabetic Foot": {
+    "risky_classes": ["Vasoconstrictor"],
+    "message": "These drugs can worsen peripheral perfusion and delay healing."
+  },
+  "Pressure Ulcer": {
+    "risky_classes": ["Sedative", "Steroid"],
+    "message": "These drugs can delay healing and increase infection risk."
+  },
+  "Cellulitis Recurrent": {
+    "risky_classes": ["Immunosuppressant"],
+    "message": "These drugs increase risk of recurrent and severe skin infections."
+  },
+  "Fungal Infection Recurrent": {
+    "risky_classes": ["Immunosuppressant", "Steroid"],
+    "message": "These drugs increase risk of recurrent and invasive fungal infections."
+  },
+  "Herpes Zoster History": {
+    "risky_classes": ["Immunosuppressant"],
+    "message": "These drugs increase risk of shingles reactivation and complications."
+  },
+  "Cold Sore Recurrent": {
+    "risky_classes": ["Immunosuppressant", "Sun exposure drug"],
+    "message": "These can trigger herpes simplex reactivation."
+  },
+  "Warts": {
+    "risky_classes": ["Immunosuppressant"],
+    "message": "These drugs can worsen viral warts and increase spread."
+  },
+  "Tinea Pedis": {
+    "risky_classes": ["Topical steroid alone"],
+    "message": "Steroids alone can worsen fungal infections (tinea incognito)."
+  },
+  "Onychomycosis": {
+    "risky_classes": ["Oral antifungal"],
+    "message": "These require monitoring for drug interactions and hepatotoxicity."
+  },
+  "Scabies": {
+    "risky_classes": ["Topical steroid alone"],
+    "message": "Steroids can worsen scabies infestation (crusted scabies)."
+  },
+  "Lice Infestation": {
+    "risky_classes": ["Neurotoxic pediculicide"],
+    "message": "These require proper use to avoid toxicity, especially in children."
+  },
+  "Bedbugs": {
+    "risky_classes": ["Systemic insecticide"],
+    "message": "Treatment focuses on environmental control, not systemic medications."
+  },
+  "Peripheral Neuropathy": {
+    "risky_classes": ["Neurotoxic drug", "Chemotherapy"],
+    "message": "These drugs can worsen nerve damage and neuropathic symptoms."
+  },
+  "Diabetic Neuropathy": {
+    "risky_classes": ["Neurotoxic drug"],
+    "message": "These drugs can worsen diabetic nerve damage."
+  },
+  "Guillain-Barre Syndrome History": {
+    "risky_classes": ["Live vaccine", "Immune stimulant"],
+    "message": "These may trigger recurrence in susceptible patients."
+  },
+  "Bell Palsy": {
+    "risky_classes": ["Anticholinergic"],
+    "message": "These drugs can worsen dry eye and oral complications."
+  },
+  "Trigeminal Neuralgia": {
+    "risky_classes": ["Vasodilator"],
+    "message": "These drugs may trigger facial pain episodes."
+  },
+  "Restless Legs Syndrome": {
+    "risky_classes": ["Antipsychotic", "Antihistamine", "Antidepressant"],
+    "message": "These drugs can trigger or worsen restless legs symptoms."
+  },
+  "Tardive Dyskinesia": {
+    "risky_classes": ["Antipsychotic"],
+    "message": "Continued antipsychotic use can worsen irreversible movement disorder."
+  },
+  "Essential Tremor": {
+    "risky_classes": ["Stimulant", "Caffeine", "Bronchodilator"],
+    "message": "These drugs can worsen tremor amplitude."
+  },
+  "Huntington Disease": {
+    "risky_classes": ["Dopamine agonist"],
+    "message": "These drugs can worsen chorea and psychiatric symptoms."
+  },
+  "Amyotrophic Lateral Sclerosis": {
+    "risky_classes": ["Respiratory depressant"],
+    "message": "These drugs can worsen respiratory function in ALS patients."
+  },
+  "Muscular Dystrophy": {
+    "risky_classes": ["Neuromuscular blocking agent", "Statin"],
+    "message": "These drugs can worsen muscle weakness and damage."
+  },
+  "Rhabdomyolysis History": {
+    "risky_classes": ["Statin", "Fibrate"],
+    "message": "These drugs significantly increase risk of recurrent rhabdomyolysis."
+  },
+  "Fibromyalgia": {
+    "risky_classes": ["Opioid long-term"],
+    "message": "Opioids are not recommended for fibromyalgia and may worsen symptoms."
+  },
+  "Chronic Fatigue Syndrome": {
+    "risky_classes": ["Sedative", "Muscle relaxant"],
+    "message": "These drugs can worsen fatigue and cognitive symptoms."
+  },
+  "Postural Orthostatic Tachycardia Syndrome": {
+    "risky_classes": ["Diuretic", "Vasodilator"],
+    "message": "These drugs can worsen orthostatic symptoms."
+  },
+  "Syncope Recurrent": {
+    "risky_classes": ["Vasodilator", "Diuretic", "Antihypertensive"],
+    "message": "These drugs increase risk of recurrent fainting episodes."
+  },
+  "Vertigo": {
+    "risky_classes": ["Ototoxic drug", "Sedative"],
+    "message": "These drugs can worsen balance and vestibular symptoms."
+  },
+  "Meniere Disease": {
+    "risky_classes": ["High sodium medication", "Caffeine"],
+    "message": "These can trigger vertigo attacks and worsen symptoms."
+  },
+  "Tinnitus": {
+    "risky_classes": ["Aspirin", "Loop diuretic", "Aminoglycoside"],
+    "message": "These drugs can cause or worsen tinnitus."
+  },
+  "Hearing Loss": {
+    "risky_classes": ["Ototoxic drug", "Aminoglycoside"],
+    "message": "These drugs can cause irreversible hearing damage."
+  },
+  "Otitis Media Recurrent": {
+    "risky_classes": ["Immunosuppressant"],
+    "message": "These drugs increase risk of recurrent and complicated ear infections."
+  },
+  "Otosclerosis": {
+    "risky_classes": ["Bisphosphonate"],
+    "message": "Effect on otosclerosis is uncertain; requires monitoring."
+  },
+  "Epistaxis Recurrent": {
+    "risky_classes": ["Anticoagulant", "Antiplatelet", "Nasal steroid"],
+    "message": "These drugs increase risk of recurrent nosebleeds."
+  },
+  "Sinusitis Chronic": {
+    "risky_classes": ["Immunosuppressant", "Intranasal steroid long-term"],
+    "message": "These require monitoring for fungal infections and complications."
+  },
+  "Nasal Polyps": {
+    "risky_classes": ["Aspirin in aspirin-sensitive patients"],
+    "message": "Aspirin can trigger severe reactions in aspirin-exacerbated respiratory disease."
+  },
+  "Allergic Rhinitis": {
+    "risky_classes": ["First generation antihistamine"],
+    "message": "These can cause excessive sedation and anticholinergic effects."
+  },
+  "Dry Eye Syndrome": {
+    "risky_classes": ["Anticholinergic", "Antihistamine", "Isotretinoin"],
+    "message": "These drugs can worsen dry eye symptoms."
+  },
+  "Cataract": {
+    "risky_classes": ["Steroid long-term"],
+    "message": "Long-term steroid use can accelerate cataract formation."
+  },
+  "Macular Degeneration": {
+    "risky_classes": ["High-dose vitamin E"],
+    "message": "Some supplements may worsen macular degeneration."
+  },
+  "Retinopathy": {
+    "risky_classes": ["Antimalarial long-term", "Tamoxifen"],
+    "message": "These drugs require regular ophthalmologic monitoring."
+  },
+  "Optic Neuritis": {
+    "risky_classes": ["Ethambutol", "Isoniazid"],
+    "message": "These drugs can cause optic nerve damage and vision loss."
+  },
+  "Uveitis": {
+    "risky_classes": ["Immunosuppressant withdrawal"],
+    "message": "Sudden withdrawal can trigger severe inflammatory flares."
+  },
+  "Keratitis": {
+    "risky_classes": ["Contact lens", "Topical steroid"],
+    "message": "Steroids can worsen infectious keratitis and delay healing."
+  },
+  "Conjunctivitis Recurrent": {
+    "risky_classes": ["Contact lens", "Eye cosmetics"],
+    "message": "These can perpetuate infection or allergic inflammation."
+  },
+  "Strabismus": {
+    "risky_classes": ["Anticholinergic"],
+    "message": "These drugs can affect eye muscle coordination."
+  },
+  "Diplopia": {
+    "risky_classes": ["Muscle relaxant", "Anticholinergic"],
+    "message": "These drugs can worsen double vision."
+  },
+  "Nystagmus": {
+    "risky_classes": ["Anticonvulsant", "Sedative"],
+    "message": "These drugs can cause or worsen involuntary eye movements."
+  },
+  "Oral Candidiasis": {
+    "risky_classes": ["Inhaled steroid", "Antibiotic", "Immunosuppressant"],
+    "message": "These drugs increase risk of oral fungal infections."
+  },
+  "Periodontitis": {
+    "risky_classes": ["Immunosuppressant", "Calcium Channel Blocker"],
+    "message": "These can worsen gum disease and cause gingival hyperplasia."
+  },
+  "Xerostomia": {
+    "risky_classes": ["Anticholinergic", "Antihistamine", "Diuretic"],
+    "message": "These drugs can worsen dry mouth and increase dental complications."
+  },
+  "Geographic Tongue": {
+    "risky_classes": ["Spicy food triggers"],
+    "message": "Certain medications and foods can trigger painful episodes."
+  },
+  "Burning Mouth Syndrome": {
+    "risky_classes": ["ACE Inhibitor", "Antifungal"],
+    "message": "Some drugs can cause or worsen burning mouth symptoms."
+  },
+  "Oral Lichen Planus": {
+    "risky_classes": ["NSAID", "ACE Inhibitor", "Beta-blocker"],
+    "message": "These drugs can trigger lichenoid reactions."
+  },
+  "Aphthous Ulcers Recurrent": {
+    "risky_classes": ["NSAID", "Nicorandil"],
+    "message": "These drugs can cause or worsen mouth ulcers."
+  },
+  "Temporomandibular Joint Disorder": {
+    "risky_classes": ["Bisphosphonate", "Denosumab"],
+    "message": "These drugs increase risk of osteonecrosis of the jaw with dental procedures."
+  },
+  "Bruxism": {
+    "risky_classes": ["SSRI", "Stimulant"],
+    "message": "These drugs can worsen teeth grinding and jaw clenching."
+  },
+  "Dental Abscess": {
+    "risky_classes": ["Immunosuppressant"],
+    "message": "These drugs increase risk of severe and spreading dental infections."
+  },
+  "Cleft Lip/Palate": {
+    "risky_classes": ["Teratogenic drug in pregnancy"],
+    "message": "These drugs increase risk of orofacial malformations."
+  },
+  "Laryngitis": {
+    "risky_classes": ["Inhaled steroid", "ACE Inhibitor"],
+    "message": "These drugs can cause or worsen voice changes and cough."
+  },
+  "Vocal Cord Dysfunction": {
+    "risky_classes": ["Reflux-inducing drug"],
+    "message": "These drugs can trigger vocal cord spasm episodes."
+  },
+  "Dyspnea": {
+    "risky_classes": ["Beta-blocker", "Respiratory depressant"],
+    "message": "These drugs can worsen breathing difficulties."
+  },
+  "Orthopnea": {
+    "risky_classes": ["Beta-blocker in heart failure"],
+    "message": "These require careful titration to avoid worsening symptoms."
+  },
+  "Pleural Effusion": {
+    "risky_classes": ["Amiodarone", "Methotrexate", "Nitrofurantoin"],
+    "message": "These drugs can cause drug-induced pleural effusion."
+  },
+  "Pneumothorax History": {
+    "risky_classes": ["Mechanical ventilation", "Biopsy procedure"],
+    "message": "These procedures increase risk of recurrent pneumothorax."
+  },
+  "Sarcoidosis": {
+    "risky_classes": ["Immunostimulant"],
+    "message": "These drugs can trigger or worsen sarcoid flares."
+  },
+  "Silicosis": {
+    "risky_classes": ["Respiratory irritant"],
+    "message": "These can worsen pulmonary symptoms and function."
+  },
+  "Asbestosis": {
+    "risky_classes": ["Respiratory irritant", "Smoking"],
+    "message": "These increase risk of malignancy and respiratory complications."
+  },
+  "Pneumoconiosis": {
+    "risky_classes": ["Respiratory irritant"],
+    "message": "These can worsen occupational lung disease."
+  },
+  "Latex Allergy": {
+    "risky_classes": ["Latex-containing product"],
+    "message": "These can cause severe allergic reactions including anaphylaxis."
+  },
+  "Food Allergy": {
+    "risky_classes": ["Food allergen in medication"],
+    "message": "Hidden food allergens in medications can trigger reactions."
+  },
+  "Anaphylaxis History": {
+    "risky_classes": ["Known allergen", "Radiocontrast"],
+    "message": "These require premedication and emergency preparedness."
+  },
+  "Mastocytosis": {
+    "risky_classes": ["Mast cell degranulator"],
+    "message": "These drugs can trigger severe systemic reactions."
+  },
+  "Hereditary Angioedema": {
+    "risky_classes": ["ACE Inhibitor", "Estrogen"],
+    "message": "These drugs can trigger life-threatening angioedema attacks."
+  },
+  "Chronic Urticaria": {
+    "risky_classes": ["Aspirin", "NSAID"],
+    "message": "These drugs can trigger or worsen chronic hives."
+  },
+  "Eosinophilic Esophagitis": {
+    "risky_classes": ["Food allergen"],
+    "message": "Dietary triggers can worsen esophageal inflammation."
+  },
+  "Hypersensitivity Pneumonitis": {
+    "risky_classes": ["Environmental allergen", "Mold exposure"],
+    "message": "Continued exposure can cause progressive lung damage."
+  },
+  "Allergic Bronchopulmonary Aspergillosis": {
+    "risky_classes": ["Immunosuppressant without antifungal"],
+    "message": "These require concurrent antifungal therapy."
+  },
+  "Contact Allergy": {
+    "risky_classes": ["Topical allergen"],
+    "message": "These can cause severe contact dermatitis in sensitized patients."
+  },
+  "Drug Allergy": {
+    "risky_classes": ["Cross-reactive drug"],
+    "message": "Structurally similar drugs may cause cross-reactions."
+  },
+  "Vaccine Allergy": {
+    "risky_classes": ["Similar vaccine component"],
+    "message": "Alternative vaccines or special protocols may be needed."
+  },
+  "Insect Sting Allergy": {
+    "risky_classes": ["Beta-blocker"],
+    "message": "Beta-blockers can interfere with epinephrine treatment and worsen reactions."
+  },
+  "Chemotherapy-Induced Nausea": {
+    "risky_classes": ["Emetogenic chemotherapy"],
+    "message": "These require aggressive antiemetic prophylaxis."
+  },
+  "Radiation-Induced Mucositis": {
+    "risky_classes": ["Irritating mouthwash"],
+    "message": "Harsh products can worsen radiation-damaged mucosa."
+  },
+  "Post-Operative Ileus": {
+    "risky_classes": ["Opioid", "Anticholinergic"],
+    "message": "These drugs can prolong ileus and delay recovery."
+  },
+  "Post-Operative Nausea": {
+    "risky_classes": ["Opioid", "Volatile anesthetic"],
+    "message": "These drugs increase PONV risk and require prophylaxis."
+  },
+  "Post-Operative Delirium": {
+    "risky_classes": ["Anticholinergic", "Benzodiazepine", "Opioid"],
+    "message": "These drugs increase delirium risk in elderly surgical patients."
+  },
+  "Malignant Hyperthermia Susceptibility": {
+    "risky_classes": ["Volatile anesthetic", "Succinylcholine"],
+    "message": "These anesthetics are absolutely contraindicated."
+  },
+  "Pseudocholinesterase Deficiency": {
+    "risky_classes": ["Succinylcholine", "Mivacurium"],
+    "message": "These drugs cause prolonged paralysis in enzyme-deficient patients."
+  },
+  "Porphyria": {
+    "risky_classes": ["Porphyrinogenic drug"],
+    "message": "These drugs can precipitate life-threatening acute attacks."
+  },
+  "Hemochromatosis": {
+    "risky_classes": ["Iron supplement", "Vitamin C high-dose"],
+    "message": "These can worsen iron overload and organ damage."
+  },
+  "Wilson Disease": {
+    "risky_classes": ["Copper-containing supplement"],
+    "message": "Additional copper can worsen neurological and hepatic damage."
+  },
+  "Alpha-1 Antitrypsin Deficiency": {
+    "risky_classes": ["Smoking", "Respiratory irritant"],
+    "message": "These accelerate emphysema progression."
+  },
+  "Marfan Syndrome": {
+    "risky_classes": ["Fluoroquinolone"],
+    "message": "These drugs may increase risk of aortic dissection."
+  },
+  "Ehlers-Danlos Syndrome": {
+    "risky_classes": ["Anticoagulant", "Antiplatelet"],
+    "message": "These significantly increase bleeding risk in vascular EDS."
+  },
+  "Osteogenesis Imperfecta": {
+    "risky_classes": ["Fall risk drug"],
+    "message": "These drugs increase fracture risk in brittle bone disease."
+  },
+  "Achondroplasia": {
+    "risky_classes": ["Epidural anesthesia"],
+    "message": "These require special considerations due to spinal anatomy."
+  },
+  "Down Syndrome": {
+    "risky_classes": ["Cervical manipulation"],
+    "message": "Atlantoaxial instability increases risk of spinal cord injury."
+  },
+  "Fragile X Syndrome": {
+    "risky_classes": ["Stimulant"],
+    "message": "These may worsen anxiety and behavioral symptoms."
+  },
+  "Phenylketonuria": {
+    "risky_classes": ["Aspartame", "High protein supplement"],
+    "message": "These contain phenylalanine and can cause neurological damage."
+  },
+  "Galactosemia": {
+    "risky_classes": ["Lactose-containing medication"],
+    "message": "Galactose sources must be strictly avoided."
+  },
+  "Maple Syrup Urine Disease": {
+    "risky_classes": ["High branched-chain amino acid"],
+    "message": "These can precipitate metabolic crisis."
+  },
+  "Homocystinuria": {
+    "risky_classes": ["Methionine supplement"],
+    "message": "These can worsen metabolic imbalance and complications."
+  },
+  "Fabry Disease": {
+    "risky_classes": ["Nephrotoxic drug"],
+    "message": "These can worsen renal complications of Fabry disease."
+  },
+  "Gaucher Disease": {
+    "risky_classes": ["Bone marrow suppressive drug"],
+    "message": "These can worsen cytopenias in Gaucher patients."
+  },
+  "Tay-Sachs Disease": {
+    "risky_classes": ["Respiratory depressant"],
+    "message": "These can worsen aspiration risk and respiratory complications."
+  },
+  "Niemann-Pick Disease": {
+    "risky_classes": ["Hepatotoxic drug"],
+    "message": "These can worsen hepatic complications."
+  },
+  "Mucopolysaccharidosis": {
+    "risky_classes": ["Airway procedure"],
+    "message": "Difficult airway requires special anesthetic planning."
+  },
+  "Glycogen Storage Disease": {
+    "risky_classes": ["Fasting-inducing condition"],
+    "message": "These can trigger hypoglycemia and metabolic crisis."
+  },
+  "Mitochondrial Disease": {
+    "risky_classes": ["Valproic acid", "Metformin"],
+    "message": "These drugs can worsen mitochondrial dysfunction."
+  },
+  "Lesch-Nyhan Syndrome": {
+    "risky_classes": ["Allopurinol"],
+    "message": "Special considerations needed for hyperuricemia management."
+  },
+  "Cri-du-Chat Syndrome": {
+    "risky_classes": ["Respiratory depressant"],
+    "message": "These increase aspiration risk due to anatomical abnormalities."
+  },
+  "Prader-Willi Syndrome": {
+    "risky_classes": ["Appetite stimulant"],
+    "message": "These can worsen hyperphagia and obesity complications."
+  },
+  "Angelman Syndrome": {
+    "risky_classes": ["Sedative"],
+    "message": "These can worsen ataxia and seizure control."
+  },
+  "Rett Syndrome": {
+    "risky_classes": ["QT-prolonging drug"],
+    "message": "These increase risk of sudden cardiac death."
+  },
+  "Williams Syndrome": {
+    "risky_classes": ["Vitamin D", "Calcium supplement"],
+    "message": "These can worsen hypercalcemia in Williams syndrome."
+  },
+  "Turner Syndrome": {
+    "risky_classes": ["Estrogen in cardiac disease"],
+    "message": "These require cardiac evaluation before hormone therapy."
+  },
+  "Klinefelter Syndrome": {
+    "risky_classes": ["Testosterone"],
+    "message": "These require monitoring for metabolic effects and complications."
+  },
+  "Noonan Syndrome": {
+    "risky_classes": ["Bleeding risk drug"],
+    "message": "Coagulation abnormalities increase bleeding risk."
+  },
+  "Neurofibromatosis": {
+    "risky_classes": ["Contrast agent"],
+    "message": "These may require special precautions for imaging."
+  },
+  "Tuberous Sclerosis": {
+    "risky_classes": ["Immunostimulant"],
+    "message": "These may worsen tumor growth in TSC patients."
   }
 }
 

@@ -113,6 +113,949 @@
     "diltiazem",
     "felodipine",
     "nicardipine"
+  ],
+  "Sedative": [
+    "diazepam",
+    "lorazepam",
+    "midazolam",
+    "temazepam",
+    "zolpidem",
+    "zopiclone",
+    "eszopiclone"
+  ],
+  "Opioid": [
+    "morphine",
+    "codeine",
+    "tramadol",
+    "oxycodone",
+    "hydrocodone",
+    "fentanyl",
+    "methadone",
+    "hydromorphone"
+  ],
+  "Anticholinergic": [
+    "atropine",
+    "scopolamine",
+    "hyoscyamine",
+    "diphenhydramine",
+    "oxybutynin",
+    "tolterodine",
+    "trihexyphenidyl"
+  ],
+  "Sympathomimetic": [
+    "ephedrine",
+    "pseudoephedrine",
+    "phenylephrine",
+    "epinephrine",
+    "norepinephrine"
+  ],
+  "Tramadol": [
+    "tramadol",
+    "tramadol hydrochloride",
+    "ultram",
+    "tramal"
+  ],
+  "Antipsychotic": [
+    "haloperidol",
+    "risperidone",
+    "olanzapine",
+    "quetiapine",
+    "aripiprazole",
+    "clozapine",
+    "chlorpromazine"
+  ],
+  "Antidepressant": [
+    "fluoxetine",
+    "sertraline",
+    "paroxetine",
+    "escitalopram",
+    "amitriptyline",
+    "venlafaxine",
+    "duloxetine"
+  ],
+  "Diuretic": [
+    "furosemide",
+    "hydrochlorothiazide",
+    "spironolactone",
+    "bumetanide",
+    "chlorthalidone",
+    "amiloride"
+  ],
+  "Aspirin": [
+    "aspirin",
+    "acetylsalicylic acid",
+    "ASA"
+  ],
+  "Amiodarone": [
+    "amiodarone",
+    "cordarone"
+  ],
+  "Lithium": [
+    "lithium carbonate",
+    "lithium citrate"
+  ],
+  "Interferon": [
+    "interferon alfa",
+    "interferon beta",
+    "peginterferon"
+  ],
+  "Proton Pump Inhibitor": [
+    "omeprazole",
+    "pantoprazole",
+    "esomeprazole",
+    "lansoprazole",
+    "rabeprazole"
+  ],
+  "Anticonvulsant": [
+    "phenytoin",
+    "carbamazepine",
+    "valproate",
+    "levetiracetam",
+    "gabapentin",
+    "lamotrigine",
+    "topiramate"
+  ],
+  "Aminoglycoside": [
+    "gentamicin",
+    "tobramycin",
+    "amikacin",
+    "streptomycin",
+    "neomycin"
+  ],
+  "Fluoroquinolone": [
+    "ciprofloxacin",
+    "levofloxacin",
+    "moxifloxacin",
+    "ofloxacin",
+    "norfloxacin"
+  ],
+  "Muscle Relaxant": [
+    "baclofen",
+    "cyclobenzaprine",
+    "tizanidine",
+    "methocarbamol",
+    "carisoprodol"
+  ],
+  "Testosterone": [
+    "testosterone",
+    "testosterone cypionate",
+    "testosterone enanthate"
+  ],
+  "Stimulant": [
+    "methylphenidate",
+    "amphetamine",
+    "dextroamphetamine",
+    "lisdexamfetamine",
+    "modafinil"
+  ],
+  "Caffeine": [
+    "caffeine",
+    "caffeine citrate"
+  ],
+  "Antiarrhythmic": [
+    "amiodarone",
+    "flecainide",
+    "propafenone",
+    "sotalol",
+    "quinidine"
+  ],
+  "Macrolide": [
+    "azithromycin",
+    "clarithromycin",
+    "erythromycin",
+    "roxithromycin"
+  ],
+  "Vasopressor": [
+    "norepinephrine",
+    "epinephrine",
+    "dopamine",
+    "vasopressin",
+    "phenylephrine"
+  ],
+  "Thrombolytic": [
+    "alteplase",
+    "reteplase",
+    "tenecteplase",
+    "streptokinase"
+  ],
+  "Benzodiazepine": [
+    "diazepam",
+    "lorazepam",
+    "alprazolam",
+    "clonazepam",
+    "midazolam"
+  ],
+  "Metoclopramide": [
+    "metoclopramide",
+    "reglan"
+  ],
+  "Prochlorperazine": [
+    "prochlorperazine",
+    "compazine"
+  ],
+  "Vasodilator": [
+    "hydralazine",
+    "minoxidil",
+    "nitroprusside",
+    "isosorbide dinitrate"
+  ],
+  "Nitrate": [
+    "nitroglycerin",
+    "isosorbide mononitrate",
+    "isosorbide dinitrate"
+  ],
+  "Estrogen": [
+    "estradiol",
+    "conjugated estrogens",
+    "ethinyl estradiol",
+    "estrone"
+  ],
+  "Gluten-containing medication": [
+    "some multivitamins",
+    "some medications with gluten excipients"
+  ],
+  "Lactose-containing medication": [
+    "many tablets with lactose filler",
+    "some inhalers"
+  ],
+  "Peanut oil-containing medication": [
+    "progesterone injection",
+    "some vitamin preparations"
+  ],
+  "Sulfonamide": [
+    "sulfamethoxazole",
+    "sulfasalazine",
+    "sulfadiazine"
+  ],
+  "Sulfonylurea": [
+    "glyburide",
+    "glipizide",
+    "glimepiride",
+    "gliclazide"
+  ],
+  "Beta-lactam": [
+    "penicillin",
+    "amoxicillin",
+    "ampicillin",
+    "piperacillin"
+  ],
+  "Cephalosporin": [
+    "cephalexin",
+    "cefuroxime",
+    "ceftriaxone",
+    "cefixime"
+  ],
+  "Antimalarial": [
+    "chloroquine",
+    "hydroxychloroquine",
+    "primaquine",
+    "mefloquine"
+  ],
+  "Nitrofurantoin": [
+    "nitrofurantoin",
+    "macrobid",
+    "macrodantin"
+  ],
+  "Barbiturate": [
+    "phenobarbital",
+    "pentobarbital",
+    "thiopental"
+  ],
+  "Antihistamine": [
+    "diphenhydramine",
+    "cetirizine",
+    "loratadine",
+    "fexofenadine",
+    "chlorpheniramine"
+  ],
+  "Volatile anesthetic": [
+    "sevoflurane",
+    "desflurane",
+    "isoflurane",
+    "halothane"
+  ],
+  "Succinylcholine": [
+    "succinylcholine",
+    "suxamethonium"
+  ],
+  "Hydralazine": [
+    "hydralazine"
+  ],
+  "Procainamide": [
+    "procainamide"
+  ],
+  "Isoniazid": [
+    "isoniazid",
+    "INH"
+  ],
+  "Immunosuppressant": [
+    "cyclosporine",
+    "tacrolimus",
+    "azathioprine",
+    "mycophenolate",
+    "methotrexate"
+  ],
+  "Biologic": [
+    "infliximab",
+    "adalimumab",
+    "etanercept",
+    "rituximab",
+    "tocilizumab"
+  ],
+  "Protease Inhibitor": [
+    "ritonavir",
+    "lopinavir",
+    "atazanavir",
+    "darunavir"
+  ],
+  "Chemotherapy": [
+    "cyclophosphamide",
+    "doxorubicin",
+    "cisplatin",
+    "5-fluorouracil",
+    "paclitaxel"
+  ],
+  "TNF inhibitor": [
+    "infliximab",
+    "adalimumab",
+    "etanercept",
+    "certolizumab"
+  ],
+  "Metformin": [
+    "metformin",
+    "glucophage"
+  ],
+  "Gadolinium": [
+    "gadolinium contrast",
+    "gadobutrol",
+    "gadopentetate"
+  ],
+  "Enoxaparin": [
+    "enoxaparin",
+    "lovenox"
+  ],
+  "Nephrotoxic drug": [
+    "gentamicin",
+    "amphotericin",
+    "cisplatin",
+    "cyclosporine"
+  ],
+  "Renally cleared drug": [
+    "digoxin",
+    "metformin",
+    "gabapentin",
+    "atenolol"
+  ],
+  "Hepatotoxic drug": [
+    "acetaminophen high dose",
+    "isoniazid",
+    "ketoconazole",
+    "valproate"
+  ],
+  "Alcohol": [
+    "ethanol",
+    "alcohol"
+  ],
+  "Bupropion": [
+    "bupropion",
+    "wellbutrin",
+    "zyban"
+  ],
+  "Appetite suppressant": [
+    "phentermine",
+    "lorcaserin",
+    "orlistat"
+  ],
+  "Insulin": [
+    "insulin regular",
+    "insulin NPH",
+    "insulin glargine",
+    "insulin lispro",
+    "insulin aspart"
+  ],
+  "Thiazide": [
+    "hydrochlorothiazide",
+    "chlorthalidone",
+    "indapamide"
+  ],
+  "Steroid withdrawal": [
+    "sudden prednisone stop",
+    "sudden dexamethasone stop"
+  ],
+  "Rifampin": [
+    "rifampin",
+    "rifampicin"
+  ],
+  "Growth hormone": [
+    "somatropin",
+    "growth hormone"
+  ],
+  "Calcium supplement": [
+    "calcium carbonate",
+    "calcium citrate"
+  ],
+  "Vitamin D": [
+    "cholecalciferol",
+    "ergocalciferol",
+    "vitamin D3"
+  ],
+  "Loop diuretic": [
+    "furosemide",
+    "bumetanide",
+    "torsemide"
+  ],
+  "Bisphosphonate": [
+    "alendronate",
+    "risedronate",
+    "ibandronate",
+    "zoledronic acid"
+  ],
+  "Beta-blocker alone": [
+    "propranolol",
+    "atenolol",
+    "metoprolol"
+  ],
+  "Tricyclic Antidepressant": [
+    "amitriptyline",
+    "nortriptyline",
+    "imipramine",
+    "doxepin"
+  ],
+  "Serotonergic drug": [
+    "fluoxetine",
+    "sertraline",
+    "tramadol",
+    "ondansetron"
+  ],
+  "Radiocontrast": [
+    "iodinated contrast",
+    "iohexol",
+    "iopamidol"
+  ],
+  "Dehydrating drug": [
+    "laxatives",
+    "diuretics"
+  ],
+  "Vasoconstrictive drug": [
+    "ephedrine",
+    "phenylephrine",
+    "ergotamine"
+  ],
+  "Oral contraceptive": [
+    "ethinyl estradiol/levonorgestrel",
+    "ethinyl estradiol/norgestimate",
+    "ethinyl estradiol/drospirenone"
+  ],
+  "Erythropoietin": [
+    "epoetin alfa",
+    "darbepoetin alfa"
+  ],
+  "Myelosuppressive drug": [
+    "chemotherapy agents",
+    "azathioprine",
+    "methotrexate"
+  ],
+  "Immunosuppressant interaction": [
+    "tacrolimus with fluconazole",
+    "cyclosporine with diltiazem"
+  ],
+  "Live vaccine": [
+    "MMR vaccine",
+    "varicella vaccine",
+    "yellow fever vaccine",
+    "oral polio vaccine"
+  ],
+  "Respiratory depressant": [
+    "opioids",
+    "benzodiazepines",
+    "barbiturates"
+  ],
+  "QT-prolonging drug": [
+    "amiodarone",
+    "azithromycin",
+    "haloperidol",
+    "ondansetron"
+  ],
+  "Tachycardia-inducing drug": [
+    "ephedrine",
+    "pseudoephedrine",
+    "albuterol"
+  ],
+  "Cardiotoxic drug": [
+    "doxorubicin",
+    "trastuzumab",
+    "cyclophosphamide"
+  ],
+  "Ergotamine": [
+    "ergotamine",
+    "dihydroergotamine"
+  ],
+  "GLP-1 agonist": [
+    "liraglutide",
+    "semaglutide",
+    "exenatide",
+    "dulaglutide"
+  ],
+  "Laxative abuse": [
+    "senna",
+    "bisacodyl",
+    "cascara"
+  ],
+  "Laxative": [
+    "senna",
+    "bisacodyl",
+    "docusate",
+    "lactulose",
+    "polyethylene glycol"
+  ],
+  "Magnesium supplement": [
+    "magnesium oxide",
+    "magnesium citrate",
+    "magnesium sulfate"
+  ],
+  "Fibrate": [
+    "fenofibrate",
+    "gemfibrozil",
+    "bezafibrate"
+  ],
+  "Rapid weight loss drug": [
+    "orlistat",
+    "phentermine"
+  ],
+  "Azathioprine": [
+    "azathioprine",
+    "imuran"
+  ],
+  "Valproic acid": [
+    "valproate",
+    "divalproex",
+    "valproic acid"
+  ],
+  "High-dose pancreatic enzyme": [
+    "pancrelipase high dose"
+  ],
+  "Alpha-blocker": [
+    "tamsulosin",
+    "alfuzosin",
+    "doxazosin",
+    "terazosin"
+  ],
+  "Acidifying agent": [
+    "ammonium chloride",
+    "ascorbic acid high dose"
+  ],
+  "Aromatase Inhibitor": [
+    "anastrozole",
+    "letrozole",
+    "exemestane"
+  ],
+  "ACE Inhibitor": [
+    "lisinopril",
+    "enalapril",
+    "ramipril",
+    "perindopril",
+    "captopril"
+  ],
+  "Potassium supplement": [
+    "potassium chloride",
+    "potassium citrate"
+  ],
+  "Potassium-sparing diuretic": [
+    "spironolactone",
+    "amiloride",
+    "triamterene"
+  ],
+  "SSRI": [
+    "fluoxetine",
+    "sertraline",
+    "paroxetine",
+    "citalopram",
+    "escitalopram"
+  ],
+  "Carbamazepine": [
+    "carbamazepine",
+    "tegretol"
+  ],
+  "Sodium-containing medication": [
+    "sodium bicarbonate",
+    "sodium chloride tablets"
+  ],
+  "Topiramate": [
+    "topiramate",
+    "topamax"
+  ],
+  "SGLT2 Inhibitor": [
+    "empagliflozin",
+    "dapagliflozin",
+    "canagliflozin"
+  ],
+  "Demeclocycline": [
+    "demeclocycline"
+  ],
+  "Phosphodiesterase Inhibitor": [
+    "sildenafil",
+    "tadalafil",
+    "vardenafil"
+  ],
+  "Trazodone": [
+    "trazodone"
+  ],
+  "Spironolactone": [
+    "spironolactone",
+    "aldactone"
+  ],
+  "Finasteride": [
+    "finasteride",
+    "proscar",
+    "propecia"
+  ],
+  "Anabolic steroid": [
+    "nandrolone",
+    "stanozolol",
+    "oxandrolone"
+  ],
+  "Topical steroid": [
+    "hydrocortisone cream",
+    "betamethasone cream",
+    "clobetasol cream"
+  ],
+  "Topical steroid long-term": [
+    "clobetasol prolonged use",
+    "betamethasone prolonged use"
+  ],
+  "Tetracycline": [
+    "tetracycline",
+    "doxycycline",
+    "minocycline"
+  ],
+  "Depigmenting agent": [
+    "hydroquinone",
+    "tretinoin"
+  ],
+  "Allopurinol": [
+    "allopurinol",
+    "zyloprim"
+  ],
+  "Topical antibiotic": [
+    "neomycin cream",
+    "bacitracin ointment",
+    "mupirocin"
+  ],
+  "Topical anesthetic": [
+    "benzocaine",
+    "lidocaine cream"
+  ],
+  "Vasoconstrictor": [
+    "epinephrine",
+    "norepinephrine",
+    "phenylephrine"
+  ],
+  "Sun exposure drug": [
+    "tetracyclines",
+    "fluoroquinolones",
+    "thiazides"
+  ],
+  "Topical steroid alone": [
+    "hydrocortisone without antifungal"
+  ],
+  "Oral antifungal": [
+    "terbinafine",
+    "itraconazole",
+    "fluconazole"
+  ],
+  "Neurotoxic pediculicide": [
+    "lindane",
+    "malathion"
+  ],
+  "Systemic insecticide": [
+    "ivermectin"
+  ],
+  "Neurotoxic drug": [
+    "vincristine",
+    "cisplatin",
+    "paclitaxel"
+  ],
+  "Immune stimulant": [
+    "interferon",
+    "interleukin-2"
+  ],
+  "Dopamine agonist": [
+    "pramipexole",
+    "ropinirole",
+    "bromocriptine"
+  ],
+  "Neuromuscular blocking agent": [
+    "succinylcholine",
+    "rocuronium",
+    "vecuronium"
+  ],
+  "Statin": [
+    "atorvastatin",
+    "simvastatin",
+    "rosuvastatin",
+    "pravastatin"
+  ],
+  "Opioid long-term": [
+    "morphine chronic use",
+    "oxycodone chronic use"
+  ],
+  "Antihypertensive": [
+    "lisinopril",
+    "amlodipine",
+    "losartan",
+    "hydrochlorothiazide"
+  ],
+  "Ototoxic drug": [
+    "gentamicin",
+    "furosemide",
+    "aspirin high dose"
+  ],
+  "High sodium medication": [
+    "sodium bicarbonate",
+    "effervescent tablets"
+  ],
+  "Intranasal steroid long-term": [
+    "fluticasone nasal spray prolonged",
+    "mometasone nasal spray prolonged"
+  ],
+  "Aspirin in aspirin-sensitive patients": [
+    "aspirin in AERD"
+  ],
+  "First generation antihistamine": [
+    "diphenhydramine",
+    "chlorpheniramine",
+    "hydroxyzine"
+  ],
+  "Isotretinoin": [
+    "isotretinoin",
+    "accutane"
+  ],
+  "Steroid long-term": [
+    "prednisone chronic",
+    "dexamethasone chronic"
+  ],
+  "High-dose vitamin E": [
+    "vitamin E >400 IU"
+  ],
+  "Antimalarial long-term": [
+    "hydroxychloroquine chronic",
+    "chloroquine chronic"
+  ],
+  "Tamoxifen": [
+    "tamoxifen"
+  ],
+  "Ethambutol": [
+    "ethambutol"
+  ],
+  "Immunosuppressant withdrawal": [
+    "sudden cyclosporine stop",
+    "sudden tacrolimus stop"
+  ],
+  "Contact lens": [
+    "contact lenses"
+  ],
+  "Eye cosmetics": [
+    "mascara",
+    "eyeliner"
+  ],
+  "Inhaled steroid": [
+    "fluticasone inhaler",
+    "budesonide inhaler",
+    "beclomethasone inhaler"
+  ],
+  "Denosumab": [
+    "denosumab",
+    "prolia"
+  ],
+  "Reflux-inducing drug": [
+    "calcium channel blockers",
+    "nitrates",
+    "anticholinergics"
+  ],
+  "Mechanical ventilation": [
+    "positive pressure ventilation"
+  ],
+  "Biopsy procedure": [
+    "lung biopsy",
+    "pleural biopsy"
+  ],
+  "Immunostimulant": [
+    "interferon",
+    "IL-2"
+  ],
+  "Respiratory irritant": [
+    "smoke",
+    "fumes",
+    "dust"
+  ],
+  "Smoking": [
+    "cigarettes",
+    "tobacco"
+  ],
+  "Latex-containing product": [
+    "latex gloves",
+    "latex catheters"
+  ],
+  "Food allergen in medication": [
+    "gelatin capsules",
+    "soy lecithin"
+  ],
+  "Known allergen": [
+    "patient-specific allergen"
+  ],
+  "Mast cell degranulator": [
+    "opioids",
+    "radiocontrast",
+    "vancomycin"
+  ],
+  "Cross-reactive drug": [
+    "cephalosporins in penicillin allergy"
+  ],
+  "Similar vaccine component": [
+    "egg protein in vaccines"
+  ],
+  "Emetogenic chemotherapy": [
+    "cisplatin",
+    "cyclophosphamide high dose"
+  ],
+  "Irritating mouthwash": [
+    "alcohol-based mouthwash",
+    "hydrogen peroxide"
+  ],
+  "Volatile anesthetic": [
+    "sevoflurane",
+    "desflurane"
+  ],
+  "Mivacurium": [
+    "mivacurium"
+  ],
+  "Porphyrinogenic drug": [
+    "barbiturates",
+    "sulfonamides",
+    "estrogens"
+  ],
+  "Iron supplement": [
+    "ferrous sulfate",
+    "ferrous gluconate",
+    "iron polymaltose"
+  ],
+  "Vitamin C high-dose": [
+    "ascorbic acid >1000mg"
+  ],
+  "Copper-containing supplement": [
+    "copper sulfate",
+    "multivitamin with copper"
+  ],
+  "Environmental allergen": [
+    "mold",
+    "dust mites",
+    "pollen"
+  ],
+  "Mold exposure": [
+    "environmental mold"
+  ],
+  "Immunosuppressant without antifungal": [
+    "corticosteroids alone"
+  ],
+  "Topical allergen": [
+    "latex",
+    "nickel",
+    "fragrances"
+  ],
+  "Food allergen": [
+    "peanuts",
+    "tree nuts",
+    "shellfish"
+  ],
+  "Fall risk drug": [
+    "sedatives",
+    "antihypertensives",
+    "psychotropics"
+  ],
+  "Epidural anesthesia": [
+    "epidural block"
+  ],
+  "Cervical manipulation": [
+    "neck manipulation"
+  ],
+  "Aspartame": [
+    "aspartame",
+    "artificial sweetener"
+  ],
+  "High protein supplement": [
+    "protein powder",
+    "amino acid supplement"
+  ],
+  "Methionine supplement": [
+    "methionine"
+  ],
+  "Bone marrow suppressive drug": [
+    "chemotherapy",
+    "chloramphenicol"
+  ],
+  "Airway procedure": [
+    "intubation",
+    "bronchoscopy"
+  ],
+  "Fasting-inducing condition": [
+    "NPO status",
+    "illness with poor intake"
+  ],
+  "Bleeding risk drug": [
+    "anticoagulants",
+    "antiplatelets",
+    "NSAIDs"
+  ],
+  "Contrast agent": [
+    "iodinated contrast",
+    "gadolinium"
+  ],
+  "Large tablet": [
+    "potassium chloride tablets",
+    "large capsules"
+  ],
+  "Extended release formulation": [
+    "extended release tablets",
+    "sustained release capsules"
+  ],
+  "Fat-soluble vitamin": [
+    "vitamin A",
+    "vitamin D",
+    "vitamin E",
+    "vitamin K"
+  ],
+  "NSAID long-term": [
+    "ibuprofen chronic use",
+    "naproxen chronic use"
+  ],
+  "Insulin resistance drug": [
+    "metformin",
+    "pioglitazone"
+  ],
+  "Estrogen in high-risk patients": [
+    "estrogen in DVT history",
+    "estrogen in breast cancer"
+  ],
+  "Teratogenic drug in pregnancy": [
+    "isotretinoin",
+    "warfarin",
+    "valproate"
+  ],
+  "High osmolar solution": [
+    "concentrated glucose",
+    "hyperosmolar feeds"
+  ],
+  "Nicorandil": [
+    "nicorandil"
+  ],
+  "Spicy food triggers": [
+    "hot peppers",
+    "spicy foods"
+  ],
+  "Beta-blocker in heart failure": [
+    "carvedilol",
+    "metoprolol succinate",
+    "bisoprolol"
   ]
 }
 

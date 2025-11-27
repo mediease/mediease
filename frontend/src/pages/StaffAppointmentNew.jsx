@@ -99,13 +99,14 @@ const StaffAppointmentNew = () => {
           }
         }
 
-        // Set nurse ID - use exact value from JWT/localStorage (no formatting)
+        // Set nurse ID - normalize to uppercase to match backend format
         if (nurseIdValue) {
-          const nurIdStr = String(nurseIdValue).trim();
+          const nurIdStr = String(nurseIdValue).trim().toUpperCase();
           setFormData(prev => ({ ...prev, nurseId: nurIdStr }));
           console.log('Nurse ID auto-filled:', nurIdStr);
         } else {
           console.warn('Nurse ID not found in localStorage or JWT token');
+          setErrorMessage('Unable to load your Nurse ID. Please log in again.');
         }
       } catch (err) {
         console.error('Error loading nurse ID:', err);
@@ -217,6 +218,9 @@ const StaffAppointmentNew = () => {
       return;
     }
 
+    // Normalize nurse ID to uppercase (backend expects uppercase format)
+    const nurseIdStr = String(finalNurseId).trim().toUpperCase();
+
     try {
       setIsSubmitting(true);
 
@@ -226,7 +230,7 @@ const StaffAppointmentNew = () => {
       const payload = {
         patientPhn: patientPhnStr,
         doctorLicense: formData.doctorLicense.trim(),
-        nurseId: finalNurseId,
+        nurseId: nurseIdStr,
         roomNo: formData.roomNo.trim(),
         type: formData.type || 'general',
         appointmentDate: appointmentDateISO
@@ -251,11 +255,19 @@ const StaffAppointmentNew = () => {
 
     } catch (err) {
       console.error('Error creating appointment:', err);
-      console.error('Error response:', err.response?.data);
+      console.error('Error response data:', err.response?.data);
+      console.error('Error response status:', err.response?.status);
+      console.error('Full error response:', err.response);
+      
+      // Extract detailed error message from backend
+      const backendMessage = err.response?.data?.message || 
+                            err.response?.data?.error || 
+                            err.response?.data?.details;
+      
       setErrorMessage(
-        err.response?.data?.message || 
+        backendMessage || 
         err.message || 
-        'Something went wrong while creating the appointment'
+        'Something went wrong while creating the appointment. Check console for details.'
       );
     } finally {
       setIsSubmitting(false);
@@ -319,9 +331,10 @@ const StaffAppointmentNew = () => {
               type="text"
               name="nurseId"
               value={formData.nurseId}
-              onChange={handleChange}
-              placeholder="Enter Nurse ID"
+              placeholder="Auto-filled from your credentials"
+              readOnly
               required
+              style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
             />
           </div>
 
