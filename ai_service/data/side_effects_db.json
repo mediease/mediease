@@ -1,0 +1,590 @@
+{
+  "NSAID": {
+    "severity": "medium",
+    "side_effects": [
+      "Stomach upset, nausea, and heartburn",
+      "Gastrointestinal bleeding or ulceration with prolonged use",
+      "Increased cardiovascular risk (heart attack, stroke)",
+      "Kidney function impairment with long-term use",
+      "Fluid retention and edema",
+      "Elevated blood pressure"
+    ],
+    "warnings": [
+      "Take with food to reduce gastrointestinal irritation",
+      "Avoid in patients with peptic ulcer disease or GI bleeding history",
+      "Use with caution in cardiovascular or kidney disease",
+      "Avoid in third trimester of pregnancy"
+    ]
+  },
+  "Steroid": {
+    "severity": "high",
+    "side_effects": [
+      "Elevated blood glucose (especially in diabetics)",
+      "Immunosuppression and increased infection risk",
+      "Osteoporosis with long-term use",
+      "Fluid retention and hypertension",
+      "Adrenal suppression with prolonged use",
+      "Weight gain and Cushing's syndrome features",
+      "Peptic ulcer risk"
+    ],
+    "warnings": [
+      "Do not stop abruptly after prolonged use (adrenal crisis risk)",
+      "Monitor blood glucose in diabetic patients",
+      "Use with calcium and vitamin D to protect bone density",
+      "Increased susceptibility to infections — monitor closely"
+    ]
+  },
+  "Antibiotic": {
+    "severity": "low",
+    "side_effects": [
+      "Nausea, vomiting, and diarrhea",
+      "Disruption of gut microbiome",
+      "Allergic reactions (rash, urticaria)",
+      "Clostridium difficile infection with broad-spectrum use",
+      "Photosensitivity (with certain antibiotics)"
+    ],
+    "warnings": [
+      "Complete the full course even if feeling better",
+      "Inform doctor of any known antibiotic allergies",
+      "Report severe or persistent diarrhea"
+    ]
+  },
+  "High-dose Antibiotic": {
+    "severity": "high",
+    "side_effects": [
+      "Nephrotoxicity (kidney damage)",
+      "Ototoxicity (hearing loss and balance issues — may be irreversible)",
+      "Severe diarrhea and C. difficile colitis",
+      "Hepatotoxicity (liver damage)"
+    ],
+    "warnings": [
+      "Monitor kidney function and drug levels closely",
+      "Monitor for changes in hearing or tinnitus",
+      "Use for shortest effective duration",
+      "Requires hospital-level monitoring"
+    ]
+  },
+  "Beta-blocker": {
+    "severity": "medium",
+    "side_effects": [
+      "Bradycardia (slow heart rate)",
+      "Fatigue and exercise intolerance",
+      "Cold extremities",
+      "Bronchospasm (contraindicated in asthma/COPD)",
+      "Masking of hypoglycemia symptoms in diabetics",
+      "Depression and sleep disturbances"
+    ],
+    "warnings": [
+      "Do not stop abruptly (risk of rebound hypertension or angina)",
+      "Contraindicated or use with extreme caution in asthma/COPD",
+      "Monitor heart rate regularly"
+    ]
+  },
+  "Paracetamol": {
+    "severity": "medium",
+    "side_effects": [
+      "Liver damage in overdose or with chronic alcohol use",
+      "Skin rash (rare)",
+      "Hypersensitivity reactions (rare)"
+    ],
+    "warnings": [
+      "Do not exceed 4g/day in adults (2g/day in elderly or liver disease)",
+      "Avoid concurrent alcohol use",
+      "Check all combination products to avoid double-dosing paracetamol"
+    ]
+  },
+  "Opioid": {
+    "severity": "high",
+    "side_effects": [
+      "Respiratory depression (potentially fatal in overdose)",
+      "Severe constipation",
+      "Nausea and vomiting",
+      "Sedation and cognitive impairment",
+      "Risk of dependence and addiction",
+      "Urinary retention",
+      "Pruritus (itching)"
+    ],
+    "warnings": [
+      "High risk of respiratory depression — avoid with alcohol or sedatives",
+      "High potential for dependence — use for shortest effective duration",
+      "Use stool softeners concurrently",
+      "Avoid driving or operating machinery"
+    ]
+  },
+  "Analgesic": {
+    "severity": "medium",
+    "side_effects": [
+      "Nausea and dizziness",
+      "Sedation",
+      "Risk of dependence with prolonged use",
+      "Gastrointestinal upset"
+    ],
+    "warnings": [
+      "Avoid driving or operating machinery",
+      "Do not combine with alcohol or other CNS depressants"
+    ]
+  },
+  "Anticoagulant": {
+    "severity": "high",
+    "side_effects": [
+      "Increased bleeding risk (minor to life-threatening)",
+      "Bruising",
+      "Haematuria (blood in urine)",
+      "Gastrointestinal bleeding",
+      "Intracranial bleeding (rare but serious)"
+    ],
+    "warnings": [
+      "Report any unusual bleeding immediately",
+      "Regular INR monitoring required (for warfarin)",
+      "Avoid NSAIDs unless specifically advised",
+      "Inform all healthcare providers before procedures or surgery"
+    ]
+  },
+  "Antiplatelet": {
+    "severity": "medium",
+    "side_effects": [
+      "Increased bleeding risk",
+      "Gastrointestinal upset",
+      "Bruising",
+      "Gastrointestinal bleeding"
+    ],
+    "warnings": [
+      "Avoid NSAIDs unless directed by physician",
+      "Inform doctor before any surgical procedure"
+    ]
+  },
+  "Sedative": {
+    "severity": "high",
+    "side_effects": [
+      "Drowsiness and sedation",
+      "Respiratory depression",
+      "Memory impairment (anterograde amnesia)",
+      "Dependence and withdrawal on abrupt cessation",
+      "Falls and injury risk (especially in elderly)",
+      "Paradoxical agitation (rare)"
+    ],
+    "warnings": [
+      "Do not drive or operate machinery",
+      "Avoid alcohol",
+      "High dependence potential — avoid long-term use",
+      "Do not stop abruptly after prolonged use (seizure risk)"
+    ]
+  },
+  "Benzodiazepine": {
+    "severity": "high",
+    "side_effects": [
+      "Sedation and cognitive impairment",
+      "Respiratory depression (especially with opioids)",
+      "Anterograde amnesia",
+      "Physical and psychological dependence",
+      "Withdrawal seizures on abrupt cessation",
+      "Falls in elderly"
+    ],
+    "warnings": [
+      "Avoid concurrent use with opioids (fatal respiratory depression risk)",
+      "Do not drive or operate machinery",
+      "Do not stop abruptly after prolonged use",
+      "Avoid alcohol"
+    ]
+  },
+  "Antihistamine": {
+    "severity": "low",
+    "side_effects": [
+      "Drowsiness and sedation (first-generation)",
+      "Dry mouth and urinary retention (anticholinergic effects)",
+      "Blurred vision",
+      "Headache"
+    ],
+    "warnings": [
+      "First-generation antihistamines impair driving ability",
+      "Use with caution in elderly (anticholinergic effects)",
+      "Avoid alcohol"
+    ]
+  },
+  "SSRI": {
+    "severity": "medium",
+    "side_effects": [
+      "Nausea (especially initially)",
+      "Sexual dysfunction",
+      "Insomnia or drowsiness",
+      "Increased suicidal ideation (especially in youth, early treatment)",
+      "Serotonin syndrome (with other serotonergic drugs)",
+      "Withdrawal effects on abrupt cessation"
+    ],
+    "warnings": [
+      "Do not stop abruptly — taper gradually under guidance",
+      "Monitor for suicidal thoughts especially in first weeks of treatment",
+      "Avoid with MAO inhibitors (serotonin syndrome risk)",
+      "May take 2–4 weeks for full therapeutic effect"
+    ]
+  },
+  "Antidepressant": {
+    "severity": "medium",
+    "side_effects": [
+      "Nausea and gastrointestinal upset",
+      "Sleep disturbances",
+      "Weight changes",
+      "Sexual dysfunction",
+      "Dry mouth and constipation (TCAs)",
+      "Withdrawal effects on sudden discontinuation"
+    ],
+    "warnings": [
+      "Do not stop abruptly",
+      "Monitor for increased suicidal thoughts in early treatment",
+      "Allow 2–4 weeks for therapeutic effect"
+    ]
+  },
+  "Diuretic": {
+    "severity": "medium",
+    "side_effects": [
+      "Electrolyte imbalances (low potassium, sodium, magnesium)",
+      "Dehydration",
+      "Hypotension (low blood pressure)",
+      "Increased urination",
+      "Muscle cramps",
+      "Dizziness on standing (postural hypotension)"
+    ],
+    "warnings": [
+      "Monitor electrolytes and kidney function regularly",
+      "Stay well hydrated",
+      "Rise slowly from seated or lying positions to avoid dizziness"
+    ]
+  },
+  "Loop diuretic": {
+    "severity": "medium",
+    "side_effects": [
+      "Electrolyte depletion (potassium, sodium, magnesium)",
+      "Dehydration and volume depletion",
+      "Ototoxicity at high doses",
+      "Hypotension"
+    ],
+    "warnings": [
+      "Monitor electrolytes frequently",
+      "High-dose IV use carries ototoxicity risk",
+      "Monitor kidney function"
+    ]
+  },
+  "Proton Pump Inhibitor": {
+    "severity": "low",
+    "side_effects": [
+      "Headache",
+      "Diarrhea or constipation",
+      "Hypomagnesaemia with long-term use",
+      "Increased risk of C. difficile infection",
+      "Reduced absorption of B12 and iron with long-term use"
+    ],
+    "warnings": [
+      "Review necessity for long-term use regularly",
+      "Monitor magnesium levels with prolonged use"
+    ]
+  },
+  "Calcium Channel Blocker": {
+    "severity": "medium",
+    "side_effects": [
+      "Peripheral edema (ankle swelling)",
+      "Flushing and headache",
+      "Reflex tachycardia (dihydropyridines)",
+      "Constipation (verapamil, diltiazem)",
+      "Bradycardia (non-dihydropyridines)"
+    ],
+    "warnings": [
+      "Grapefruit juice can increase drug levels — avoid",
+      "Non-dihydropyridines (verapamil, diltiazem) contraindicated in heart block"
+    ]
+  },
+  "Antipsychotic": {
+    "severity": "high",
+    "side_effects": [
+      "Extrapyramidal symptoms (tremor, rigidity, dystonia)",
+      "Tardive dyskinesia with long-term use",
+      "Metabolic syndrome (weight gain, hyperglycaemia, dyslipidaemia)",
+      "QT interval prolongation (cardiac risk)",
+      "Sedation",
+      "Orthostatic hypotension",
+      "Neuroleptic malignant syndrome (rare, serious)"
+    ],
+    "warnings": [
+      "Monitor weight, blood glucose, and lipids regularly",
+      "ECG monitoring for QT prolongation",
+      "Avoid sudden discontinuation"
+    ]
+  },
+  "Anticonvulsant": {
+    "severity": "medium",
+    "side_effects": [
+      "Drowsiness and cognitive dulling",
+      "Dizziness and ataxia",
+      "Liver toxicity (valproate)",
+      "Teratogenicity (valproate in pregnancy — highly teratogenic)",
+      "Blood dyscrasias",
+      "Significant drug interactions (enzyme-inducing agents)"
+    ],
+    "warnings": [
+      "Do not stop abruptly (seizure risk)",
+      "Valproate is highly teratogenic — strict contraception required for women of childbearing age",
+      "Monitor liver function and blood counts regularly",
+      "Be aware of drug interactions (enzyme inducers)"
+    ]
+  },
+  "Statin": {
+    "severity": "low",
+    "side_effects": [
+      "Muscle pain and weakness (myopathy)",
+      "Elevated liver enzymes",
+      "Rhabdomyolysis (rare but serious)",
+      "Headache",
+      "Gastrointestinal upset"
+    ],
+    "warnings": [
+      "Report any unexplained muscle pain or weakness immediately",
+      "Avoid grapefruit juice (some statins)",
+      "Monitor liver function",
+      "Risk of myopathy increased with certain drug combinations (e.g., fibrates)"
+    ]
+  },
+  "ACE Inhibitor": {
+    "severity": "medium",
+    "side_effects": [
+      "Persistent dry cough",
+      "Hyperkalemia (high potassium)",
+      "First-dose hypotension",
+      "Angioedema (rare but potentially life-threatening)",
+      "Kidney function deterioration in renovascular disease"
+    ],
+    "warnings": [
+      "Stop immediately if angioedema occurs — seek emergency care",
+      "Contraindicated in pregnancy",
+      "Monitor potassium and kidney function",
+      "Avoid with potassium-sparing diuretics without close monitoring"
+    ]
+  },
+  "Decongestant": {
+    "severity": "medium",
+    "side_effects": [
+      "Elevated blood pressure",
+      "Palpitations and rapid heart rate",
+      "Insomnia",
+      "Dry mouth",
+      "Nervousness and anxiety"
+    ],
+    "warnings": [
+      "Avoid in hypertension, heart disease, or hyperthyroidism",
+      "Rebound nasal congestion with prolonged topical use (rhinitis medicamentosa)"
+    ]
+  },
+  "Antifungal": {
+    "severity": "medium",
+    "side_effects": [
+      "Liver toxicity (especially azole antifungals)",
+      "Nausea and gastrointestinal upset",
+      "Headache",
+      "Significant drug interactions (azoles inhibit CYP enzymes)"
+    ],
+    "warnings": [
+      "Monitor liver function especially with oral azole antifungals",
+      "Review all concurrent medications for drug interactions",
+      "Fluconazole prolongs QT interval"
+    ]
+  },
+  "Immunosuppressant": {
+    "severity": "high",
+    "side_effects": [
+      "Increased infection susceptibility (opportunistic infections)",
+      "Nephrotoxicity (cyclosporine, tacrolimus)",
+      "Bone marrow suppression (methotrexate, azathioprine)",
+      "Increased cancer risk (lymphoma) with long-term use",
+      "Hypertension and dyslipidaemia"
+    ],
+    "warnings": [
+      "Regular monitoring of kidney function, blood counts, and drug levels required",
+      "Avoid live vaccines while immunosuppressed",
+      "Report any signs of infection promptly"
+    ]
+  },
+  "Fluoroquinolone": {
+    "severity": "medium",
+    "side_effects": [
+      "Tendonitis and tendon rupture (especially Achilles tendon)",
+      "QT interval prolongation",
+      "CNS effects (dizziness, confusion, seizures)",
+      "Photosensitivity",
+      "Peripheral neuropathy"
+    ],
+    "warnings": [
+      "Discontinue immediately if tendon pain or swelling occurs",
+      "Avoid in patients with history of tendon problems",
+      "Avoid prolonged sun exposure",
+      "Use with caution in patients with QT prolongation risk"
+    ]
+  },
+  "Tramadol": {
+    "severity": "high",
+    "side_effects": [
+      "Nausea and vomiting",
+      "Dizziness and drowsiness",
+      "Serotonin syndrome risk (with SSRIs or serotonergic drugs)",
+      "Seizure risk at high doses or with interacting medications",
+      "Dependence potential",
+      "Respiratory depression"
+    ],
+    "warnings": [
+      "Avoid with SSRIs/SNRIs (serotonin syndrome risk)",
+      "Avoid with other opioids and CNS depressants",
+      "Do not use in patients with seizure disorders",
+      "Do not drive or operate machinery"
+    ]
+  },
+  "Metformin": {
+    "severity": "low",
+    "side_effects": [
+      "Gastrointestinal upset (nausea, diarrhea) especially initially",
+      "Lactic acidosis (rare but serious — in high-risk patients)",
+      "Vitamin B12 deficiency with long-term use"
+    ],
+    "warnings": [
+      "Withhold before contrast procedures (lactic acidosis risk)",
+      "Contraindicated in severe kidney disease (eGFR < 30)",
+      "Monitor B12 levels with long-term use"
+    ]
+  },
+  "Sulfonylurea": {
+    "severity": "medium",
+    "side_effects": [
+      "Hypoglycemia (low blood sugar)",
+      "Weight gain",
+      "Nausea",
+      "Photosensitivity"
+    ],
+    "warnings": [
+      "Hypoglycemia risk — especially if meals are missed",
+      "Educate patient on hypoglycemia recognition and management",
+      "Avoid in severe kidney or liver disease"
+    ]
+  },
+  "Aminoglycoside": {
+    "severity": "high",
+    "side_effects": [
+      "Nephrotoxicity (kidney damage)",
+      "Ototoxicity (hearing loss and balance damage — may be irreversible)",
+      "Neuromuscular blockade"
+    ],
+    "warnings": [
+      "Monitor kidney function and drug levels closely",
+      "Monitor for hearing changes, tinnitus, or balance disturbance",
+      "Use for shortest effective duration",
+      "Requires hospital-level monitoring"
+    ]
+  },
+  "Macrolide": {
+    "severity": "low",
+    "side_effects": [
+      "Gastrointestinal upset (nausea, abdominal cramping)",
+      "QT interval prolongation (azithromycin, clarithromycin)",
+      "Liver toxicity (clarithromycin)"
+    ],
+    "warnings": [
+      "ECG monitoring in patients with QT prolongation risk",
+      "Drug interactions — macrolides inhibit CYP3A4"
+    ]
+  },
+  "Antihypertensive": {
+    "severity": "medium",
+    "side_effects": [
+      "Hypotension (low blood pressure)",
+      "Dizziness and falls (especially in elderly)",
+      "Electrolyte disturbances",
+      "Fatigue"
+    ],
+    "warnings": [
+      "Rise slowly from seated or lying positions",
+      "Monitor blood pressure regularly",
+      "Do not stop abruptly"
+    ]
+  },
+  "Muscle Relaxant": {
+    "severity": "medium",
+    "side_effects": [
+      "Drowsiness and sedation",
+      "Dizziness",
+      "Dry mouth",
+      "Dependence potential with prolonged use"
+    ],
+    "warnings": [
+      "Do not drive or operate machinery",
+      "Avoid alcohol and other CNS depressants",
+      "Do not stop abruptly after prolonged use"
+    ]
+  },
+  "Tetracycline": {
+    "severity": "low",
+    "side_effects": [
+      "Nausea and gastrointestinal upset",
+      "Photosensitivity",
+      "Esophageal irritation if not taken with water",
+      "Dental discoloration (in children under 8 and fetuses)"
+    ],
+    "warnings": [
+      "Avoid in children under 8 and pregnancy",
+      "Take with a full glass of water — do not lie down after taking",
+      "Avoid prolonged sun exposure",
+      "Avoid dairy products and antacids near dosing time (reduce absorption)"
+    ]
+  },
+  "Anticoagulant Warfarin": {
+    "severity": "high",
+    "side_effects": [
+      "Increased bleeding risk",
+      "Bruising",
+      "Haematuria (blood in urine)",
+      "Rare: skin necrosis"
+    ],
+    "warnings": [
+      "Regular INR monitoring required",
+      "Many drug and food interactions — check all new medications",
+      "Avoid vitamin K-rich foods in large variable amounts",
+      "Report any unusual bleeding immediately"
+    ]
+  },
+  "Dopamine agonist": {
+    "severity": "medium",
+    "side_effects": [
+      "Nausea",
+      "Orthostatic hypotension",
+      "Impulse control disorders (gambling, hypersexuality)",
+      "Hallucinations",
+      "Excessive daytime sleepiness"
+    ],
+    "warnings": [
+      "Screen for impulse control disorders regularly",
+      "Do not drive if experiencing sudden sleep episodes",
+      "Rise slowly to avoid dizziness"
+    ]
+  },
+  "Phosphodiesterase Inhibitor": {
+    "severity": "medium",
+    "side_effects": [
+      "Flushing and headache",
+      "Hypotension (especially with nitrates)",
+      "Visual disturbances",
+      "Nasal congestion"
+    ],
+    "warnings": [
+      "Absolutely contraindicated with nitrates (severe hypotension risk)",
+      "Avoid in severe cardiovascular disease"
+    ]
+  },
+  "Bisphosphonate": {
+    "severity": "medium",
+    "side_effects": [
+      "Esophageal irritation and ulceration",
+      "Osteonecrosis of the jaw (rare with IV use)",
+      "Atypical femur fractures with long-term use",
+      "Flu-like symptoms (IV formulations)"
+    ],
+    "warnings": [
+      "Take oral bisphosphonates on empty stomach with full glass of water, remain upright for 30 minutes",
+      "Dental review before starting therapy",
+      "Review need for treatment after 3–5 years"
+    ]
+  }
+}

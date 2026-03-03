@@ -1,0 +1,296 @@
+[
+  {
+    "class_a": "NSAID",
+    "class_b": "Anticoagulant",
+    "severity": "high",
+    "message": "NSAIDs combined with anticoagulants significantly increase bleeding risk. NSAIDs inhibit platelet function and can cause gastrointestinal ulceration."
+  },
+  {
+    "class_a": "NSAID",
+    "class_b": "Antiplatelet",
+    "severity": "high",
+    "message": "Concurrent NSAIDs and antiplatelet therapy markedly increases gastrointestinal bleeding risk."
+  },
+  {
+    "class_a": "NSAID",
+    "class_b": "Steroid",
+    "severity": "high",
+    "message": "Concurrent NSAIDs and steroids greatly increase the risk of peptic ulceration and gastrointestinal bleeding. Add gastric protection if co-prescribing."
+  },
+  {
+    "class_a": "NSAID",
+    "class_b": "SSRI",
+    "severity": "medium",
+    "message": "SSRIs inhibit platelet serotonin uptake; combined with NSAIDs, gastrointestinal bleeding risk is significantly elevated."
+  },
+  {
+    "class_a": "NSAID",
+    "class_b": "Diuretic",
+    "severity": "medium",
+    "message": "NSAIDs can reduce the effectiveness of diuretics and worsen kidney function, especially in patients with compromised renal function."
+  },
+  {
+    "class_a": "NSAID",
+    "class_b": "ACE Inhibitor",
+    "severity": "medium",
+    "message": "NSAIDs can attenuate the antihypertensive effect of ACE inhibitors and increase nephrotoxicity risk."
+  },
+  {
+    "class_a": "Opioid",
+    "class_b": "Benzodiazepine",
+    "severity": "high",
+    "message": "FDA black box warning: concurrent opioids and benzodiazepines can cause profound sedation, respiratory depression, coma, and death."
+  },
+  {
+    "class_a": "Opioid",
+    "class_b": "Sedative",
+    "severity": "high",
+    "message": "Concurrent opioids and sedatives potentiate CNS and respiratory depression. Combination should be avoided unless no alternatives exist."
+  },
+  {
+    "class_a": "Opioid",
+    "class_b": "Muscle Relaxant",
+    "severity": "medium",
+    "message": "Both agents cause CNS depression; concurrent use increases sedation and respiratory depression risk."
+  },
+  {
+    "class_a": "Tramadol",
+    "class_b": "SSRI",
+    "severity": "high",
+    "message": "Tramadol combined with SSRIs can precipitate serotonin syndrome: agitation, confusion, tremor, tachycardia, hyperthermia."
+  },
+  {
+    "class_a": "Tramadol",
+    "class_b": "Antidepressant",
+    "severity": "high",
+    "message": "Tramadol with antidepressants (especially serotonergic agents) increases risk of serotonin syndrome and seizures."
+  },
+  {
+    "class_a": "Tramadol",
+    "class_b": "Benzodiazepine",
+    "severity": "high",
+    "message": "Combined use increases risk of respiratory depression and CNS depression."
+  },
+  {
+    "class_a": "Tramadol",
+    "class_b": "Opioid",
+    "severity": "high",
+    "message": "Concurrent use of tramadol with other opioids dramatically increases respiratory depression and serotonin syndrome risk."
+  },
+  {
+    "class_a": "Anticoagulant",
+    "class_b": "Antiplatelet",
+    "severity": "high",
+    "message": "Dual anticoagulant and antiplatelet therapy substantially increases bleeding risk. Use only when clinical benefit clearly outweighs risk."
+  },
+  {
+    "class_a": "Anticoagulant",
+    "class_b": "SSRI",
+    "severity": "medium",
+    "message": "SSRIs can potentiate the anticoagulant effect of warfarin and increase bleeding risk."
+  },
+  {
+    "class_a": "Anticoagulant",
+    "class_b": "Fluoroquinolone",
+    "severity": "medium",
+    "message": "Fluoroquinolones can enhance the anticoagulant effect of warfarin, increasing bleeding risk. Monitor INR closely."
+  },
+  {
+    "class_a": "Anticoagulant",
+    "class_b": "Macrolide",
+    "severity": "medium",
+    "message": "Macrolide antibiotics (especially clarithromycin) inhibit CYP3A4 and can potentiate warfarin. Monitor INR."
+  },
+  {
+    "class_a": "Anticoagulant",
+    "class_b": "Antifungal",
+    "severity": "high",
+    "message": "Azole antifungals strongly inhibit CYP enzymes, substantially increasing warfarin levels and bleeding risk. Close INR monitoring required."
+  },
+  {
+    "class_a": "Benzodiazepine",
+    "class_b": "Sedative",
+    "severity": "high",
+    "message": "Concurrent benzodiazepines and sedatives cause additive CNS depression and respiratory depression."
+  },
+  {
+    "class_a": "Benzodiazepine",
+    "class_b": "Antipsychotic",
+    "severity": "medium",
+    "message": "Additive CNS depression; combination increases sedation, respiratory depression, and hypotension risk."
+  },
+  {
+    "class_a": "Beta-blocker",
+    "class_b": "Calcium Channel Blocker",
+    "severity": "medium",
+    "message": "Non-dihydropyridine calcium channel blockers (verapamil, diltiazem) combined with beta-blockers can cause severe bradycardia and heart block."
+  },
+  {
+    "class_a": "Beta-blocker",
+    "class_b": "Insulin",
+    "severity": "medium",
+    "message": "Beta-blockers mask the tachycardia warning signs of hypoglycemia, making it harder to detect low blood sugar in diabetic patients."
+  },
+  {
+    "class_a": "ACE Inhibitor",
+    "class_b": "Potassium-sparing diuretic",
+    "severity": "medium",
+    "message": "ACE inhibitors combined with potassium-sparing diuretics or potassium supplements can cause dangerous hyperkalaemia (high potassium)."
+  },
+  {
+    "class_a": "ACE Inhibitor",
+    "class_b": "Potassium supplement",
+    "severity": "medium",
+    "message": "ACE inhibitors with potassium supplements risk hyperkalaemia. Monitor potassium levels closely."
+  },
+  {
+    "class_a": "ACE Inhibitor",
+    "class_b": "NSAID",
+    "severity": "medium",
+    "message": "NSAIDs can reduce ACE inhibitor antihypertensive efficacy and increase nephrotoxicity risk (already listed from NSAID side)."
+  },
+  {
+    "class_a": "Statin",
+    "class_b": "Fibrate",
+    "severity": "medium",
+    "message": "Concurrent statin and fibrate therapy (especially gemfibrozil) significantly increases myopathy and rhabdomyolysis risk."
+  },
+  {
+    "class_a": "Statin",
+    "class_b": "Antifungal",
+    "severity": "medium",
+    "message": "Azole antifungals inhibit CYP3A4 and increase statin blood levels, raising the risk of myopathy and rhabdomyolysis."
+  },
+  {
+    "class_a": "Statin",
+    "class_b": "Macrolide",
+    "severity": "medium",
+    "message": "Macrolide antibiotics (especially clarithromycin) inhibit CYP3A4 and increase statin levels, raising myopathy risk."
+  },
+  {
+    "class_a": "Fluoroquinolone",
+    "class_b": "NSAID",
+    "severity": "medium",
+    "message": "Fluoroquinolones combined with NSAIDs may lower seizure threshold; the combination should be used with caution."
+  },
+  {
+    "class_a": "Fluoroquinolone",
+    "class_b": "Antiarrhythmic",
+    "severity": "high",
+    "message": "Both fluoroquinolones and antiarrhythmics can prolong the QT interval. Combination risks life-threatening torsades de pointes."
+  },
+  {
+    "class_a": "Antipsychotic",
+    "class_b": "Antiarrhythmic",
+    "severity": "high",
+    "message": "Both classes prolong QT interval; concurrent use significantly increases risk of torsades de pointes and cardiac arrest."
+  },
+  {
+    "class_a": "Antipsychotic",
+    "class_b": "Macrolide",
+    "severity": "medium",
+    "message": "Macrolides can increase antipsychotic levels (CYP inhibition) and also prolong QT interval — additive QT prolongation risk."
+  },
+  {
+    "class_a": "SSRI",
+    "class_b": "Antidepressant",
+    "severity": "high",
+    "message": "Combining two serotonergic antidepressants risks serotonin syndrome. Avoid unless under specialist supervision."
+  },
+  {
+    "class_a": "Diuretic",
+    "class_b": "Anticonvulsant",
+    "severity": "medium",
+    "message": "Diuretics can alter serum electrolytes (sodium) which may affect seizure threshold and anticonvulsant effectiveness."
+  },
+  {
+    "class_a": "Metformin",
+    "class_b": "Loop diuretic",
+    "severity": "medium",
+    "message": "Loop diuretics can cause volume depletion and impair renal function, increasing the risk of metformin-associated lactic acidosis."
+  },
+  {
+    "class_a": "Immunosuppressant",
+    "class_b": "Antifungal",
+    "severity": "high",
+    "message": "Azole antifungals markedly increase tacrolimus and cyclosporine levels via CYP inhibition — monitor drug levels and kidney function closely."
+  },
+  {
+    "class_a": "Anticonvulsant",
+    "class_b": "Oral contraceptive",
+    "severity": "medium",
+    "message": "Enzyme-inducing anticonvulsants (carbamazepine, phenytoin) reduce oral contraceptive efficacy, risking unintended pregnancy."
+  },
+  {
+    "class_a": "Anticonvulsant",
+    "class_b": "Anticoagulant",
+    "severity": "medium",
+    "message": "Enzyme-inducing anticonvulsants increase the metabolism of warfarin, reducing its effect. Monitor INR closely."
+  },
+  {
+    "class_a": "Proton Pump Inhibitor",
+    "class_b": "Antiplatelet",
+    "severity": "low",
+    "message": "Some PPIs (especially omeprazole) may reduce the antiplatelet effect of clopidogrel via CYP2C19 inhibition. Consider pantoprazole as an alternative."
+  },
+  {
+    "class_a": "Aminoglycoside",
+    "class_b": "Loop diuretic",
+    "severity": "high",
+    "message": "Concurrent aminoglycosides and loop diuretics greatly increase ototoxicity and nephrotoxicity risk."
+  },
+  {
+    "class_a": "Aminoglycoside",
+    "class_b": "NSAID",
+    "severity": "medium",
+    "message": "NSAIDs reduce renal blood flow, increasing aminoglycoside accumulation and nephrotoxicity."
+  },
+  {
+    "class_a": "Antifungal",
+    "class_b": "Anticoagulant",
+    "severity": "high",
+    "message": "Already listed from anticoagulant side — azole antifungals strongly potentiate warfarin."
+  },
+  {
+    "class_a": "Calcium Channel Blocker",
+    "class_b": "Beta-blocker",
+    "severity": "medium",
+    "message": "Already listed — non-dihydropyridine CCBs with beta-blockers risk bradycardia and heart block."
+  },
+  {
+    "class_a": "Sedative",
+    "class_b": "Opioid",
+    "severity": "high",
+    "message": "Already listed — additive respiratory and CNS depression."
+  },
+  {
+    "class_a": "Muscle Relaxant",
+    "class_b": "Sedative",
+    "severity": "medium",
+    "message": "Additive CNS depression with combined muscle relaxants and sedatives."
+  },
+  {
+    "class_a": "Sulfonylurea",
+    "class_b": "NSAID",
+    "severity": "medium",
+    "message": "NSAIDs may enhance the hypoglycaemic effect of sulfonylureas by displacing them from protein binding or reducing renal excretion."
+  },
+  {
+    "class_a": "Sulfonylurea",
+    "class_b": "Fluoroquinolone",
+    "severity": "medium",
+    "message": "Fluoroquinolones can both increase and decrease blood glucose levels and may unpredictably alter sulfonylurea effect."
+  },
+  {
+    "class_a": "Diuretic",
+    "class_b": "Aminoglycoside",
+    "severity": "high",
+    "message": "Already listed — loop diuretics with aminoglycosides increase ototoxicity and nephrotoxicity."
+  },
+  {
+    "class_a": "ACE Inhibitor",
+    "class_b": "Diuretic",
+    "severity": "low",
+    "message": "First dose hypotension is possible when starting ACE inhibitors in patients already taking diuretics, especially if volume-depleted."
+  }
+]
