@@ -872,12 +872,10 @@ const NewPrescription = () => {
                 ) : (
                   <>
                     <p>
-                      <strong>Safe:</strong>{" "}
-                      {validationResult.safe ? "Yes" : "No"}
-                    </p>
-                    <p>
-                      <strong>Warnings count:</strong>{" "}
-                      {validationResult.warnings?.length || 0}
+                      <strong>Status:</strong>{" "}
+                      {validationResult.safe
+                        ? "No high-risk side effects detected"
+                        : "High-risk side effects detected — review carefully"}
                     </p>
 
                     {validationResult.warnings &&
@@ -888,10 +886,9 @@ const NewPrescription = () => {
                               <tr>
                                 <th>Medicine</th>
                                 <th>Drug Class</th>
-                                <th>Condition</th>
+                                <th>Type</th>
                                 <th>Severity</th>
-                                <th>Message</th>
-                                <th>Alternatives</th>
+                                <th>Details</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -900,13 +897,22 @@ const NewPrescription = () => {
                                   <td>{w.medicineName}</td>
                                   <td>{w.drugClass}</td>
                                   <td>{w.relatedCondition}</td>
-                                  <td>{w.severity}</td>
-                                  <td>{w.message}</td>
-                                  <td>
-                                    {Array.isArray(w.suggestedAlternatives) &&
-                                    w.suggestedAlternatives.length > 0
-                                      ? w.suggestedAlternatives.join(", ")
-                                      : "-"}
+                                  <td
+                                    style={{
+                                      color:
+                                        w.severity === "high"
+                                          ? "#c0392b"
+                                          : w.severity === "medium"
+                                          ? "#e67e22"
+                                          : "#27ae60",
+                                      fontWeight: "bold",
+                                      textTransform: "capitalize",
+                                    }}
+                                  >
+                                    {w.severity}
+                                  </td>
+                                  <td style={{ whiteSpace: "pre-wrap" }}>
+                                    {w.message}
                                   </td>
                                 </tr>
                               ))}
@@ -918,7 +924,7 @@ const NewPrescription = () => {
                     {(!validationResult.warnings ||
                       validationResult.warnings.length === 0) && (
                       <p className="selection-helper">
-                        No warnings. Prescription appears safe.
+                        No known side effects found for the prescribed medicines.
                       </p>
                     )}
                   </>
