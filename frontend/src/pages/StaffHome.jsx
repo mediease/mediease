@@ -8,37 +8,35 @@ import httpClient from '../services/httpClient';
 
 const StaffHome = () => {
   const navigate = useNavigate();
-  const [nurseName, setNurseName] = useState("Nurse");
+  const [staffName, setStaffName] = useState("Staff");
   const [appointmentCount, setAppointmentCount] = useState(0);
 
   useEffect(() => {
-    // Load nurse name from localStorage
+    // Determine which localStorage key to use based on role
     try {
-      const raw = localStorage.getItem("staff");
+      const role = localStorage.getItem("userRole");
+      let raw = null;
+      if (role === "nurse") {
+        raw = localStorage.getItem("nurse");
+      } else if (role === "lab_assistant") {
+        raw = localStorage.getItem("labAssistant");
+      }
       const staff = raw ? JSON.parse(raw) : null;
       if (staff) {
         const name = `${staff.firstName || ""} ${staff.lastName || ""}`.trim();
-        setNurseName(name || "Nurse");
+        setStaffName(name || "Staff");
       }
     } catch {
-      setNurseName("Nurse");
+      setStaffName("Staff");
     }
 
-    // Load appointment count
+    // Load appointment count using the staff/nurse endpoint
     const loadAppointmentCount = async () => {
       try {
-        // Note: GET /fhir/Appointment requires an ID, so we can't get all appointments
-        // Try admin endpoint as fallback (may not work for staff)
-        try {
-          const res = await httpClient.get('/admin/appointments');
-          const appointments = res.data?.data || [];
-          setAppointmentCount(Array.isArray(appointments) ? appointments.length : 0);
-        } catch (adminErr) {
-          // If admin endpoint doesn't work, set a default or leave at 0
-          setAppointmentCount(0);
-        }
-      } catch (err) {
-        console.error("Error loading appointment count:", err);
+        const res = await httpClient.get('/fhir/staff/appointments');
+        const total = res.data?.total ?? (Array.isArray(res.data?.data) ? res.data.data.length : 0);
+        setAppointmentCount(total);
+      } catch {
         setAppointmentCount(0);
       }
     };
@@ -46,18 +44,10 @@ const StaffHome = () => {
     loadAppointmentCount();
   }, []);
 
-  const handleAddPatient = () => {
-    navigate('/staff/patients/new');
-  };
-
-  const handleCreateAppointment = () => {
-    navigate('/staff/appointments/new');
-  };
-
   return (
     <div className="staff-home-container">
-      <h1 className="staff-welcome">Welcome Back, {nurseName}!</h1>
-      
+      <h1 className="staff-welcome">Welcome Back, {staffName}!</h1>
+
       <div className="staff-action-cards">
         {/* Add New Patient Card */}
         <div className="staff-action-card">
@@ -65,7 +55,7 @@ const StaffHome = () => {
           <div className="card-icon-large">
             <FaPlus />
           </div>
-          <button className="staff-action-btn" onClick={handleAddPatient}>
+          <button className="staff-action-btn" onClick={() => navigate('/staff/patients/new')}>
             Add
           </button>
         </div>
@@ -79,7 +69,7 @@ const StaffHome = () => {
               <FaRegCalendarCheck />
             </div>
           </div>
-          <button className="staff-action-btn" onClick={handleCreateAppointment}>
+          <button className="staff-action-btn" onClick={() => navigate('/staff/appointments/new')}>
             Create
           </button>
         </div>
@@ -89,5 +79,3 @@ const StaffHome = () => {
 };
 
 export default StaffHome;
-
-

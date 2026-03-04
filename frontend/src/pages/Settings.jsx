@@ -20,8 +20,31 @@ const Settings = () => {
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
-    email: 'dr.smith@hospital.com'
+    email: ''
   });
+
+  // Load user info from localStorage on mount
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    let userData = null;
+    try {
+      if (role === 'doctor') {
+        userData = JSON.parse(localStorage.getItem('doctor') || '{}');
+      } else if (role === 'nurse') {
+        userData = JSON.parse(localStorage.getItem('nurse') || '{}');
+      } else if (role === 'lab_assistant') {
+        userData = JSON.parse(localStorage.getItem('labAssistant') || '{}');
+      }
+    } catch { userData = null; }
+    if (userData) {
+      setProfileData(prev => ({
+        ...prev,
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        email: userData.email || ''
+      }));
+    }
+  }, []);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -228,7 +251,7 @@ const Settings = () => {
                       <h3 className="settings-info-title">Email Address</h3>
                     </div>
                     <p className="settings-email-text">
-                      Your current email: <span className="settings-email-value">dr.smith@hospital.com</span>
+                      Your current email: <span className="settings-email-value">{profileData.email || '—'}</span>
                     </p>
                     <div className="settings-divider"></div>
                   </div>
@@ -269,7 +292,7 @@ const Settings = () => {
                             name="firstName"
                             className="form-input"
                             placeholder=" Enter First Name"
-                            value={profileData. firstName}
+                            value={profileData.firstName}
                             onChange={handleProfileChange}
                           />
                         </div>

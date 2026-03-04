@@ -292,5 +292,71 @@
     "class_b": "Diuretic",
     "severity": "low",
     "message": "First dose hypotension is possible when starting ACE inhibitors in patients already taking diuretics, especially if volume-depleted."
+  },
+  {
+    "class_a": "Beta-lactam",
+    "class_b": "Cephalosporin",
+    "severity": "high",
+    "message": "Patients with Penicillin/Amoxicillin allergy (Beta-lactam class) have a 1-10% cross-reactivity risk with Cephalosporins. Avoid unless benefits clearly outweigh risks and resuscitation facilities are available."
+  },
+  {
+    "class_a": "Antibiotic",
+    "class_b": "Beta-lactam",
+    "severity": "high",
+    "message": "Cross-reactivity alert: if the patient has a documented allergy to any Beta-lactam antibiotic (Penicillin, Amoxicillin, Ampicillin), prescribing another Beta-lactam carries high anaphylaxis risk. Verify allergy history before prescribing."
+  },
+  {
+    "class_a": "Fluoroquinolone",
+    "class_b": "Anticoagulant",
+    "severity": "medium",
+    "message": "Fluoroquinolones may enhance the anticoagulant effect of warfarin, increasing bleeding risk. Monitor INR closely if co-prescribing."
+  },
+  {
+    "class_a": "Macrolide",
+    "class_b": "Statin",
+    "severity": "high",
+    "message": "Clarithromycin and erythromycin inhibit CYP3A4, significantly raising statin plasma levels and myopathy/rhabdomyolysis risk. Use azithromycin as a safer alternative."
+  },
+  {
+    "class_a": "Macrolide",
+    "class_b": "Anticoagulant",
+    "severity": "medium",
+    "message": "Macrolides inhibit CYP3A4 and can increase warfarin effect. Monitor INR closely."
+  },
+  {
+    "class_a": "Antibiotic",
+    "class_b": "Anticoagulant",
+    "severity": "medium",
+    "message": "Broad-spectrum antibiotics disrupt gut flora, reducing vitamin K production and potentially enhancing warfarin anticoagulation. Monitor INR."
+  },
+  {
+    "class_a": "Nitrate",
+    "class_b": "Phosphodiesterase Inhibitor",
+    "severity": "high",
+    "message": "Absolute contraindication: Nitrates combined with PDE5 inhibitors (sildenafil, tadalafil) cause severe, potentially fatal hypotension. Do not co-prescribe."
+  },
+  {
+    "class_a": "Statin",
+    "class_b": "Fibrate",
+    "severity": "high",
+    "message": "Combining statins with fibrates (especially gemfibrozil) greatly increases myopathy and rhabdomyolysis risk. Use with extreme caution and monitor CK levels."
+  },
+  {
+    "class_a": "ACE Inhibitor",
+    "class_b": "Potassium-sparing diuretic",
+    "severity": "high",
+    "message": "Both ACE inhibitors and potassium-sparing diuretics raise serum potassium. Co-administration risks dangerous hyperkalaemia. Monitor potassium levels closely."
+  },
+  {
+    "class_a": "Beta-blocker",
+    "class_b": "Calcium Channel Blocker",
+    "severity": "high",
+    "message": "Non-dihydropyridine calcium channel blockers (verapamil, diltiazem) combined with beta-blockers risk severe bradycardia, heart block, and hypotension."
+  },
+  {
+    "class_a": "Anticonvulsant",
+    "class_b": "Anticoagulant",
+    "severity": "high",
+    "message": "Enzyme-inducing anticonvulsants (carbamazepine, phenytoin) accelerate warfarin metabolism, reducing anticoagulant effect. INR may become erratic. Monitor closely."
   }
 ]

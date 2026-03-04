@@ -1,63 +1,84 @@
-import React from 'react';
-import {  useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from "react-router-dom";
 import './css/appointmentview.css';
 import SimpleButton from '../components/buttons';
+import httpClient from '../services/httpClient';
+
 const AppointmentView = () => {
   const navigate = useNavigate();
-  const clickVisit = () => {
-    navigate(`/doctor/patient/1001`);
-  };
+  const { id } = useParams();
+  const [appointment, setAppointment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAppointment = async () => {
+      try {
+        const res = await httpClient.get(`/fhir/Appointment/${id}`);
+        setAppointment(res.data?.data || null);
+      } catch (err) {
+        setError('Appointment not found');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchAppointment();
+  }, [id]);
+
+  const meta = appointment?.metadata || {};
+  const patientPhn = meta.patientPhn || '';
+  const status = meta.status || '-';
+  const date = meta.appointmentDate
+    ? new Date(meta.appointmentDate).toLocaleDateString()
+    : '-';
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading appointment…</div>;
+  if (error) return <div style={{ padding: '2rem', color: 'red' }}>{error}</div>;
+
   return (
     <div className="appointment-page">
       <h1 className="main-header">Appointment</h1>
-      
+
       <div className="appointment-view">
         <div className="appointment-details">
           <div className="detail-row">
-            <h3 className="patient-name">Niluka Herath</h3>
-            <span className="status-badge in-progress">In Progress</span>
+            <h3 className="patient-name">Patient: {patientPhn || '—'}</h3>
+            <span className={`status-badge ${status.toLowerCase().replace(' ', '-')}`}>
+              {status}
+            </span>
           </div>
 
           <table className="detail-table">
             <tbody>
               <tr>
                 <td><label>Date:</label></td>
-                <td className="bold-text">20/12/2024</td>
+                <td className="bold-text">{date}</td>
               </tr>
               <tr>
                 <td><label>ID:</label></td>
-                <td className="bold-text">1001</td>
+                <td className="bold-text">{appointment?.apid || '-'}</td>
               </tr>
               <tr>
                 <td><label>Room No:</label></td>
-                <td className="bold-text">Clinic A, Room 5</td>
+                <td className="bold-text">{meta.roomNo || '-'}</td>
               </tr>
               <tr>
                 <td><label>Type:</label></td>
-                <td className="bold-text">Consultation</td>
+                <td className="bold-text">{meta.type || '-'}</td>
               </tr>
               <tr>
                 <td><label>Doctor:</label></td>
-                <td className="bold-text">Dr. Michel Smith</td>
+                <td className="bold-text">{meta.doctorLicense || '-'}</td>
               </tr>
             </tbody>
           </table>
 
-          <div className="attachments-section">
-            <h4>Attachments (Important Documents)</h4>
-            <ul className="attachment-list">
-              <li>
-                <a href="#" className="bold-text">Lab Results aug_2020.pdf</a>
-              </li>
-              <li>
-                <a href="#" className="bold-text">Prescription</a>
-              </li>
-            </ul>
-          </div>
-          <SimpleButton 
-                label="View Patient Details" 
-                onClick={clickVisit}
-                />
+          <SimpleButton
+            label="View Patient Details"
+            onClick={() => patientPhn && navigate(`/doctor/patient/${patientPhn}`)}
+          />
         </div>
       </div>
     </div>

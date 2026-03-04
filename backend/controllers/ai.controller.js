@@ -1,7 +1,7 @@
 // controllers/ai.controller.js
 import asyncHandler from "express-async-handler";
 import { generateMedicalSummary } from "../services/aiSummary.service.js";
-import { generateOpenAISummary } from "../services/aiOpenAI.service.js";
+import { generateGeminiSummary } from "../services/geminiSummary.service.js";
 
 export const getPatientSummary = asyncHandler(async (req, res) => {
   const { phn } = req.params;
@@ -25,7 +25,7 @@ export const getPatientSummary = asyncHandler(async (req, res) => {
   }
 
   try {
-    const summary = await generateOpenAISummary(medicalData);
+    const summary = await generateGeminiSummary(medicalData);
 
     return res.status(200).json({
       success: true,

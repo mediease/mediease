@@ -11,7 +11,6 @@ import fhirPrescriptionRoutes from './routes/fhirPrescription.routes.js';
 import allergyRoutes from './routes/allergy.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import labRoutes from './routes/lab.routes.js';
-import summarizeRoute from './routes/summarize.js';
 
 const app = express();
 
@@ -31,7 +30,6 @@ app.use('/fhir', fhirPrescriptionRoutes);
 app.use('/fhir', allergyRoutes);
 app.use('/ai', aiRoutes);
 app.use('/api/lab', labRoutes);
-app.use('/api', summarizeRoute);
 app.use('/admin', fhirAppointmentRoutes); // admin appointment routes
 app.use('/admin', authRoutes); // admin approval routes
 app.use('/clinic', fhirEncounterRoutes); // clinic encounter routes

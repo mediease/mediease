@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { MdEmail, MdPerson, MdLocalHospital, MdPhone, MdBadge, MdVpnKey } from 'react-icons/md';
+import httpClient from '../services/httpClient';
 import { FaUserMd, FaUserTie, FaIdCard } from 'react-icons/fa';
 import logo from '../assets/logo2.png';
 import './css/CreateAccount.css';
@@ -131,25 +132,11 @@ function CreateAccount() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: 'Account created successfully' });
-        // Optionally reset form or redirect
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Registration failed' });
-      }
+      await httpClient.post('/auth/register', requestBody);
+      setMessage({ type: 'success', text: 'Account created successfully! Awaiting admin approval.' });
     } catch (error) {
-      setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
-      console.error('Registration error:', error);
+      const msg = error.response?.data?.message || 'Registration failed. Please try again.';
+      setMessage({ type: 'error', text: msg });
     }
   };
 

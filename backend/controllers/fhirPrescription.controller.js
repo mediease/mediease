@@ -1,12 +1,9 @@
 import asyncHandler from 'express-async-handler';
-import axios from 'axios';
 import Prescription from '../models/prescription.model.js';
 import FHIRPatient from '../models/fhirPatient.model.js';
-import FHIREncounter from '../models/fhirEncounter.model.js';
-import Allergy from '../models/allergy.model.js';
 import User from '../models/user.model.js';
 import { validateEncounterBeforePrescription, attachPrescriptionToEncounter } from '../services/prescriptionEncounter.service.js';
-import { runAiValidation } from '../services/aiPrescriptionValidation.service.js';
+import { runAiValidation, validateMedicines } from '../services/aiPrescriptionValidation.service.js';
 
 // Map UI status to FHIR-compliant status values
 const mapStatusToFHIR = (status) => {
@@ -63,65 +60,13 @@ export const validatePrescriptionDraft = asyncHandler(async (req, res) => {
     instructions: item.doseComment || item.comment || ""
   }));
 
-  // --- Fetch patient clinical context from MongoDB in parallel ---
-  const [encounters, allergies, pastPrescriptions] = await Promise.all([
-    FHIREncounter.find({ patientPhn }).select('complaint').lean(),
-    Allergy.find({ patientPhn, category: 'medication' })
-      .select('substance criticality reaction').lean(),
-    Prescription.find({ subject: patientPhn })
-      .select('dosageInstruction').lean()
-  ]);
-
-  // Health conditions — unique non-empty complaints from all past encounters
-  const patientConditions = [
-    ...new Set(
-      encounters
-        .map(e => (e.complaint || '').trim())
-        .filter(c => c.length > 0)
-        .map(c => c.charAt(0).toUpperCase() + c.slice(1).toLowerCase())
-    )
-  ];
-
-  // Allergy records
-  const patientAllergies = allergies.map(a => ({
-    substance: a.substance,
-    criticality: a.criticality,
-    reaction: a.reaction || null
-  }));
-
-  // Current medications — flatten all dosage instructions across all past prescriptions
-  const newMedNames = new Set(medicines.map(m => (m.name || '').toLowerCase().trim()));
-  const currentMedications = [
-    ...new Set(
-      pastPrescriptions.flatMap(p =>
-        (p.dosageInstruction || []).map(d => (d.medication || '').trim())
-      ).filter(name => name.length > 0 && !newMedNames.has(name.toLowerCase()))
-    )
-  ].map(name => ({ name }));
-
-  const payload = {
-    patientPhn,
-    medicines,
-    patientConditions,
-    patientAllergies,
-    currentMedications,
-    currentComplaint: complaint || null
-  };
-
-  console.log('=== VALIDATE DRAFT PAYLOAD TO AI ===');
-  console.log(JSON.stringify(payload, null, 2));
-
   try {
-    const response = await axios.post(
-      'http://0.0.0.0:8000/ai/validate-prescription',
-      payload,
-      { timeout: 10000 }
-    );
+    const aiData = await validateMedicines(patientPhn, medicines);
 
     // Deduplicate by medicine + drug class
-    if (Array.isArray(response.data?.warnings)) {
+    if (Array.isArray(aiData?.warnings)) {
       const seen = new Set();
-      response.data.warnings = response.data.warnings.filter(w => {
+      aiData.warnings = aiData.warnings.filter(w => {
         const key = `${w.medicineName}-${w.drugClass}`;
         if (seen.has(key)) return false;
         seen.add(key);
@@ -131,7 +76,7 @@ export const validatePrescriptionDraft = asyncHandler(async (req, res) => {
 
     return res.json({
       success: true,
-      aiValidation: response.data
+      aiValidation: aiData
     });
 
   } catch (error) {
