@@ -1,8 +1,6 @@
 // controllers/lab.controller.js
 
 import asyncHandler from 'express-async-handler';
-import fs from 'fs';
-import path from 'path';
 
 import LabRequest from '../models/labRequest.model.js';
 import FHIRDiagnosticReport from '../models/fhirDiagnosticReport.model.js';
@@ -10,20 +8,7 @@ import FHIRObservation from '../models/fhirObservation.model.js';
 import FHIREncounter from '../models/fhirEncounter.model.js';
 import FHIRPatient from '../models/fhirPatient.model.js';
 import { getLabTestCoding, getLabTestConfig } from '../utils/labTestMappings.js';
-
-// Ensure upload directory exists
-const uploadDir = path.join(process.cwd(), 'uploads', 'lab');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Helper: delete uploaded file if rejected
-function safeDeleteUploadedFile(file) {
-  if (!file) return;
-  try {
-    fs.unlinkSync(file.path);
-  } catch {}
-}
+import { uploadBuffer } from '../utils/cloudinaryClient.js';
 
 // Build FHIR DiagnosticReport
 function buildDiagnosticReport({
@@ -243,15 +228,11 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
   const { resultText } = req.body;
 
   const labRequest = await LabRequest.findById(labRequestId);
-  if (!labRequest) {
-    safeDeleteUploadedFile(req.file);
+  if (!labRequest)
     return res.status(404).json({ success: false, message: 'LabRequest not found' });
-  }
 
-  if (labRequest.status === 'completed') {
-    safeDeleteUploadedFile(req.file);
+  if (labRequest.status === 'completed')
     return res.status(400).json({ success: false, message: 'Already completed' });
-  }
 
   const config = getLabTestConfig(labRequest.testType);
 
@@ -259,14 +240,11 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
   if (config.file.required && !req.file)
     return res.status(400).json({ success: false, message: 'File required' });
 
-  if (config.file.prohibited && req.file) {
-    safeDeleteUploadedFile(req.file);
+  if (config.file.prohibited && req.file)
     return res.status(400).json({ success: false, message: 'File not allowed' });
-  }
 
   if (req.file && config.file.allowedMimeTypes?.length) {
     if (!config.file.allowedMimeTypes.includes(req.file.mimetype)) {
-      safeDeleteUploadedFile(req.file);
       return res.status(400).json({
         success: false,
         message: `Invalid file type. Allowed: ${config.file.allowedMimeTypes.join(', ')}`
@@ -274,17 +252,33 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
     }
   }
 
-  // Parameter validation
+  // Parameter validation — frontend sends params as a JSON string in FormData
+  let bodyForValidation = req.body;
+  if (req.body.parameters) {
+    try {
+      const parsed = JSON.parse(req.body.parameters);
+      bodyForValidation = { ...req.body, ...parsed };
+    } catch {}
+  }
   const { error, parameters } = validateAndExtractParameters(
     labRequest.testType,
-    req.body
+    bodyForValidation
   );
   if (error) {
-    safeDeleteUploadedFile(req.file);
     return res.status(400).json({ success: false, message: error });
   }
 
-  const fileUrl = req.file ? `/uploads/lab/${req.file.filename}` : undefined;
+  // Upload file to Cloudinary (memory buffer → Cloudinary)
+  let fileUrl = undefined;
+  if (req.file) {
+    const resourceType = req.file.mimetype === 'application/pdf' ? 'raw' : 'image';
+    const cloudResult = await uploadBuffer(req.file.buffer, {
+      folder: 'mediease/lab-reports',
+      resource_type: resourceType,
+      public_id: `lab_${labRequest.labId}_${Date.now()}`,
+    });
+    fileUrl = cloudResult.secure_url;
+  }
 
   // Update LabRequest
   labRequest.status = 'completed';
@@ -352,24 +346,27 @@ export const uploadLabReport = asyncHandler(async (req, res) => {
 export const getLabReportByLabId = asyncHandler(async (req, res) => {
   const { labId } = req.params;
 
-  const diag = await FHIRDiagnosticReport.findOne({ labId }).lean();
-  if (!diag)
-    return res.status(404).json({ success: false, message: 'Diagnostic report not found' });
-
-  // Only doctor or lab assistant
-  if (!['doctor', 'lab', 'lab_assistant'].includes(req.user.role)) {
+  // Role check first
+  if (!['doctor', 'lab', 'lab_assistant'].includes(req.user.role))
     return res.status(403).json({ success: false, message: 'Access denied' });
-  }
 
+  // LabRequest is the source of truth — exists for both pending and completed
   const labRequest = await LabRequest.findOne({ labId }).lean();
-  const observation = await FHIRObservation.findOne({ labRequestId: labRequest?._id }).lean();
-  const encounter = await FHIREncounter.findOne({ encId: diag.encounterEncId }).lean();
-  const patient = await FHIRPatient.findOne({ phn: diag.patientPhn }).lean();
+  if (!labRequest)
+    return res.status(404).json({ success: false, message: 'Lab request not found' });
+
+  // Diagnostic report only exists once the lab assistant has uploaded results
+  const diag = await FHIRDiagnosticReport.findOne({ labId }).lean();
+  const observation = diag
+    ? await FHIRObservation.findOne({ labRequestId: labRequest._id }).lean()
+    : null;
+  const encounter = await FHIREncounter.findById(labRequest.encounterId).lean();
+  const patient = await FHIRPatient.findOne({ phn: labRequest.patientPhn }).lean();
 
   res.json({
     success: true,
     data: {
-      diagnosticReport: diag,
+      diagnosticReport: diag,   // null when report is still pending
       observation,
       labRequest,
       encounter,
