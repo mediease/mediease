@@ -4,6 +4,7 @@ import FHIRPatient from '../models/fhirPatient.model.js';
 import User from '../models/user.model.js';
 import { validateEncounterBeforePrescription, attachPrescriptionToEncounter } from '../services/prescriptionEncounter.service.js';
 import { runAiValidation, validateMedicines } from '../services/aiPrescriptionValidation.service.js';
+import { generatePrescriptionQR, verifyQRToken } from '../utils/qrGenerator.js';
 
 // Map UI status to FHIR-compliant status values
 const mapStatusToFHIR = (status) => {
@@ -263,4 +264,181 @@ export const getPrescriptionsByDoctor = asyncHandler(async (req, res) => {
     entry: prescriptions.map(p => ({ resource: p.resource }))
   };
   return res.json({ success: true, data: bundle });
+});
+
+/**
+ * @desc    Validate a saved prescription and generate a QR code
+ * @route   POST /fhir/MedicationRequest/:prescriptionId/validate
+ * @access  Private (doctor)
+ *
+ * Query params:
+ *   force=true  — regenerate QR even if already VALIDATED
+ *
+ * Sample response:
+ *   { success, message, data: { prescriptionId, validationStatus, validatedAt, qrCodeData } }
+ */
+export const validateAndGenerateQR = asyncHandler(async (req, res) => {
+  const { prescriptionId } = req.params;
+  const force = req.query.force === 'true';
+
+  const prescription = await Prescription.findOne({ prescriptionId });
+  if (!prescription) {
+    return res.status(404).json({ success: false, message: 'Prescription not found' });
+  }
+
+  // Return existing QR if already validated and not forced
+  if (prescription.validationStatus === 'VALIDATED' && !force) {
+    return res.json({
+      success: true,
+      message: 'Prescription already validated',
+      data: {
+        prescriptionId: prescription.prescriptionId,
+        validationStatus: prescription.validationStatus,
+        validatedAt: prescription.validatedAt,
+        qrCodeData: prescription.qrCodeData,
+      }
+    });
+  }
+
+  // Validate required fields
+  if (!prescription.subject || !prescription.requester) {
+    return res.status(400).json({
+      success: false,
+      message: 'Prescription is missing required fields (patient or doctor)'
+    });
+  }
+
+  if (!prescription.dosageInstruction || prescription.dosageInstruction.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Prescription must contain at least one medicine'
+    });
+  }
+
+  for (const item of prescription.dosageInstruction) {
+    if (!item.medication) {
+      return res.status(400).json({
+        success: false,
+        message: 'All prescription items must have a medication name'
+      });
+    }
+  }
+
+  // Generate QR code
+  const { dataUrl, hash } = await generatePrescriptionQR(prescriptionId);
+
+  prescription.validationStatus = 'VALIDATED';
+  prescription.validatedAt = new Date();
+  prescription.qrCodeData = dataUrl;
+  prescription.qrPayloadHash = hash;
+  await prescription.save();
+
+  return res.json({
+    success: true,
+    message: 'Prescription validated and QR code generated',
+    data: {
+      prescriptionId: prescription.prescriptionId,
+      validationStatus: prescription.validationStatus,
+      validatedAt: prescription.validatedAt,
+      qrCodeData: prescription.qrCodeData,
+    }
+  });
+});
+
+/**
+ * @desc    Get the stored QR code for a validated prescription
+ * @route   GET /fhir/MedicationRequest/:prescriptionId/qrcode
+ * @access  Private
+ */
+export const getQRCode = asyncHandler(async (req, res) => {
+  const { prescriptionId } = req.params;
+
+  const prescription = await Prescription.findOne({ prescriptionId })
+    .select('prescriptionId validationStatus validatedAt qrCodeData');
+
+  if (!prescription) {
+    return res.status(404).json({ success: false, message: 'Prescription not found' });
+  }
+
+  if (prescription.validationStatus !== 'VALIDATED' || !prescription.qrCodeData) {
+    return res.status(404).json({
+      success: false,
+      message: 'QR code not yet generated. Validate the prescription first.'
+    });
+  }
+
+  return res.json({
+    success: true,
+    data: {
+      prescriptionId: prescription.prescriptionId,
+      validationStatus: prescription.validationStatus,
+      validatedAt: prescription.validatedAt,
+      qrCodeData: prescription.qrCodeData,
+    }
+  });
+});
+
+/**
+ * @desc    Public endpoint — verify a prescription by scanning its QR code
+ * @route   GET /verify-prescription/:prescriptionId?token=<signedJWT>
+ * @access  Public (no auth required)
+ *
+ * Returns VALID/INVALID status and safe prescription summary.
+ */
+export const verifyPrescriptionById = asyncHandler(async (req, res) => {
+  const { prescriptionId } = req.params;
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({
+      success: false,
+      valid: false,
+      message: 'Verification token is required'
+    });
+  }
+
+  const { valid, reason } = verifyQRToken(token);
+  if (!valid) {
+    return res.status(400).json({
+      success: false,
+      valid: false,
+      message: `Invalid token: ${reason}`
+    });
+  }
+
+  const prescription = await Prescription.findOne({ prescriptionId })
+    .select('prescriptionId subject requester authoredOn visitType validationStatus validatedAt dosageInstruction');
+
+  if (!prescription) {
+    return res.status(404).json({ success: false, valid: false, message: 'Prescription not found' });
+  }
+
+  if (prescription.validationStatus !== 'VALIDATED') {
+    return res.json({
+      success: true,
+      valid: false,
+      message: 'Prescription exists but has not been officially validated',
+      prescriptionId
+    });
+  }
+
+  return res.json({
+    success: true,
+    valid: true,
+    message: 'VALID — This prescription is authentic',
+    data: {
+      prescriptionId: prescription.prescriptionId,
+      patientPhn: prescription.subject,
+      doctorLicense: prescription.requester,
+      visitType: prescription.visitType,
+      authoredOn: prescription.authoredOn,
+      validatedAt: prescription.validatedAt,
+      medicines: prescription.dosageInstruction.map(d => ({
+        name: d.medication,
+        dose: d.dose,
+        frequency: d.frequency,
+        period: d.period,
+      })),
+    }
+  });
 });

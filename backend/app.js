@@ -11,6 +11,7 @@ import fhirPrescriptionRoutes from './routes/fhirPrescription.routes.js';
 import allergyRoutes from './routes/allergy.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import labRoutes from './routes/lab.routes.js';
+import { verifyPrescriptionById } from './controllers/fhirPrescription.controller.js';
 
 const app = express();
 
@@ -35,6 +36,9 @@ app.use('/admin', authRoutes); // admin approval routes
 app.use('/clinic', fhirEncounterRoutes); // clinic encounter routes
 app.use('/doctor', fhirAppointmentRoutes); // doctor appointment routes
 app.use('/staff', fhirAppointmentRoutes); // staff/nurse appointment routes
+
+// Public prescription verification (no auth — scanned from QR code)
+app.get('/verify-prescription/:prescriptionId', verifyPrescriptionById);
 
 // Health check
 app.get('/ping', (req, res) => {

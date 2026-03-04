@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import React, { useMemo, useState, useEffect } from "react";
 import SegmentedControl from "../components/SegmentedControl";
 import httpClient from "../services/httpClient";
+import PrescriptionQRModal from "../components/PrescriptionQRModal";
 import "./css/style.css";
 
 const DOSE_OPTIONS = ["1 drop", "2 drops", "5 ml", "10 ml", "After meal", "Before meal", "As directed"];
@@ -82,6 +83,11 @@ const NewPrescription = () => {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
   const [isValidating, setIsValidating] = useState(false);
+
+  // --- QR validation modal (shown after prescription is saved + validated) ---
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrData, setQrData] = useState(null);         // { prescriptionId, validatedAt, qrCodeData }
+  const [isGeneratingQR, setIsGeneratingQR] = useState(false);
 
   // ============================
   //  LOAD PATIENT + DOCTOR DATA
@@ -372,11 +378,34 @@ const NewPrescription = () => {
       };
 
       const res = await httpClient.post("/fhir/MedicationRequest", payload);
-      console.log("MedicationRequest created:", res.data);
+      const savedPrescriptionId = res.data?.data?.id;
 
-      alert("Prescription created successfully.");
       setShowValidationModal(false);
-      navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
+
+      // Validate the saved prescription and generate QR
+      if (savedPrescriptionId) {
+        setIsGeneratingQR(true);
+        try {
+          const qrRes = await httpClient.post(
+            `/fhir/MedicationRequest/${savedPrescriptionId}/validate`
+          );
+          if (qrRes.data?.success) {
+            setQrData(qrRes.data.data);
+            setShowQRModal(true);
+          } else {
+            alert("Prescription saved. QR generation failed — you can retry from the medications list.");
+            navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
+          }
+        } catch {
+          alert("Prescription saved successfully.");
+          navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
+        } finally {
+          setIsGeneratingQR(false);
+        }
+      } else {
+        alert("Prescription created successfully.");
+        navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
+      }
     } catch (err) {
       console.error("Failed to save prescription", err?.response?.data || err);
       alert("Failed to create prescription.");
@@ -1039,6 +1068,23 @@ const NewPrescription = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* QR Validation Modal — shown after prescription is saved + validated */}
+        {showQRModal && qrData && (
+          <PrescriptionQRModal
+            prescriptionId={qrData.prescriptionId}
+            validatedAt={qrData.validatedAt}
+            qrCodeData={qrData.qrCodeData}
+            patientName={patientName}
+            patientPhn={patientPhn}
+            doctorName={doctorDisplayName}
+            medicines={prescriptionItems.map((i) => i.name).filter(Boolean)}
+            onClose={() => {
+              setShowQRModal(false);
+              navigate(`/doctor/patient/${patientPhn}/medicationsinfo`);
+            }}
+          />
         )}
       </div>
     </div>

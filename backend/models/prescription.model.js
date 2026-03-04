@@ -31,7 +31,12 @@ const prescriptionSchema = new mongoose.Schema({
   visitType: { type: String, enum: ['OPD', 'IPD', 'Clinic'], required: true },
   complaint: { type: String },
   dosageInstruction: { type: [dosageInstructionSchema], required: true },
-  resource: { type: Object, required: true } // Full FHIR MedicationRequest resource for response
+  resource: { type: Object, required: true }, // Full FHIR MedicationRequest resource for response
+  // QR validation fields
+  validationStatus: { type: String, enum: ['DRAFT', 'VALIDATED'], default: 'DRAFT' },
+  validatedAt: { type: Date },
+  qrCodeData: { type: String },       // base64 PNG data URL
+  qrPayloadHash: { type: String }     // HMAC-SHA256 for integrity verification
 }, { timestamps: true });
 
 // Generate prescriptionId PRxxxxx
