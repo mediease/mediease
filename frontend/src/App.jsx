@@ -25,6 +25,7 @@ import OrderNewReport from './pages/OrderNewReport';
 import AdminPanel from './pages/AdminPanel';
 import AdminSidebar from './components/AdminSidebar';
 import StaffSidebar from './components/StaffSidebar';
+import LabSidebar from './components/LabSidebar';
 import CreateAccount from './pages/CreateAccount';
 import LoginPage from './pages/LoginPage';
 import AdminDocAppointments from './pages/AdminDocAppointments';
@@ -57,10 +58,11 @@ function MainLayout() {
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isStaffRoute = location.pathname.startsWith('/staff');
   const isNurseRoute = location.pathname.startsWith('/nurse');
+  const isLabRoute = location.pathname.startsWith('/lab-assistant');
 
   return (
     <div className="app-container">
-      {isAdminRoute ? <AdminSidebar /> : (isStaffRoute || isNurseRoute) ? <StaffSidebar /> : <Sidebar />}
+      {isAdminRoute ? <AdminSidebar /> : isLabRoute ? <LabSidebar /> : (isStaffRoute || isNurseRoute) ? <StaffSidebar /> : <Sidebar />}
       <div className="main-content">
         <Header />
         <div className="content-container">
@@ -151,6 +153,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['lab_assistant']}>
                 <div>Update Report Coming Soon</div>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="lab-assistant/settings"
+            element={
+              <ProtectedRoute allowedRoles={['lab_assistant']}>
+                <Settings />
               </ProtectedRoute>
             }
           />

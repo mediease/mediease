@@ -107,7 +107,5 @@ def check_allergies(
                 logger.warning(
                     f"Allergy conflict: '{med_name}' vs allergy '{substance}' — {match_reason}"
                 )
-                # Only one warning per medicine-allergy pair
-                break
 
     return warnings

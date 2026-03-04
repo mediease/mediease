@@ -1,62 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import SectionHeader from '../components/SectionHeader';
 import SegmentedTable from '../components/SegmentedTable';
+import httpClient from '../services/httpClient';
 import './css/style.css';
 
+const columns = [
+  { label: "PHN", key: "phn" },
+  { label: "Status", key: "status" },
+  { label: "Date", key: "date" },
+  { label: "Type", key: "type" }
+];
+
 const DocAllAppointment = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [doctorName, setDoctorName] = useState('');
   const navigate = useNavigate();
 
-  
+  useEffect(() => {
+    const medicalLicenseId = localStorage.getItem('medicalLicenseId');
+    const doctorRaw = localStorage.getItem('doctor');
+    if (doctorRaw) {
+      try {
+        const doc = JSON.parse(doctorRaw);
+        setDoctorName(doc.name || doc.fullName || '');
+      } catch (_) {}
+    }
+
+    if (!medicalLicenseId) {
+      setError('Doctor license not found. Please log in again.');
+      setLoading(false);
+      return;
+    }
+
+    const fetchAppointments = async () => {
+      try {
+        const res = await httpClient.get(`/fhir/appointments/${medicalLicenseId}`);
+        const mapped = (res.data?.data || []).map(apt => ({
+          phn: apt.metadata?.patientPhn || '-',
+          status: apt.metadata?.status || '-',
+          date: apt.metadata?.appointmentDate
+            ? new Date(apt.metadata.appointmentDate).toLocaleDateString()
+            : '-',
+          type: apt.metadata?.type || '-',
+          apid: apt.apid
+        }));
+        setData(mapped);
+      } catch (err) {
+        setError('Failed to load appointments');
+        console.error('Appointments fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
   const handleRowClick = (row) => {
-    navigate(`/admin/allappointments/${row.doctorId}`); 
+    navigate(`/patient/${row.phn}`);
   };
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
-
-  selectedDate ? selectedDate.toDateString() : 'None';
-
- 
-  const columns = [
-    { label: "Patient Name", key: "patientName" },
-    { label: "PHN", key: "phn" },
-    { label: "Status", key: "status" },
-    { label: "Date", key: "date" },
-    { label: "Type", key: "type" }
-  ];
-  
-  
-  
-
- 
-  const data = [
-    { patientName: "Niluka", phn: "1001", status: "In Progress", date: "20/12/2024", type: "Consultation" },
-    { patientName: "Roshini", phn: "1102", status: "Completed", date: "24/12/2024", type: "Lab Test" },
-    { patientName: "Lahiru", phn: "1256", status: "In Progress", date: "21/12/2024", type: "Emergency Visit" },
-    { patientName: "Pathum", phn: "890", status: "In Progress", date: "26/12/2024", type: "Follow-up" },
-    { patientName: "Henry", phn: "251", status: "Completed", date: "21/12/2024", type: "Vaccination" },
-    { patientName: "Sonali", phn: "899", status: "In Progress", date: "26/12/2024", type: "Follow-up" }
-  ];
-  
-  
-  
+  const title = doctorName
+    ? `Appointments — ${doctorName}`
+    : 'Appointments';
 
   return (
     <div>
-      <SectionHeader title="Appointments &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Doctor - Niluka Piris" onDateChange={handleDateChange} />
-      <div>
-        
+      <SectionHeader title={title} />
+      {loading && <p style={{ padding: '1rem' }}>Loading appointments…</p>}
+      {error && <p style={{ padding: '1rem', color: 'red' }}>{error}</p>}
+      {!loading && !error && (
         <SegmentedTable
           columns={columns}
           data={data}
-          filterOptions={[]} 
+          filterOptions={[]}
           handleRowClick={handleRowClick}
         />
-        
-      </div>
+      )}
     </div>
   );
 };
